@@ -57,7 +57,7 @@ export function TaskItem({ inst, showDate = false, compact = false }: { inst: In
       </button>
       <button className="min-w-0 flex-1 text-left" onClick={() => setMenu(true)} aria-label={`Действия: ${inst.title}`}>
         <p className={`flex items-center gap-1.5 text-[14px] font-semibold ${done || inactive ? 'text-muted line-through decoration-1' : ''}`}>
-          <span className="truncate">{inst.title}</span>
+          <span className="line-clamp-2 break-words leading-snug sm:line-clamp-1">{inst.title}</span>
           {inst.priority === 'high' && !done && <Star size={13} className="shrink-0 fill-gold text-gold" aria-label="Важно" />}
         </p>
         {(meta.length > 0 || overdue || inst.moved || (inst.status !== 'planned' && inst.status !== 'done')) && (
