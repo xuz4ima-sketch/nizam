@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useId, useRef, useSt
 import { CircleAlert, CircleCheck, X } from 'lucide-react';
 import { ValidationError } from '../lib/validate';
 
-export const errMsg = (e: unknown) => (e instanceof Error ? e.message : 'Неизвестная ошибка');
+import { t as T } from '../i18n';
+export const errMsg = (e: unknown) => (e instanceof Error ? e.message : T('Неизвестная ошибка'));
 export const errFields = (e: unknown) => (e instanceof ValidationError ? e.errors : {});
 
 /* ---------- Modal (нативный <dialog>: фокус, Esc, доступность) ---------- */
@@ -31,7 +32,7 @@ export function Modal({ open, onClose, title, children, footer, wide }: {
           <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-line sm:hidden" aria-hidden />
           <div className="flex items-center justify-between gap-2 px-5 pt-3 pb-2 sm:pt-4">
             <h2 id={titleId} className="min-w-0 truncate text-[17px] font-bold tracking-tight">{title}</h2>
-            <button type="button" className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Закрыть"><X size={18} /></button>
+            <button type="button" className="btn btn-ghost btn-icon" onClick={onClose} aria-label={T('Закрыть')}><X size={18} /></button>
           </div>
           <div className="px-5 pb-4">{children}</div>
           {footer && <div className="flex flex-wrap justify-end gap-2 border-t border-line px-5 py-3">{footer}</div>}
@@ -66,9 +67,9 @@ export function UIProvider({ children }: { children: ReactNode }) {
         onClose={() => close(false)}
         title={pending?.title ?? ''}
         footer={<>
-          <button className="btn btn-outline" onClick={() => close(false)}>Отмена</button>
+          <button className="btn btn-outline" onClick={() => close(false)}>{T('Отмена')}</button>
           <button className={`btn ${pending?.danger ? 'btn-danger' : 'btn-primary'}`} onClick={() => close(true)} autoFocus>
-            {pending?.confirmText ?? 'Подтвердить'}
+            {pending?.confirmText ?? T('Подтвердить')}
           </button>
         </>}
       >
@@ -89,7 +90,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
 
 export function useUI() {
   const v = useContext(UI);
-  if (!v) throw new Error('UIProvider отсутствует');
+  if (!v) throw new Error(T('UIProvider отсутствует'));
   return v;
 }
 

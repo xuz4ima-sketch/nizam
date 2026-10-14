@@ -1,6 +1,7 @@
 // Работа с датами без внешних библиотек. День пользователя вычисляется по выбранному часовому поясу.
 import type { ISODate } from '../db/schema';
 
+import { getLang, locale, t as T } from '../i18n';
 const DAY = 86_400_000;
 const fmtCache = new Map<string, Intl.DateTimeFormat>();
 
@@ -66,7 +67,7 @@ export function dateRange(from: ISODate, to: ISODate): ISODate[] {
 }
 
 export function fmtDate(iso: ISODate, opts: Intl.DateTimeFormatOptions) {
-  const s = new Intl.DateTimeFormat('ru-RU', { timeZone: 'UTC', ...opts }).format(new Date(toUTC(iso)));
+  const s = new Intl.DateTimeFormat(locale(), { timeZone: 'UTC', ...opts }).format(new Date(toUTC(iso)));
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 export const fmtLong = (iso: ISODate) => fmtDate(iso, { weekday: 'long', day: 'numeric', month: 'long' });
@@ -81,9 +82,9 @@ export function parseTime(t: string | undefined): number | null {
 export const fmtTime = (min: number) => `${pad(Math.floor(min / 60) % 24)}:${pad(min % 60)}`;
 export function fmtMinutes(m: number) {
   const v = Math.round(m);
-  if (v < 60) return `${v} мин`;
+  if (v < 60) return T('{0} мин', v);
   const h = Math.floor(v / 60), r = v % 60;
-  return r ? `${h} ч ${r} мин` : `${h} ч`;
+  return r ? T('{0} ч {1} мин', h, r) : T('{0} ч', h);
 }
 export function fmtClock(ms: number) {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -91,7 +92,9 @@ export function fmtClock(ms: number) {
   return h ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
 }
 
-export const WEEKDAY_NAMES = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+/** Краткие названия дней недели (0 = вс); при чтении переводятся на текущий язык. */
+const WD = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+export const WEEKDAY_NAMES: readonly string[] = new Proxy(WD, { get: (arr, k) => (typeof k === 'string' && /^[0-6]$/.test(k) ? T(arr[Number(k)]) : Reflect.get(arr, k)) });
 
 /* ---------- Отображение времени (12/24 ч) — только для показа, поля ввода всегда 24 ч ---------- */
 let h12 = false;
@@ -104,19 +107,23 @@ export function showTime(min: number) {
 export const showTimeStr = (t?: string) => { const v = parseTime(t); return v === null ? '' : showTime(v); };
 
 /* ---------- Дата по хиджре: календарь Умм аль-Кура (Intl), возможна разница ±1 день с местным началом месяца ---------- */
-let hijriFmt: Intl.DateTimeFormat | null | undefined;
+const hijriFmts = new Map<string, Intl.DateTimeFormat | null>();
 export const HIJRI_METHOD = 'Умм аль-Кура';
 export function fmtHijri(iso: ISODate): string | null {
+  const loc = getLang() === 'ar' ? 'ar-SA' : getLang() === 'en' ? 'en-GB' : 'ru-RU';
+  let hijriFmt = hijriFmts.get(loc);
   if (hijriFmt === undefined) {
     try {
-      const f = new Intl.DateTimeFormat('ru-RU-u-ca-islamic-umalqura', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' });
+      const f = new Intl.DateTimeFormat(`${loc}-u-ca-islamic-umalqura`, { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' });
       hijriFmt = f.resolvedOptions().calendar === 'islamic-umalqura' ? f : null;
     } catch { hijriFmt = null; }
+    hijriFmts.set(loc, hijriFmt);
   }
   if (!hijriFmt) return null;
+  if (getLang() === 'ar') return hijriFmt.format(new Date(toUTC(iso)));
   const p: Record<string, string> = {};
   for (const x of hijriFmt.formatToParts(new Date(toUTC(iso)))) p[x.type] = x.value;
   if (!p.day || !p.month || !p.year) return null;
   const month = p.month.charAt(0).toUpperCase() + p.month.slice(1);
-  return `${p.day} ${month} ${p.year} г. х.`;
+  return T('{0} {1} {2} г. х.', p.day, month, p.year);
 }

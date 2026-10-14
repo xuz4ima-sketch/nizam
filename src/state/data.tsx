@@ -8,6 +8,7 @@ import {
 import { isValidTimeZone, setTimeFormat, zonedParts } from '../lib/dates';
 import { expand, indexSessions, type SessionIndex } from '../lib/recurrence';
 
+import { t as T } from '../i18n';
 export interface AppData {
   settings: Settings;
   tasks: Task[];
@@ -84,7 +85,7 @@ export function DataProvider({ children, fallback }: { children: ReactNode; fall
 
 export function useData(): AppData {
   const v = useContext(Ctx);
-  if (!v) throw new Error('DataProvider отсутствует');
+  if (!v) throw new Error(T('DataProvider отсутствует'));
   return v;
 }
 

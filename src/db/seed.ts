@@ -4,6 +4,7 @@ import { db } from './db';
 import type { AreaUnit, ISODate, StudyArea, Task } from './schema';
 import { AREA_COLORS, uid } from '../lib/labels';
 
+import { t as T } from '../i18n';
 interface DemoItem { name: string; unit: AreaUnit; daily: number; duration: number; category: string; faith?: boolean; minimal?: boolean }
 
 export const DEMO_PLAN: DemoItem[] = [
@@ -21,16 +22,17 @@ export async function seedDemoPlan(today: ISODate): Promise<number> {
   let created = 0;
   await db.transaction('rw', [db.areas, db.tasks], async () => {
     const existing = new Set((await db.areas.toArray()).map((a) => a.name.toLowerCase()));
+    const name = (d: DemoItem) => T(d.name);
     const t = Date.now();
     for (const [i, d] of DEMO_PLAN.entries()) {
-      if (existing.has(d.name.toLowerCase())) continue;
+      if (existing.has(name(d).toLowerCase())) continue;
       const area: StudyArea = {
-        id: uid(), name: d.name, description: 'Пример из демонстрационного плана — измените или удалите.',
+        id: uid(), name: name(d), description: T('Пример из демонстрационного плана — измените или удалите.'),
         unit: d.unit, dailyTarget: d.daily, weeklyTarget: 0, totalTarget: 0, faith: !!d.faith,
         carryOver: false, extra: {}, color: AREA_COLORS[i % AREA_COLORS.length], createdAt: t + i,
       };
       const task: Task = {
-        id: uid(), title: d.name, description: '', category: d.category, date: today, durationMin: d.duration,
+        id: uid(), title: name(d), description: '', category: T(d.category), date: today, durationMin: d.duration,
         priority: d.minimal ? 'high' : 'medium', recurrence: { kind: 'daily' }, studyAreaId: area.id,
         minimal: !!d.minimal, createdAt: t, updatedAt: t,
       };

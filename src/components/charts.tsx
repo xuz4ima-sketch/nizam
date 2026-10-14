@@ -7,6 +7,7 @@ import { addDays, dateRange, endOfMonth, fmtDate, startOfMonth, startOfWeek, WEE
 import { isActive, isOverdue, type Instance } from '../lib/recurrence';
 import { useData, useInstances } from '../state/data';
 
+import { t as T } from '../i18n';
 /** Текущие значения CSS-переменных темы (Recharts требует явные цвета). Обновляются при смене темы. */
 const subscribeTheme = (cb: () => void) => {
   const o = new MutationObserver(cb);
@@ -81,8 +82,8 @@ export function MiniCalendar({ selected, onSelect }: { selected?: ISODate; onSel
       <div className="mb-2 flex items-center justify-between">
         <p className="text-[15px] font-bold">{fmtDate(first, { month: 'long', year: 'numeric' })}</p>
         <div className="flex">
-          <button className="btn btn-ghost btn-icon !min-h-8 !min-w-8 !p-1" onClick={() => shift(-1)} aria-label="Предыдущий месяц"><ChevronLeft size={18} /></button>
-          <button className="btn btn-ghost btn-icon !min-h-8 !min-w-8 !p-1" onClick={() => shift(1)} aria-label="Следующий месяц"><ChevronRight size={18} /></button>
+          <button className="btn btn-ghost btn-icon !min-h-8 !min-w-8 !p-1" onClick={() => shift(-1)} aria-label={T('Предыдущий месяц')}><ChevronLeft size={18} /></button>
+          <button className="btn btn-ghost btn-icon !min-h-8 !min-w-8 !p-1" onClick={() => shift(1)} aria-label={T('Следующий месяц')}><ChevronRight size={18} /></button>
         </div>
       </div>
       <div className="grid grid-cols-7 text-center text-[11px] font-semibold text-muted">{heads.map((h) => <div key={h} className="py-1">{h}</div>)}</div>
@@ -94,7 +95,7 @@ export function MiniCalendar({ selected, onSelect }: { selected?: ISODate; onSel
           const allDone = list.length > 0 && list.every((i) => i.status === 'done');
           const late = list.some((i) => isOverdue(i, today, nowMin));
           return (
-            <button key={d} onClick={() => pick(d)} aria-label={`${fmtDate(d, { day: 'numeric', month: 'long' })}: задач ${list.length}`} aria-current={isToday ? 'date' : undefined}
+            <button key={d} onClick={() => pick(d)} aria-label={T('{0}: задач {1}', fmtDate(d, { day: 'numeric', month: 'long' }), list.length)} aria-current={isToday ? 'date' : undefined}
               className={`relative mx-auto grid size-9 place-items-center rounded-full text-[13px] font-semibold tabular-nums transition-colors
                 ${isToday ? 'bg-accent text-accent-fg' : isSel ? 'bg-accent-soft text-accent' : 'hover:bg-soft'} ${inMonth ? '' : 'opacity-35'}`}>
               {Number(d.slice(8))}

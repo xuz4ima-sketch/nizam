@@ -15,6 +15,7 @@ import { useData, useInstances } from '../state/data';
 import { TaskForm } from './TaskForm';
 import { errMsg, Field, Modal, ProgressBar, toNum, useUI } from './ui';
 
+import { t as T } from '../i18n';
 export function TaskItem({ inst, showDate = false, compact = false }: { inst: Instance; showDate?: boolean; compact?: boolean }) {
   const { today, nowMin, areas } = useData();
   const { toast } = useUI();
@@ -31,44 +32,44 @@ export function TaskItem({ inst, showDate = false, compact = false }: { inst: In
 
   async function toggle() {
     try {
-      if (done) { await resetInstance(inst); toast('Отметка снята'); }
-      else { await completeInstance(inst); toast('Выполнено — так держать!'); }
+      if (done) { await resetInstance(inst); toast(T('Отметка снята')); }
+      else { await completeInstance(inst); toast(T('Выполнено — так держать!')); }
     } catch (e) { toast(errMsg(e), 'error'); }
   }
 
   const meta: React.ReactNode[] = [];
   if (showDate) meta.push(<span key="d">{fmtShort(inst.date)}</span>);
   if (st !== null) meta.push(<span key="dur" className="tabular-nums font-semibold" style={{ color: `color-mix(in srgb, ${color} 80%, var(--text))` }}>{fmtMinutes(inst.durationMin)}</span>);
-  if (inst.task.category) meta.push(<span key="c" className="inline-flex items-center gap-1"><span className="size-1.5 rounded-full" style={{ background: color }} />{inst.task.category}</span>);
+  if (inst.task.category) meta.push(<span key="c" className="inline-flex items-center gap-1"><span className="size-1.5 rounded-full" style={{ background: color }} />{T(inst.task.category)}</span>);
   if (inst.task.recurrence.kind !== 'none') meta.push(<span key="r" className="inline-flex items-center gap-1"><Repeat size={11} />{recurrenceLabel(inst.task)}</span>);
-  if (inst.doneMin > 0 && !done) meta.push(<span key="f" className="tabular-nums">факт {fmtMinutes(inst.doneMin)}{amountLabel && ` · ${amountLabel}`}</span>);
+  if (inst.doneMin > 0 && !done) meta.push(<span key="f" className="tabular-nums">{T('факт')}{' '}{fmtMinutes(inst.doneMin)}{amountLabel && ` · ${amountLabel}`}</span>);
 
   return (
     <li className={`group relative flex min-w-0 items-center gap-3 rounded-[14px] px-2.5 py-2.5 transition-colors hover:bg-soft/70 ${overdue ? 'bg-danger-soft/60' : ''}`}>
       <button
         onClick={toggle}
         disabled={inactive}
-        aria-label={done ? `Снять отметку: ${inst.title}` : `Отметить выполненной: ${inst.title}`}
+        aria-label={done ? T('Снять отметку: {0}', inst.title) : T('Отметить выполненной: {0}', inst.title)}
         aria-pressed={done}
         className={`relative grid size-[22px] shrink-0 place-items-center overflow-hidden rounded-[7px] border-2 transition-colors ${done ? 'border-accent bg-accent text-accent-fg' : partial ? 'border-gold' : 'border-line hover:border-accent'} disabled:opacity-40`}
       >
         {done && <Check size={14} strokeWidth={3.2} className="check-pop" />}
         {!done && partial && <span className="absolute inset-x-0 bottom-0 bg-gold/70" style={{ height: `${Math.max(15, frac * 100)}%` }} />}
       </button>
-      <button className="min-w-0 flex-1 text-start" onClick={() => setMenu(true)} aria-label={`Действия: ${inst.title}`}>
+      <button className="min-w-0 flex-1 text-start" onClick={() => setMenu(true)} aria-label={T('Действия: {0}', inst.title)}>
         <p className={`flex items-center gap-1.5 text-[14px] font-semibold ${done || inactive ? 'text-muted line-through decoration-1' : ''}`}>
           <span className="line-clamp-2 break-words leading-snug sm:line-clamp-1">{inst.title}</span>
-          {inst.priority === 'high' && !done && <Star size={13} className="shrink-0 fill-gold text-gold" aria-label="Важно" />}
+          {inst.priority === 'high' && !done && <Star size={13} className="shrink-0 fill-gold text-gold" aria-label={T('Важно')} />}
         </p>
         {(meta.length > 0 || overdue || inst.moved || (inst.status !== 'planned' && inst.status !== 'done')) && (
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] text-muted">
             {meta}
-            {overdue && <span className="chip !bg-danger-soft !text-danger">Просрочено</span>}
+            {overdue && <span className="chip !bg-danger-soft !text-danger">{T('Просрочено')}</span>}
             {inst.status !== 'planned' && inst.status !== 'done' && <span className="chip">{STATUS_LABEL[inst.status]}{inst.skipReason ? `: ${SKIP_REASONS[inst.skipReason].toLowerCase()}` : ''}</span>}
-            {inst.moved && <span className="chip"><CalendarClock size={11} />с {fmtShort(inst.origDate)}</span>}
+            {inst.moved && <span className="chip"><CalendarClock size={11} />{T('с')}{' '}{fmtShort(inst.origDate)}</span>}
           </div>
         )}
-        {!done && frac > 0 && <div className="mt-1.5 max-w-[220px]"><ProgressBar value={frac} size="sm" tone="gold" label="Частичное выполнение" /></div>}
+        {!done && frac > 0 && <div className="mt-1.5 max-w-[220px]"><ProgressBar value={frac} size="sm" tone="gold" label={T('Частичное выполнение')} /></div>}
       </button>
       {!compact && st === null && (
         <span className="hidden shrink-0 rounded-lg px-2 py-1 text-[12px] font-semibold tabular-nums sm:inline-block"
@@ -82,7 +83,7 @@ export function TaskItem({ inst, showDate = false, compact = false }: { inst: In
         </span>
       )}
       {!compact && st === null && <span className="shrink-0 rounded-lg bg-soft px-2 py-1 text-[12px] font-semibold tabular-nums text-muted sm:hidden">{fmtMinutes(inst.durationMin)}</span>}
-      <button className="btn btn-ghost btn-icon -me-1 !min-w-9 !px-1.5 text-muted" onClick={() => setMenu(true)} aria-label={`Меню задачи ${inst.title}`}>
+      <button className="btn btn-ghost btn-icon -me-1 !min-w-9 !px-1.5 text-muted" onClick={() => setMenu(true)} aria-label={T('Меню задачи {0}', inst.title)}>
         <Ellipsis size={18} />
       </button>
       {menu && <InstanceActions inst={inst} onClose={() => setMenu(false)} />}
@@ -119,7 +120,7 @@ export function InstanceActions({ inst, onClose, initial = 'menu' }: { inst: Ins
   })();
 
   async function focus(mode: 'free' | 'five') {
-    if (timer) { toast('Уже идёт сеанс концентрации', 'error'); nav('/focus'); onClose(); return; }
+    if (timer) { toast(T('Уже идёт сеанс концентрации'), 'error'); nav('/focus'); onClose(); return; }
     try {
       await startTimer({ mode, label: inst.title, taskId: inst.task.id, occKey: inst.key, areaId: inst.task.studyAreaId });
       onClose();
@@ -129,7 +130,7 @@ export function InstanceActions({ inst, onClose, initial = 'menu' }: { inst: Ins
 
   if (mode === 'edit') return <TaskForm open onClose={onClose} instance={inst} />;
 
-  const titles: Record<Mode, string> = { menu: inst.title, progress: 'Фактическое выполнение', skip: 'Пропуск', move: 'Перенос', edit: '' };
+  const titles: Record<Mode, string> = { menu: inst.title, progress: T('Фактическое выполнение'), skip: T('Пропуск'), move: T('Перенос'), edit: '' };
 
   return (
     <Modal open onClose={onClose} title={titles[mode]}>
@@ -137,33 +138,33 @@ export function InstanceActions({ inst, onClose, initial = 'menu' }: { inst: Ins
       {mode === 'menu' && (
         <div className="grid gap-1">
           <p className="mb-2 text-sm text-muted">
-            {fmtShort(inst.date)} · план {fmtMinutes(inst.durationMin)}{inst.doneMin > 0 && ` · факт ${fmtMinutes(inst.doneMin)}`} · {STATUS_LABEL[inst.status]}
+            {fmtShort(inst.date)}{' '}{T('· план')}{' '}{fmtMinutes(inst.durationMin)}{inst.doneMin > 0 && T(' · факт {0}', fmtMinutes(inst.doneMin))} · {STATUS_LABEL[inst.status]}
           </p>
           {inst.description && <p className="mb-2 whitespace-pre-wrap text-sm">{inst.description}</p>}
-          {inst.status !== 'done' && <MenuBtn icon={<Check size={18} />} onClick={() => run(() => completeInstance(inst), 'Выполнено ✓')}>Выполнено</MenuBtn>}
-          <MenuBtn icon={<Clock size={18} />} onClick={() => setMode('progress')}>Указать фактическое время / частично</MenuBtn>
-          {inst.status !== 'done' && <MenuBtn icon={<Play size={18} />} onClick={() => focus('free')}>Начать в режиме концентрации</MenuBtn>}
-          {inst.status !== 'done' && <MenuBtn icon={<Zap size={18} />} onClick={() => focus('five')}>Начни с 5 минут</MenuBtn>}
-          <MenuBtn icon={<CalendarClock size={18} />} onClick={() => setMode('move')}>Перенести</MenuBtn>
-          {inst.status !== 'skipped' && <MenuBtn icon={<CircleSlash size={18} />} onClick={() => setMode('skip')}>Пропустить (указать причину)</MenuBtn>}
-          {inst.status !== 'cancelled' && <MenuBtn icon={<Ban size={18} />} onClick={() => run(() => cancelInstance(inst), 'Задача отменена')}>Отменить</MenuBtn>}
-          {inst.status !== 'planned' && <MenuBtn icon={<RotateCcw size={18} />} onClick={() => run(() => resetInstance(inst), 'Возвращено в план')}>Вернуть в «Запланировано»</MenuBtn>}
-          <MenuBtn icon={<Pencil size={18} />} onClick={() => setMode('edit')}>Редактировать</MenuBtn>
+          {inst.status !== 'done' && <MenuBtn icon={<Check size={18} />} onClick={() => run(() => completeInstance(inst), T('Выполнено ✓'))}>{T('Выполнено')}</MenuBtn>}
+          <MenuBtn icon={<Clock size={18} />} onClick={() => setMode('progress')}>{T('Указать фактическое время / частично')}</MenuBtn>
+          {inst.status !== 'done' && <MenuBtn icon={<Play size={18} />} onClick={() => focus('free')}>{T('Начать в режиме концентрации')}</MenuBtn>}
+          {inst.status !== 'done' && <MenuBtn icon={<Zap size={18} />} onClick={() => focus('five')}>{T('Начни с 5 минут')}</MenuBtn>}
+          <MenuBtn icon={<CalendarClock size={18} />} onClick={() => setMode('move')}>{T('Перенести')}</MenuBtn>
+          {inst.status !== 'skipped' && <MenuBtn icon={<CircleSlash size={18} />} onClick={() => setMode('skip')}>{T('Пропустить (указать причину)')}</MenuBtn>}
+          {inst.status !== 'cancelled' && <MenuBtn icon={<Ban size={18} />} onClick={() => run(() => cancelInstance(inst), T('Задача отменена'))}>{T('Отменить')}</MenuBtn>}
+          {inst.status !== 'planned' && <MenuBtn icon={<RotateCcw size={18} />} onClick={() => run(() => resetInstance(inst), T('Возвращено в план'))}>{T('Вернуть в «Запланировано»')}</MenuBtn>}
+          <MenuBtn icon={<Pencil size={18} />} onClick={() => setMode('edit')}>{T('Редактировать')}</MenuBtn>
           <MenuBtn danger icon={<Trash2 size={18} />} onClick={async () => {
             const ok = await confirm({
-              title: recurring ? 'Удалить этот день?' : 'Удалить задачу?',
-              message: 'Учтённое по ней время тоже будет удалено, показатели пересчитаются.', confirmText: 'Удалить', danger: true,
+              title: recurring ? T('Удалить этот день?') : T('Удалить задачу?'),
+              message: T('Учтённое по ней время тоже будет удалено, показатели пересчитаются.'), confirmText: T('Удалить'), danger: true,
             });
-            if (ok) run(() => deleteInstance(inst), 'Удалено');
-          }}>{recurring ? 'Удалить только этот день' : 'Удалить'}</MenuBtn>
+            if (ok) run(() => deleteInstance(inst), T('Удалено'));
+          }}>{recurring ? T('Удалить только этот день') : T('Удалить')}</MenuBtn>
           {recurring && (
             <MenuBtn danger icon={<Trash2 size={18} />} onClick={async () => {
               const ok = await confirm({
-                title: 'Удалить всю серию?', message: `«${inst.task.title}» исчезнет из всех дней вместе с историей выполнения.`,
-                confirmText: 'Удалить серию', danger: true,
+                title: T('Удалить всю серию?'), message: T('«{0}» исчезнет из всех дней вместе с историей выполнения.', inst.task.title),
+                confirmText: T('Удалить серию'), danger: true,
               });
-              if (ok) run(() => deleteTask(inst.task.id), 'Серия удалена');
-            }}>Удалить всю серию</MenuBtn>
+              if (ok) run(() => deleteTask(inst.task.id), T('Серия удалена'));
+            }}>{T('Удалить всю серию')}</MenuBtn>
           )}
         </div>
       )}
@@ -173,34 +174,34 @@ export function InstanceActions({ inst, onClose, initial = 'menu' }: { inst: Ins
           e.preventDefault();
           const m = toNum(minutes);
           const a = unit ? (amount.trim() ? toNum(amount) : undefined) : undefined;
-          if (!Number.isFinite(m) || m < 0) return setErr('Введите количество минут (0 или больше)');
-          if (a !== undefined && (!Number.isFinite(a) || a < 0)) return setErr('Объём должен быть числом не меньше 0');
+          if (!Number.isFinite(m) || m < 0) return setErr(T('Введите количество минут (0 или больше)'));
+          if (a !== undefined && (!Number.isFinite(a) || a < 0)) return setErr(T('Объём должен быть числом не меньше 0'));
           run(() => completeInstance(inst, { totalMin: m, amount: a, status: m >= inst.durationMin ? 'done' : 'partial' }),
-            m >= inst.durationMin ? 'Выполнено ✓' : 'Частичное выполнение сохранено');
+            m >= inst.durationMin ? T('Выполнено ✓') : T('Частичное выполнение сохранено'));
         }}>
-          <p className="text-sm text-muted">План: {fmtMinutes(inst.durationMin)}. Укажите общее фактическое время. Время из таймера уже учтено и не будет добавлено повторно.</p>
-          <Field label="Всего минут" id="p-min">
+          <p className="text-sm text-muted">{T('План:')}{' '}{fmtMinutes(inst.durationMin)}{T('. Укажите общее фактическое время. Время из таймера уже учтено и не будет добавлено повторно.')}</p>
+          <Field label={T('Всего минут')} id="p-min">
             <input id="p-min" className="input" type="number" min={0} max={1440} inputMode="numeric" value={minutes} onChange={(e) => setMinutes(e.target.value)} autoFocus />
           </Field>
           {unit && (
-            <Field label={`Выполненный объём (${unit.label.toLowerCase()})`} id="p-amt">
+            <Field label={T('Выполненный объём ({0})', unit.label.toLowerCase())} id="p-amt">
               <input id="p-amt" className="input" type="number" min={0} inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} />
             </Field>
           )}
           {Number.isFinite(toNum(minutes)) && (
-            <ProgressBar value={toNum(minutes) / inst.durationMin} label="Доля выполнения" />
+            <ProgressBar value={toNum(minutes) / inst.durationMin} label={T('Доля выполнения')} />
           )}
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn btn-outline" onClick={() => setMode('menu')}>Назад</button>
-            <button className="btn btn-primary">Сохранить</button>
+            <button type="button" className="btn btn-outline" onClick={() => setMode('menu')}>{T('Назад')}</button>
+            <button className="btn btn-primary">{T('Сохранить')}</button>
           </div>
         </form>
       )}
 
       {mode === 'skip' && (
-        <form className="grid gap-3" onSubmit={(e) => { e.preventDefault(); run(() => skipInstance(inst, reason, note), 'Пропуск отмечен'); }}>
+        <form className="grid gap-3" onSubmit={(e) => { e.preventDefault(); run(() => skipInstance(inst, reason, note), T('Пропуск отмечен')); }}>
           <fieldset className="grid gap-1.5">
-            <legend className="label">Что помешало?</legend>
+            <legend className="label">{T('Что помешало?')}</legend>
             {(Object.keys(SKIP_REASONS) as SkipReason[]).map((r) => (
               <label key={r} className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm ${reason === r ? 'border-accent bg-accent-soft' : 'border-line'}`}>
                 <input type="radio" name="reason" value={r} checked={reason === r} onChange={() => setReason(r)} className="accent-[var(--accent)]" />
@@ -208,36 +209,35 @@ export function InstanceActions({ inst, onClose, initial = 'menu' }: { inst: Ins
               </label>
             ))}
           </fieldset>
-          <Field label="Комментарий" id="s-note">
+          <Field label={T('Комментарий')} id="s-note">
             <input id="s-note" className="input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} />
           </Field>
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn btn-outline" onClick={() => setMode('menu')}>Назад</button>
-            <button className="btn btn-primary">Отметить пропуск</button>
+            <button type="button" className="btn btn-outline" onClick={() => setMode('menu')}>{T('Назад')}</button>
+            <button className="btn btn-primary">{T('Отметить пропуск')}</button>
           </div>
         </form>
       )}
 
       {mode === 'move' && (
-        <form className="grid gap-3" onSubmit={(e) => { e.preventDefault(); run(() => moveInstance(inst, moveDate, moveTime || undefined), 'Перенесено'); }}>
-          {recurring && <p className="text-sm text-muted">Переносится только этот день — остальная серия не меняется.</p>}
+        <form className="grid gap-3" onSubmit={(e) => { e.preventDefault(); run(() => moveInstance(inst, moveDate, moveTime || undefined), T('Перенесено')); }}>
+          {recurring && <p className="text-sm text-muted">{T('Переносится только этот день — остальная серия не меняется.')}</p>}
           <div className="flex flex-wrap gap-2">
-            <button type="button" className="btn btn-sm btn-outline" onClick={() => setMoveDate(today)}>Сегодня</button>
-            <button type="button" className="btn btn-sm btn-outline" onClick={() => setMoveDate(addDays(today, 1))}>Завтра</button>
-            <button type="button" className="btn btn-sm btn-outline" onClick={() => setMoveDate(addDays(today, 2))}>Послезавтра</button>
+            <button type="button" className="btn btn-sm btn-outline" onClick={() => setMoveDate(today)}>{T('Сегодня')}</button>
+            <button type="button" className="btn btn-sm btn-outline" onClick={() => setMoveDate(addDays(today, 1))}>{T('Завтра')}</button>
+            <button type="button" className="btn btn-sm btn-outline" onClick={() => setMoveDate(addDays(today, 2))}>{T('Послезавтра')}</button>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Дата" id="m-date"><input id="m-date" type="date" className="input" value={moveDate} onChange={(e) => setMoveDate(e.target.value)} /></Field>
-            <Field label="Время" id="m-time"><input id="m-time" type="time" className="input" value={moveTime} onChange={(e) => setMoveTime(e.target.value)} /></Field>
+            <Field label={T('Дата')} id="m-date"><input id="m-date" type="date" className="input" value={moveDate} onChange={(e) => setMoveDate(e.target.value)} /></Field>
+            <Field label={T('Время')} id="m-time"><input id="m-time" type="time" className="input" value={moveTime} onChange={(e) => setMoveTime(e.target.value)} /></Field>
           </div>
           {suggestion !== null ? (
             <button type="button" className="btn btn-outline justify-start" onClick={() => setMoveTime(fmtTime(suggestion))}>
-              <Timer size={16} /> Свободное окно: {showTime(suggestion)}–{showTime(suggestion + inst.durationMin)} — подставить
-            </button>
-          ) : <p className="text-sm text-muted">В этот день нет свободного окна на {fmtMinutes(inst.durationMin)} в пределах рабочего дня.</p>}
+              <Timer size={16} />{' '}{T('Свободное окно:')}{' '}{showTime(suggestion)}–{showTime(suggestion + inst.durationMin)}{' '}{T('— подставить')}</button>
+          ) : <p className="text-sm text-muted">{T('В этот день нет свободного окна на')}{' '}{fmtMinutes(inst.durationMin)}{' '}{T('в пределах рабочего дня.')}</p>}
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn btn-outline" onClick={() => setMode('menu')}>Назад</button>
-            <button className="btn btn-primary">Перенести</button>
+            <button type="button" className="btn btn-outline" onClick={() => setMode('menu')}>{T('Назад')}</button>
+            <button className="btn btn-primary">{T('Перенести')}</button>
           </div>
         </form>
       )}

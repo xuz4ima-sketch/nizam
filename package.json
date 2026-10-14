@@ -25,6 +25,7 @@
     "recharts": "^3.10.1"
   },
   "devDependencies": {
+    "@babel/parser": "^8.0.7",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

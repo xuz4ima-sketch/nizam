@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Bell, BookOpen, BookOpenText, CalendarDays, ChartColumn, ChevronRight, ClipboardList, Download, Ellipsis, Flame, GraduationCap, History,
+  Bell, BookOpen, BookOpenText, Check, Languages, CalendarDays, ChartColumn, ChevronRight, ClipboardList, Download, Ellipsis, Flame, GraduationCap, History,
   House, Library, LifeBuoy, ListChecks, Moon, NotebookPen, Plus, ScrollText, Search, Settings, Sun, Target, Timer, UserRound, X,
 } from 'lucide-react';
 import { useData, useInstances, useNow } from '../state/data';
@@ -14,8 +14,9 @@ import { Logo, StarPattern } from './Art';
 import { useIsDark } from './charts';
 import { TaskForm, type TaskPreset } from './TaskForm';
 import { IconBadge, errMsg, useUI } from './ui';
-import { t } from '../i18n';
+import { LANGS, t } from '../i18n';
 
+import { t as T } from '../i18n';
 export const NAV = [
   { to: '/', label: 'Главная', icon: House, group: 'main' },
   { to: '/tasks', label: 'Задачи', icon: ListChecks, group: 'main' },
@@ -51,19 +52,18 @@ interface QuickAdd { openTask: (o?: TaskOpen) => void; openSearch: () => void }
 const QuickCtx = createContext<QuickAdd | null>(null);
 export function useQuickAdd() {
   const v = useContext(QuickCtx);
-  if (!v) throw new Error('Layout отсутствует');
+  if (!v) throw new Error(T('Layout отсутствует'));
   return v;
 }
 
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
-    <NavLink to="/" className="flex items-center gap-2.5 rounded-xl" aria-label="НИЗАМ — на главную">
+    <NavLink to="/" className="flex items-center gap-2.5 rounded-xl" aria-label={T('НИЗАМ — на главную')}>
       <Logo size={compact ? 32 : 38} />
       <div className="leading-none">
-        <p className="flex items-baseline gap-2 text-[17px] font-extrabold tracking-[0.12em] text-accent-strong dark:text-fg">
-          НИЗАМ <span className="arabic text-[19px] font-semibold tracking-normal text-gold" lang="ar">نِظَام</span>
+        <p className="flex items-baseline gap-2 text-[17px] font-extrabold tracking-[0.12em] text-accent-strong dark:text-fg">{T('НИЗАМ')}{' '}<span className="arabic text-[19px] font-semibold tracking-normal text-gold" lang="ar">نِظَام</span>
         </p>
-        {!compact && <p className="mt-1.5 whitespace-nowrap text-[10px] font-medium text-muted">Порядок · Постоянство · Развитие</p>}
+        {!compact && <p className="mt-1.5 whitespace-nowrap text-[10px] font-medium text-muted">{T('Порядок · Постоянство · Развитие')}</p>}
       </div>
     </NavLink>
   );
@@ -76,7 +76,7 @@ function TimerPill() {
   return (
     <NavLink to="/focus" className="flex items-center gap-2 rounded-xl bg-accent-soft px-3 py-2.5 text-sm font-semibold text-accent">
       <span className={`size-2 rounded-full ${timer.runningSince ? 'animate-pulse bg-accent' : 'bg-warn'}`} />
-      <span className="truncate">{timer.phase === 'break' ? 'Отдых' : timer.runningSince ? 'Идёт сеанс' : 'Пауза'}</span>
+      <span className="truncate">{timer.phase === 'break' ? T('Отдых') : timer.runningSince ? T('Идёт сеанс') : T('Пауза')}</span>
       <span className="ms-auto tabular-nums">{fmtClock(timerElapsed(timer, Math.max(now, timer.runningSince ?? 0)))}</span>
     </NavLink>
   );
@@ -86,19 +86,19 @@ function Sidebar() {
   const link = ({ isActive }: { isActive: boolean }) =>
     `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-semibold transition-colors ${isActive ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-soft hover:text-fg'}`;
   return (
-    <aside className="fixed inset-y-0 start-0 z-30 hidden w-[248px] flex-col border-e border-line bg-card lg:flex" aria-label="Главное меню">
+    <aside className="fixed inset-y-0 start-0 z-30 hidden w-[248px] flex-col border-e border-line bg-card lg:flex" aria-label={T('Главное меню')}>
       <div className="px-5 pb-5 pt-6"><Brand /></div>
       <nav className="thin-scroll flex flex-1 flex-col gap-0.5 overflow-y-auto px-3">
         {NAV.filter((n) => n.group === 'main').map(({ to, label, icon: Icon }) => (
-          <NavLink key={to} to={to} end={to === '/'} className={link}><Icon size={19} strokeWidth={1.9} />{label}</NavLink>
+          <NavLink key={to} to={to} end={to === '/'} className={link}><Icon size={19} strokeWidth={1.9} />{T(label)}</NavLink>
         ))}
         <p className="eyebrow mb-1 mt-4 px-3">{t('Знание')}</p>
         {NAV.filter((n) => n.group === 'ilm').map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} className={link}><Icon size={19} strokeWidth={1.9} />{t(label)}</NavLink>
         ))}
-        <p className="eyebrow mt-4 mb-1 px-3">Ещё</p>
+        <p className="eyebrow mt-4 mb-1 px-3">{T('Ещё')}</p>
         {NAV.filter((n) => n.group === 'more').map(({ to, label, icon: Icon }) => (
-          <NavLink key={to} to={to} className={link}><Icon size={19} strokeWidth={1.9} />{label}</NavLink>
+          <NavLink key={to} to={to} className={link}><Icon size={19} strokeWidth={1.9} />{T(label)}</NavLink>
         ))}
       </nav>
       <div className="grid gap-3 p-3">
@@ -106,7 +106,7 @@ function Sidebar() {
         <div className="relative overflow-hidden rounded-2xl bg-brand-900 px-4 py-4 text-white">
           <StarPattern className="absolute inset-0" opacity={0.18} color="#c4a56b" size={36} />
           <p className="arabic relative text-center text-2xl text-gold" lang="ar">نِظَام</p>
-          <p className="relative mt-1 text-center text-[11px] font-medium text-white/75">Порядок. Постоянство. Развитие.</p>
+          <p className="relative mt-1 text-center text-[11px] font-medium text-white/75">{T('Порядок. Постоянство. Развитие.')}</p>
         </div>
       </div>
     </aside>
@@ -135,36 +135,36 @@ function SearchPalette({ open, onClose, onTask }: { open: boolean; onClose: () =
     const s = q.trim().toLowerCase();
     const go = (to: string) => () => { onClose(); nav(to); };
     const m = (...xs: (string | undefined)[]) => xs.some((x) => x?.toLowerCase().includes(s));
-    const pages: Hit[] = NAV.filter((n) => !s || m(n.label)).map((n) => ({ id: `p${n.to}`, title: n.label, sub: 'Раздел', icon: <n.icon size={17} />, run: go(n.to) }));
+    const pages: Hit[] = NAV.filter((n) => !s || m(T(n.label), n.label)).map((n) => ({ id: `p${n.to}`, title: T(n.label), sub: T('Раздел'), icon: <n.icon size={17} />, run: go(n.to) }));
     if (!s) return pages.slice(0, 8);
     const out: Hit[] = [];
-    for (const t of tasks) if (m(t.title, t.category, t.description)) out.push({ id: `t${t.id}`, title: t.title, sub: `Задача · ${t.category}${t.recurrence.kind === 'none' ? ` · ${fmtShort(t.date)}` : ' · повторяется'}`, icon: <ListChecks size={17} />, run: () => { onClose(); onTask(t); } });
-    for (const g of goals) if (m(g.title, g.note)) out.push({ id: `g${g.id}`, title: g.title, sub: 'Цель', icon: <Target size={17} />, run: go('/goals') });
-    for (const a of areas) if (m(a.name, a.description)) out.push({ id: `a${a.id}`, title: a.name, sub: 'Учебное направление', icon: <GraduationCap size={17} />, run: go(a.faith ? '/faith' : '/study') });
-    for (const h of habits) if (m(h.name)) out.push({ id: `h${h.id}`, title: h.name, sub: 'Привычка', icon: <Flame size={17} />, run: go('/habits') });
+    for (const t of tasks) if (m(t.title, t.category, t.description)) out.push({ id: `t${t.id}`, title: t.title, sub: T('Задача · {0}{1}', t.category, t.recurrence.kind === 'none' ? ` · ${fmtShort(t.date)}` : T(' · повторяется')), icon: <ListChecks size={17} />, run: () => { onClose(); onTask(t); } });
+    for (const g of goals) if (m(g.title, g.note)) out.push({ id: `g${g.id}`, title: g.title, sub: T('Цель'), icon: <Target size={17} />, run: go('/goals') });
+    for (const a of areas) if (m(a.name, a.description)) out.push({ id: `a${a.id}`, title: a.name, sub: T('Учебное направление'), icon: <GraduationCap size={17} />, run: go(a.faith ? '/faith' : '/study') });
+    for (const h of habits) if (m(h.name)) out.push({ id: `h${h.id}`, title: h.name, sub: T('Привычка'), icon: <Flame size={17} />, run: go('/habits') });
     return [...out.slice(0, 30), ...pages];
   }, [q, tasks, goals, areas, habits, nav, onClose, onTask]);
 
   useEffect(() => { setSel(0); }, [q]);
 
   return (
-    <dialog ref={ref} className="modal !mt-[8vh] !mb-auto" aria-label="Поиск"
+    <dialog ref={ref} className="modal !mt-[8vh] !mb-auto" aria-label={T('Поиск')}
       onCancel={(e) => { e.preventDefault(); onClose(); }} onMouseDown={(e) => { if (e.target === ref.current) onClose(); }}>
       {open && (
         <div className="flex max-h-[70dvh] flex-col">
           <div className="flex items-center gap-3 border-b border-line px-4">
             <Search size={18} className="shrink-0 text-muted" />
-            <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск задач, целей, направлений, привычек…"
-              className="min-h-14 w-full bg-transparent text-[15px] outline-none placeholder:text-muted" aria-label="Строка поиска"
+            <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder={T('Поиск задач, целей, направлений, привычек…')}
+              className="min-h-14 w-full bg-transparent text-[15px] outline-none placeholder:text-muted" aria-label={T('Строка поиска')}
               onKeyDown={(e) => {
                 if (e.key === 'ArrowDown') { e.preventDefault(); setSel((v) => Math.min(hits.length - 1, v + 1)); }
                 if (e.key === 'ArrowUp') { e.preventDefault(); setSel((v) => Math.max(0, v - 1)); }
                 if (e.key === 'Enter') { e.preventDefault(); hits[sel]?.run(); }
               }} />
-            <button className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Закрыть поиск"><X size={18} /></button>
+            <button className="btn btn-ghost btn-icon" onClick={onClose} aria-label={T('Закрыть поиск')}><X size={18} /></button>
           </div>
-          <ul className="thin-scroll overflow-y-auto p-2" role="listbox" aria-label="Результаты">
-            {q.trim() && hits.every((h) => h.sub === 'Раздел') && <li className="px-3 py-6 text-center text-sm text-muted">Ничего не найдено по запросу «{q.trim()}»</li>}
+          <ul className="thin-scroll overflow-y-auto p-2" role="listbox" aria-label={T('Результаты')}>
+            {q.trim() && hits.every((h) => h.sub === T('Раздел')) && <li className="px-3 py-6 text-center text-sm text-muted">{T('Ничего не найдено по запросу «')}{q.trim()}»</li>}
             {hits.map((h, i) => (
               <li key={h.id} role="option" aria-selected={i === sel}>
                 <button onClick={h.run} onMouseEnter={() => setSel(i)}
@@ -176,7 +176,7 @@ function SearchPalette({ open, onClose, onTask }: { open: boolean; onClose: () =
               </li>
             ))}
           </ul>
-          <p className="hidden border-t border-line px-4 py-2 text-[11px] text-muted sm:block">↑↓ — выбор · Enter — открыть · Esc — закрыть · Ctrl+K — открыть поиск</p>
+          <p className="hidden border-t border-line px-4 py-2 text-[11px] text-muted sm:block">{T('↑↓ — выбор · Enter — открыть · Esc — закрыть · Ctrl+K — открыть поиск')}</p>
         </div>
       )}
     </dialog>
@@ -211,24 +211,24 @@ function NotificationsPanel({ notices, onClose }: { notices: Notice[]; onClose: 
   async function toggle() {
     try {
       if (!settings.notifications) {
-        if (!supported) { toast('Этот браузер не поддерживает уведомления', 'error'); return; }
+        if (!supported) { toast(T('Этот браузер не поддерживает уведомления'), 'error'); return; }
         if (Notification.permission !== 'granted') {
           const p = await Notification.requestPermission();
-          if (p !== 'granted') { toast('Браузер не разрешил уведомления', 'error'); return; }
+          if (p !== 'granted') { toast(T('Браузер не разрешил уведомления'), 'error'); return; }
         }
         await saveSettings({ notifications: true });
-        toast('Уведомления включены');
-      } else { await saveSettings({ notifications: false }); toast('Уведомления выключены'); }
+        toast(T('Уведомления включены'));
+      } else { await saveSettings({ notifications: false }); toast(T('Уведомления выключены')); }
     } catch (e) { toast(errMsg(e), 'error'); }
   }
   return (
     <div className="flex max-h-[70dvh] flex-col">
       <div className="flex items-center justify-between px-4 pb-2 pt-4">
-        <h2 className="h2">Уведомления</h2>
-        <span className="text-xs text-muted">{notices.length ? `${notices.length} активн.` : 'всё спокойно'}</span>
+        <h2 className="h2">{T('Уведомления')}</h2>
+        <span className="text-xs text-muted">{notices.length ? T('{0} активн.', notices.length) : T('всё спокойно')}</span>
       </div>
       <ul className="thin-scroll grid gap-1 overflow-y-auto px-2">
-        {!notices.length && <li className="px-3 py-6 text-center text-sm text-muted">Новых уведомлений нет. Хорошего дня!</li>}
+        {!notices.length && <li className="px-3 py-6 text-center text-sm text-muted">{T('Новых уведомлений нет. Хорошего дня!')}</li>}
         {notices.map((n) => (
           <li key={n.id}>
             <button className="flex w-full items-start gap-3 rounded-xl px-2 py-2.5 text-start hover:bg-soft" onClick={() => { onClose(); nav(n.to); }}>
@@ -243,10 +243,10 @@ function NotificationsPanel({ notices, onClose }: { notices: Notice[]; onClose: 
       <div className="mt-2 border-t border-line px-4 py-3">
         <label className="flex cursor-pointer items-center justify-between gap-3 text-sm">
           <span>
-            <span className="block font-semibold">Напоминания браузера</span>
-            <span className="block text-xs text-muted">За 5 минут до начала задачи, пока приложение открыто. Фоновая доставка на телефонах не гарантируется.</span>
+            <span className="block font-semibold">{T('Напоминания браузера')}</span>
+            <span className="block text-xs text-muted">{T('За 5 минут до начала задачи, пока приложение открыто. Фоновая доставка на телефонах не гарантируется.')}</span>
           </span>
-          <Switch checked={settings.notifications} onChange={toggle} label="Напоминания браузера" />
+          <Switch checked={settings.notifications} onChange={toggle} label={T('Напоминания браузера')} />
         </label>
       </div>
     </div>
@@ -271,15 +271,15 @@ function ProfilePanel({ onClose }: { onClose: () => void }) {
       <div className="flex items-center gap-3 px-3 py-3">
         <Avatar size={42} />
         <div className="min-w-0">
-          <p className="truncate font-bold">{settings.name || 'Гость'}</p>
-          <p className="text-xs text-muted">Данные хранятся на этом устройстве</p>
+          <p className="truncate font-bold">{settings.name || T('Гость')}</p>
+          <p className="text-xs text-muted">{T('Данные хранятся на этом устройстве')}</p>
         </div>
       </div>
-      <button className="btn btn-ghost w-full justify-start" onClick={() => { onClose(); nav('/settings'); }}><Settings size={17} />Настройки и профиль</button>
+      <button className="btn btn-ghost w-full justify-start" onClick={() => { onClose(); nav('/settings'); }}><Settings size={17} />{T('Настройки и профиль')}</button>
       <button className="btn btn-ghost w-full justify-start" onClick={async () => {
-        try { downloadJSON(await exportAll(), `nizam-backup-${today}.json`); await saveSettings({ lastBackupAt: Date.now() }); toast('Резервная копия сохранена'); onClose(); }
+        try { downloadJSON(await exportAll(), `nizam-backup-${today}.json`); await saveSettings({ lastBackupAt: Date.now() }); toast(T('Резервная копия сохранена')); onClose(); }
         catch (e) { toast(errMsg(e), 'error'); }
-      }}><Download size={17} />Скачать резервную копию</button>
+      }}><Download size={17} />{T('Скачать резервную копию')}</button>
     </div>
   );
 }
@@ -295,31 +295,50 @@ function Avatar({ size = 36 }: { size?: number }) {
 }
 
 function HeaderActions({ notices, onSearch, mobile = false }: { notices: Notice[]; onSearch: () => void; mobile?: boolean }) {
-  const [panel, setPanel] = useState<'bell' | 'profile' | null>(null);
+  const [panel, setPanel] = useState<'bell' | 'profile' | 'lang' | null>(null);
+  const { settings } = useData();
   const dark = useIsDark();
   const nav = useNavigate();
   const close = useCallback(() => setPanel(null), []);
   const urgent = notices.filter((n) => n.tone === 'danger' || n.tone === 'gold' || n.tone === 'warn').length;
   return (
     <div className="relative flex items-center gap-1">
-      {mobile && <button className="btn btn-ghost btn-icon" onClick={onSearch} aria-label="Поиск"><Search size={20} /></button>}
-      <button className="btn btn-ghost btn-icon relative" onClick={() => setPanel(panel === 'bell' ? null : 'bell')} aria-label={`Уведомления: ${notices.length}`} aria-expanded={panel === 'bell'}>
+      {mobile && <button className="btn btn-ghost btn-icon" onClick={onSearch} aria-label={T('Поиск')}><Search size={20} /></button>}
+      <button className="btn btn-ghost !min-h-10 !px-2 text-[13px] font-bold" onClick={() => setPanel(panel === 'lang' ? null : 'lang')}
+        aria-label={T('Язык: {0}', LANGS.find((l) => l.code === settings.language)?.label ?? '')} aria-expanded={panel === 'lang'}>
+        <Languages size={19} /><span className={settings.language === 'ar' ? 'arabic text-[15px]' : ''}>{LANGS.find((l) => l.code === settings.language)?.short}</span>
+      </button>
+      <button className="btn btn-ghost btn-icon relative" onClick={() => setPanel(panel === 'bell' ? null : 'bell')} aria-label={T('Уведомления: {0}', notices.length)} aria-expanded={panel === 'bell'}>
         <Bell size={20} />
         {notices.length > 0 && <span className={`absolute end-2 top-2 size-2 rounded-full ring-2 ring-card ${urgent ? 'bg-danger' : 'bg-gold'}`} />}
       </button>
       {!mobile && (
         <>
-          <button className="btn btn-ghost btn-icon" onClick={() => saveSettings({ theme: dark ? 'light' : 'dark' })} aria-label={dark ? 'Светлая тема' : 'Тёмная тема'}>
+          <button className="btn btn-ghost btn-icon" onClick={() => saveSettings({ theme: dark ? 'light' : 'dark' })} aria-label={dark ? T('Светлая тема') : T('Тёмная тема')}>
             {dark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <button className="btn btn-ghost btn-icon" onClick={() => nav('/settings')} aria-label="Настройки"><Settings size={20} /></button>
+          <button className="btn btn-ghost btn-icon" onClick={() => nav('/settings')} aria-label={T('Настройки')}><Settings size={20} /></button>
         </>
       )}
-      <button className="ms-1 rounded-full" onClick={() => setPanel(panel === 'profile' ? null : 'profile')} aria-label="Профиль" aria-expanded={panel === 'profile'}>
+      <button className="ms-1 rounded-full" onClick={() => setPanel(panel === 'profile' ? null : 'profile')} aria-label={T('Профиль')} aria-expanded={panel === 'profile'}>
         <Avatar size={mobile ? 34 : 38} />
       </button>
-      <Popover open={panel === 'bell'} onClose={close} label="Уведомления"><NotificationsPanel notices={notices} onClose={close} /></Popover>
-      <Popover open={panel === 'profile'} onClose={close} label="Профиль" className="sm:w-[300px]"><ProfilePanel onClose={close} /></Popover>
+      <Popover open={panel === 'bell'} onClose={close} label={T('Уведомления')}><NotificationsPanel notices={notices} onClose={close} /></Popover>
+      <Popover open={panel === 'profile'} onClose={close} label={T('Профиль')} className="sm:w-[300px]"><ProfilePanel onClose={close} /></Popover>
+      <Popover open={panel === 'lang'} onClose={close} label={T('Язык интерфейса')} className="sm:w-[240px]">
+        <ul className="grid p-2" role="listbox" aria-label={T('Язык интерфейса')}>
+          {LANGS.map((l) => (
+            <li key={l.code}>
+              <button role="option" aria-selected={settings.language === l.code} lang={l.code}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-start text-[15px] font-semibold hover:bg-soft ${settings.language === l.code ? 'text-accent' : ''}`}
+                onClick={() => { close(); if (settings.language !== l.code) saveSettings({ language: l.code }); }}>
+                <span className={l.code === 'ar' ? 'arabic' : ''}>{l.label}</span>
+                {settings.language === l.code && <Check size={17} />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Popover>
     </div>
   );
 }
@@ -337,7 +356,7 @@ function useTaskReminders(todayInsts: ReturnType<typeof useInstances>) {
         if (localStorage.getItem(key)) continue;
         localStorage.setItem(key, '1');
       } catch { /* хранилище недоступно — уведомим один раз за сессию */ }
-      try { new Notification('НИЗАМ — скоро занятие', { body: `${i.title}${i.startTime ? ` в ${i.startTime}` : ''}`, icon: './icon-192.png', tag: i.key }); } catch { /* мобильные браузеры */ }
+      try { new Notification(T('НИЗАМ — скоро занятие'), { body: `${i.title}${i.startTime ? T(' в {0}', i.startTime) : ''}`, icon: './icon-192.png', tag: i.key }); } catch { /* мобильные браузеры */ }
     }
   }, [settings.notifications, nowMin, today, todayInsts]);
 }
@@ -374,17 +393,16 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <QuickCtx.Provider value={ctx}>
       <div className="min-h-dvh bg-bg text-fg">
-        <a href="#main" className="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-[70]">К содержанию</a>
+        <a href="#main" className="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-[70]">{T('К содержанию')}</a>
         <Sidebar />
 
         {/* Верхняя панель — компьютер */}
         <header className="sticky top-0 z-20 hidden h-[72px] items-center gap-4 border-b border-line/70 bg-bg/85 px-8 backdrop-blur-md lg:ms-[248px] lg:flex">
-          <button onClick={openSearch} className="flex h-11 w-full max-w-[460px] items-center gap-3 rounded-xl border border-line bg-card px-3.5 text-sm text-muted transition-colors hover:border-accent/40" aria-label="Открыть поиск">
-            <Search size={18} />Поиск задач, целей, направлений…
-            <kbd className="ms-auto rounded-md border border-line bg-soft px-1.5 py-0.5 font-sans text-[11px]">Ctrl K</kbd>
+          <button onClick={openSearch} className="flex h-11 w-full max-w-[460px] items-center gap-3 rounded-xl border border-line bg-card px-3.5 text-sm text-muted transition-colors hover:border-accent/40" aria-label={T('Открыть поиск')}>
+            <Search size={18} />{T('Поиск задач, целей, направлений…')}<kbd className="ms-auto rounded-md border border-line bg-soft px-1.5 py-0.5 font-sans text-[11px]">Ctrl K</kbd>
           </button>
           <div className="ms-auto flex items-center gap-2">
-            <button className="btn btn-primary" onClick={() => openTask()}><Plus size={18} />Задача</button>
+            <button className="btn btn-primary" onClick={() => openTask()}><Plus size={18} />{T('Задача')}</button>
             <HeaderActions notices={notices} onSearch={openSearch} />
           </div>
         </header>
@@ -402,14 +420,14 @@ export function Layout({ children }: { children: ReactNode }) {
         </main>
 
         {showFab && (
-          <button onClick={() => openTask()} aria-label="Добавить задачу"
+          <button onClick={() => openTask()} aria-label={T('Добавить задачу')}
             className="fixed bottom-[calc(80px+env(safe-area-inset-bottom))] end-4 z-30 grid size-14 place-items-center rounded-2xl bg-accent text-accent-fg shadow-[var(--shadow-lg)] transition-transform active:scale-95 lg:hidden">
             <Plus size={26} />
           </button>
         )}
 
         {/* Нижняя навигация */}
-        <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card/95 backdrop-blur-md lg:hidden" aria-label="Нижнее меню">
+        <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card/95 backdrop-blur-md lg:hidden" aria-label={T('Нижнее меню')}>
           <div className="mx-auto grid max-w-xl grid-cols-5">
             {MOBILE.map(({ to, label, icon: Icon }) => {
               const active = to === '/more' ? moreActive : to === '/' ? loc.pathname === '/' : loc.pathname.startsWith(to);
@@ -417,7 +435,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 <NavLink key={to} to={to} aria-current={active ? 'page' : undefined}
                   className={`flex min-h-[60px] flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors ${active ? 'text-accent' : 'text-muted'}`}>
                   <span className={`grid h-7 w-12 place-items-center rounded-full transition-colors ${active ? 'bg-accent-soft' : ''}`}><Icon size={20} strokeWidth={active ? 2.2 : 1.9} /></span>
-                  {label}
+                  {T(label)}
                 </NavLink>
               );
             })}
@@ -436,7 +454,7 @@ export function MorePage() {
   const { timer } = useData();
   return (
     <div className="fade-in grid gap-4">
-      <h1 className="h1">Ещё</h1>
+      <h1 className="h1">{T('Ещё')}</h1>
       {timer && <TimerPill />}
       <ul className="card-flat divide-y divide-line overflow-hidden">
         {MORE_ITEMS.map((to) => {
@@ -447,7 +465,7 @@ export function MorePage() {
             <li key={to}>
               <NavLink to={to} className="flex min-h-14 items-center gap-3 px-4 py-3 hover:bg-soft">
                 <IconBadge size={36}><Icon size={18} /></IconBadge>
-                <span className="flex-1 font-semibold">{n.label}</span>
+                <span className="flex-1 font-semibold">{T(n.label)}</span>
                 <ChevronRight size={18} className="text-muted" />
               </NavLink>
             </li>
@@ -457,7 +475,7 @@ export function MorePage() {
       <div className="relative overflow-hidden rounded-[18px] bg-brand-900 px-5 py-6 text-center text-white">
         <StarPattern className="absolute inset-0" opacity={0.18} color="#c4a56b" size={36} />
         <p className="arabic relative text-3xl text-gold" lang="ar">نِظَام</p>
-        <p className="relative mt-1 text-xs text-white/75">Порядок. Постоянство. Развитие.</p>
+        <p className="relative mt-1 text-xs text-white/75">{T('Порядок. Постоянство. Развитие.')}</p>
       </div>
     </div>
   );

@@ -1,56 +1,27 @@
-// Напоминания для главной. Только тексты с точной ссылкой на источник; перевод — смысловой.
-// Новые записи добавлять только после проверки по первоисточнику (номер аята / номер хадиса в сборнике).
-import type { ISODate } from '../db/schema';
+// Напоминание дня: аяты и хадисы, где и арабский текст, и переводы взяты из источников
+// (scripts/hadith/build_reminders.py: Quran.com API — Кулиев/Saheeh International; fawazahmed0/hadith-api).
+import type { ISODate, Lang } from '../db/schema';
 import { diffDays } from './dates';
+import data from '../data/reminders.json';
 
 export interface Reminder {
-  arabic: string;
-  meaning: string; // смысловой перевод на русский
-  source: string;
   kind: 'quran' | 'hadith';
+  ar: string;
+  ru: string | null;
+  en: string | null;
+  source: Record<Lang, string>;
 }
 
-export const REMINDERS: Reminder[] = [
-  {
-    kind: 'hadith',
-    arabic: 'أَحَبُّ الأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ',
-    meaning: 'Самые любимые Аллахом дела — те, что совершаются постоянно, даже если их немного.',
-    source: 'Хадис от Аиши. аль-Бухари, № 6464; Муслим, № 783',
-  },
-  {
-    kind: 'quran',
-    arabic: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ۝ إِنَّ مَعَ الْعُسْرِ يُسْرًا',
-    meaning: 'Воистину, за тягостью — облегчение. Воистину, за тягостью — облегчение.',
-    source: 'Коран, сура «аш-Шарх», 94:5–6',
-  },
-  {
-    kind: 'quran',
-    arabic: 'وَقُل رَّبِّ زِدْنِي عِلْمًا',
-    meaning: 'И говори: «Господь мой, приумножь мои знания».',
-    source: 'Коран, сура «Та Ха», 20:114',
-  },
-  {
-    kind: 'hadith',
-    arabic: 'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ',
-    meaning: 'Тому, кто встал на путь поиска знания, Аллах облегчит этим путь в Рай.',
-    source: 'Хадис от Абу Хурайры. Муслим, № 2699',
-  },
-  {
-    kind: 'quran',
-    arabic: 'إِنَّ اللَّهَ لَا يُغَيِّرُ مَا بِقَوْمٍ حَتَّىٰ يُغَيِّرُوا مَا بِأَنفُسِهِمْ',
-    meaning: 'Воистину, Аллах не меняет положения людей, пока они не изменят самих себя.',
-    source: 'Коран, сура «ар-Раад», 13:11',
-  },
-  {
-    kind: 'quran',
-    arabic: 'وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا',
-    meaning: 'А тех, кто усердствовал ради Нас, Мы непременно поведём Нашими путями.',
-    source: 'Коран, сура «аль-Анкабут», 29:69',
-  },
-];
+export const REMINDERS = (data as { items: Reminder[] }).items;
 
 /** Одно напоминание на день — стабильно в течение дня, меняется ежедневно. */
 export function reminderFor(date: ISODate): Reminder {
   const n = diffDays(date, '2024-01-01');
   return REMINDERS[((n % REMINDERS.length) + REMINDERS.length) % REMINDERS.length];
+}
+
+/** Перевод на язык интерфейса (для арабского — без перевода). */
+export function reminderMeaning(r: Reminder, lang: Lang): string | null {
+  if (lang === 'ar') return null;
+  return lang === 'en' ? r.en : (r.ru ?? r.en);
 }

@@ -12,6 +12,7 @@ import {
   assertValid, checkDate, checkNumber, checkRecurrence, checkTime, checkTitle, type Errors,
 } from '../lib/validate';
 
+import { t as T } from '../i18n';
 const now = () => Date.now();
 
 /* ---------- Настройки ---------- */
@@ -23,14 +24,14 @@ export async function getSettings(): Promise<Settings> {
 
 export async function saveSettings(patch: Partial<Settings>) {
   const errors: Errors = {};
-  if (patch.timeZone !== undefined && !isValidTimeZone(patch.timeZone)) errors.timeZone = 'Неизвестный часовой пояс';
-  if (patch.pomodoroWork !== undefined) checkNumber(errors, 'pomodoroWork', patch.pomodoroWork, { min: 1, max: 180, int: true, label: 'Работа' });
-  if (patch.pomodoroBreak !== undefined) checkNumber(errors, 'pomodoroBreak', patch.pomodoroBreak, { min: 1, max: 60, int: true, label: 'Отдых' });
-  if (patch.dayStart !== undefined) checkTime(errors, 'dayStart', patch.dayStart, 'Начало дня');
-  if (patch.dayEnd !== undefined) checkTime(errors, 'dayEnd', patch.dayEnd, 'Конец дня');
-  if (patch.name !== undefined && patch.name.length > 60) errors.name = 'Имя: не длиннее 60 символов';
-  if (patch.greetTitle !== undefined && patch.greetTitle.length > 80) errors.greetTitle = 'Заголовок: не длиннее 80 символов';
-  if (patch.greetText !== undefined && patch.greetText.length > 200) errors.greetText = 'Текст: не длиннее 200 символов';
+  if (patch.timeZone !== undefined && !isValidTimeZone(patch.timeZone)) errors.timeZone = T('Неизвестный часовой пояс');
+  if (patch.pomodoroWork !== undefined) checkNumber(errors, 'pomodoroWork', patch.pomodoroWork, { min: 1, max: 180, int: true, label: T('Работа') });
+  if (patch.pomodoroBreak !== undefined) checkNumber(errors, 'pomodoroBreak', patch.pomodoroBreak, { min: 1, max: 60, int: true, label: T('Отдых') });
+  if (patch.dayStart !== undefined) checkTime(errors, 'dayStart', patch.dayStart, T('Начало дня'));
+  if (patch.dayEnd !== undefined) checkTime(errors, 'dayEnd', patch.dayEnd, T('Конец дня'));
+  if (patch.name !== undefined && patch.name.length > 60) errors.name = T('Имя: не длиннее 60 символов');
+  if (patch.greetTitle !== undefined && patch.greetTitle.length > 80) errors.greetTitle = T('Заголовок: не длиннее 80 символов');
+  if (patch.greetText !== undefined && patch.greetText.length > 200) errors.greetText = T('Текст: не длиннее 200 символов');
   assertValid(errors);
   const cur = await getSettings();
   await db.settings.put({ ...cur, ...patch, id: 'main' });
@@ -46,12 +47,12 @@ export function validateTask(t: TaskInput): Errors {
   const e: Errors = {};
   checkTitle(e, 'title', t.title);
   checkDate(e, 'date', t.date);
-  checkDate(e, 'endDate', t.endDate, 'Дата окончания', true);
-  if (!e.date && !e.endDate && t.endDate && t.endDate < t.date) e.endDate = 'Окончание раньше начала';
-  checkTime(e, 'startTime', t.startTime, 'Время начала');
-  checkNumber(e, 'durationMin', t.durationMin, { min: 1, max: 1440, int: true, label: 'Продолжительность' });
+  checkDate(e, 'endDate', t.endDate, T('Дата окончания'), true);
+  if (!e.date && !e.endDate && t.endDate && t.endDate < t.date) e.endDate = T('Окончание раньше начала');
+  checkTime(e, 'startTime', t.startTime, T('Время начала'));
+  checkNumber(e, 'durationMin', t.durationMin, { min: 1, max: 1440, int: true, label: T('Продолжительность') });
   checkRecurrence(e, t.recurrence);
-  if (t.description.length > 2000) e.description = 'Описание: не длиннее 2000 символов';
+  if (t.description.length > 2000) e.description = T('Описание: не длиннее 2000 символов');
   return e;
 }
 
@@ -65,7 +66,7 @@ export async function saveTask(input: TaskInput, id?: string): Promise<string> {
   };
   if (id) {
     const cur = await db.tasks.get(id);
-    if (!cur) throw new Error('Задача не найдена');
+    if (!cur) throw new Error(T('Задача не найдена'));
     await db.tasks.put({ ...cur, ...clean, id, updatedAt: now() });
     return id;
   }
@@ -98,8 +99,8 @@ export async function completeInstance(
   opts: { totalMin?: number; amount?: number; status?: 'done' | 'partial' } = {},
 ) {
   const errors: Errors = {};
-  if (opts.totalMin !== undefined) checkNumber(errors, 'totalMin', opts.totalMin, { min: 0, max: 1440, label: 'Минуты' });
-  if (opts.amount !== undefined) checkNumber(errors, 'amount', opts.amount, { min: 0, label: 'Объём' });
+  if (opts.totalMin !== undefined) checkNumber(errors, 'totalMin', opts.totalMin, { min: 0, max: 1440, label: T('Минуты') });
+  if (opts.amount !== undefined) checkNumber(errors, 'amount', opts.amount, { min: 0, label: T('Объём') });
   assertValid(errors);
   const fillerId = `t|${inst.key}`;
   await db.transaction('rw', [db.sessions, db.occurrences], async () => {
@@ -162,7 +163,7 @@ export async function editInstance(inst: Instance, patch: { title: string; descr
   const e: Errors = {};
   checkTitle(e, 'title', patch.title);
   checkTime(e, 'startTime', patch.startTime);
-  checkNumber(e, 'durationMin', patch.durationMin, { min: 1, max: 1440, int: true, label: 'Продолжительность' });
+  checkNumber(e, 'durationMin', patch.durationMin, { min: 1, max: 1440, int: true, label: T('Продолжительность') });
   assertValid(e);
   await upsertOcc(inst, {
     title: patch.title.trim() === inst.task.title ? undefined : patch.title.trim(),
@@ -188,9 +189,9 @@ export type AreaInput = Omit<StudyArea, 'id' | 'createdAt' | 'extra'>;
 export function validateArea(a: AreaInput): Errors {
   const e: Errors = {};
   checkTitle(e, 'name', a.name);
-  checkNumber(e, 'dailyTarget', a.dailyTarget, { min: 0, max: 10_000, label: 'Дневная норма' });
-  checkNumber(e, 'weeklyTarget', a.weeklyTarget, { min: 0, max: 70_000, label: 'Недельный план' });
-  checkNumber(e, 'totalTarget', a.totalTarget, { min: 0, max: 10_000_000, label: 'Общая цель' });
+  checkNumber(e, 'dailyTarget', a.dailyTarget, { min: 0, max: 10_000, label: T('Дневная норма') });
+  checkNumber(e, 'weeklyTarget', a.weeklyTarget, { min: 0, max: 70_000, label: T('Недельный план') });
+  checkNumber(e, 'totalTarget', a.totalTarget, { min: 0, max: 10_000_000, label: T('Общая цель') });
   return e;
 }
 
@@ -198,7 +199,7 @@ export async function saveArea(a: AreaInput, id?: string): Promise<string> {
   assertValid(validateArea(a));
   if (id) {
     const cur = await db.areas.get(id);
-    if (!cur) throw new Error('Направление не найдено');
+    if (!cur) throw new Error(T('Направление не найдено'));
     await db.areas.put({ ...cur, ...a, name: a.name.trim(), id });
     return id;
   }
@@ -219,9 +220,9 @@ export async function deleteArea(id: string) {
 export async function addManualSession(p: { areaId?: string; date: ISODate; minutes: number; amount?: number; note?: string }) {
   const e: Errors = {};
   checkDate(e, 'date', p.date);
-  checkNumber(e, 'minutes', p.minutes, { min: 0, max: 1440, label: 'Минуты' });
-  if (p.amount !== undefined) checkNumber(e, 'amount', p.amount, { min: 0, max: 10_000, label: 'Объём' });
-  if (!e.minutes && !e.amount && p.minutes === 0 && !p.amount) e.minutes = 'Укажите время или объём';
+  checkNumber(e, 'minutes', p.minutes, { min: 0, max: 1440, label: T('Минуты') });
+  if (p.amount !== undefined) checkNumber(e, 'amount', p.amount, { min: 0, max: 10_000, label: T('Объём') });
+  if (!e.minutes && !e.amount && p.minutes === 0 && !p.amount) e.minutes = T('Укажите время или объём');
   assertValid(e);
   const t = now();
   const id = uid();
@@ -237,7 +238,7 @@ export const deleteSession = (id: string) => db.sessions.delete(id);
 /** Подтверждённая пользователем компенсация недовыполненной нормы (с ограничением нагрузки). */
 export async function acceptCarry(areaId: string, date: ISODate, amount: number) {
   const a = await db.areas.get(areaId);
-  if (!a) throw new Error('Направление не найдено');
+  if (!a) throw new Error(T('Направление не найдено'));
   const s = await getSettings();
   const cap = Math.round(a.dailyTarget * s.maxCarryRatio);
   const v = Math.max(0, Math.min(cap, Math.round(amount)));
@@ -260,9 +261,9 @@ export type HabitInput = Omit<Habit, 'id' | 'createdAt' | 'archived'>;
 export function validateHabit(h: HabitInput): Errors {
   const e: Errors = {};
   checkTitle(e, 'name', h.name);
-  checkNumber(e, 'target', h.target, { min: 1, max: 10_000, label: 'Цель' });
-  if (h.frequency === 'weekly') checkNumber(e, 'timesPerWeek', h.timesPerWeek, { min: 1, max: 7, int: true, label: 'Раз в неделю' });
-  checkDate(e, 'startDate', h.startDate, 'Дата начала');
+  checkNumber(e, 'target', h.target, { min: 1, max: 10_000, label: T('Цель') });
+  if (h.frequency === 'weekly') checkNumber(e, 'timesPerWeek', h.timesPerWeek, { min: 1, max: 7, int: true, label: T('Раз в неделю') });
+  checkDate(e, 'startDate', h.startDate, T('Дата начала'));
   return e;
 }
 
@@ -271,7 +272,7 @@ export async function saveHabit(h: HabitInput, id?: string) {
   assertValid(validateHabit(clean));
   if (id) {
     const cur = await db.habits.get(id);
-    if (!cur) throw new Error('Привычка не найдена');
+    if (!cur) throw new Error(T('Привычка не найдена'));
     await db.habits.put({ ...cur, ...clean, id });
     return id;
   }
@@ -290,7 +291,7 @@ export async function deleteHabit(id: string) {
 export async function setHabitLog(habitId: string, date: ISODate, value: number, kind: HabitLog['kind'] = 'value') {
   const e: Errors = {};
   checkDate(e, 'date', date);
-  checkNumber(e, 'value', value, { min: 0, max: 100_000, label: 'Значение' });
+  checkNumber(e, 'value', value, { min: 0, max: 100_000, label: T('Значение') });
   assertValid(e);
   const id = `${habitId}|${date}`;
   if (kind === 'value' && value === 0) await db.habitLogs.delete(id);
@@ -304,13 +305,13 @@ export type GoalInput = Omit<Goal, 'id' | 'createdAt' | 'log' | 'status'>;
 export function validateGoal(g: GoalInput): Errors {
   const e: Errors = {};
   checkTitle(e, 'title', g.title);
-  checkNumber(e, 'target', g.target, { min: 1, max: 10_000_000, label: 'Целевое значение' });
-  checkNumber(e, 'initial', g.initial, { min: 0, max: 10_000_000, label: 'Уже выполнено' });
-  checkDate(e, 'startDate', g.startDate, 'Дата начала');
-  checkDate(e, 'endDate', g.endDate, 'Дата окончания');
-  if (!e.startDate && !e.endDate && g.endDate < g.startDate) e.endDate = 'Окончание раньше начала';
-  if (!e.target && !e.initial && g.initial > g.target) e.initial = 'Больше целевого значения';
-  if (g.source === 'area' && !g.areaId) e.areaId = 'Выберите направление';
+  checkNumber(e, 'target', g.target, { min: 1, max: 10_000_000, label: T('Целевое значение') });
+  checkNumber(e, 'initial', g.initial, { min: 0, max: 10_000_000, label: T('Уже выполнено') });
+  checkDate(e, 'startDate', g.startDate, T('Дата начала'));
+  checkDate(e, 'endDate', g.endDate, T('Дата окончания'));
+  if (!e.startDate && !e.endDate && g.endDate < g.startDate) e.endDate = T('Окончание раньше начала');
+  if (!e.target && !e.initial && g.initial > g.target) e.initial = T('Больше целевого значения');
+  if (g.source === 'area' && !g.areaId) e.areaId = T('Выберите направление');
   return e;
 }
 
@@ -319,7 +320,7 @@ export async function saveGoal(g: GoalInput, id?: string) {
   const clean = { ...g, title: g.title.trim(), areaId: g.source === 'area' ? g.areaId : undefined };
   if (id) {
     const cur = await db.goals.get(id);
-    if (!cur) throw new Error('Цель не найдена');
+    if (!cur) throw new Error(T('Цель не найдена'));
     await db.goals.put({ ...cur, ...clean, id });
     return id;
   }
@@ -337,11 +338,11 @@ export async function deleteGoal(id: string) {
 
 export async function addGoalProgress(id: string, date: ISODate, value: number) {
   const e: Errors = {};
-  checkNumber(e, 'value', value, { min: -10_000_000, max: 10_000_000, label: 'Значение' });
-  if (!e.value && value === 0) e.value = 'Значение не может быть 0';
+  checkNumber(e, 'value', value, { min: -10_000_000, max: 10_000_000, label: T('Значение') });
+  if (!e.value && value === 0) e.value = T('Значение не может быть 0');
   assertValid(e);
   const g = await db.goals.get(id);
-  if (!g) throw new Error('Цель не найдена');
+  if (!g) throw new Error(T('Цель не найдена'));
   await db.goals.update(id, { log: [...g.log, { date, value }] });
 }
 
@@ -365,10 +366,10 @@ export const timerElapsed = (t: TimerState, at = now()) => t.accumulatedMs + (t.
 
 export async function startTimer(p: Pick<TimerState, 'mode' | 'label' | 'taskId' | 'occKey' | 'areaId'>) {
   const existing = await db.timer.get('current');
-  if (existing) throw new Error('Уже идёт сеанс. Завершите или сбросьте его.');
+  if (existing) throw new Error(T('Уже идёт сеанс. Завершите или сбросьте его.'));
   const t = now();
   await db.timer.put({
-    id: 'current', ...p, label: p.label.trim() || 'Сосредоточенная работа', phase: 'work',
+    id: 'current', ...p, label: p.label.trim() || T('Сосредоточенная работа'), phase: 'work',
     sessionStartedAt: t, runningSince: t, accumulatedMs: 0, distractions: [], completedPomodoros: 0,
   });
 }
@@ -454,6 +455,6 @@ export const RECOVERY_WINDOW_DAYS = 7;
 export const recoveryFrom = (today: ISODate) => addDays(today, -RECOVERY_WINDOW_DAYS);
 
 /** Отпустить задачу: пометить пропущенной без переноса. */
-export const letGo = (inst: Instance, reason: SkipReason = 'other') => skipInstance(inst, reason, 'Отпущено при восстановлении');
+export const letGo = (inst: Instance, reason: SkipReason = 'other') => skipInstance(inst, reason, T('Отпущено при восстановлении'));
 
 export { occKey, parseTime };

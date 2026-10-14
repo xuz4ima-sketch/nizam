@@ -13,6 +13,7 @@ import { completion, isActive, isOverdue, type Instance } from '../lib/recurrenc
 import { findOverlaps, layoutDay } from '../lib/slots';
 import { useData, useInstances } from '../state/data';
 
+import { t as T } from '../i18n';
 type View = 'day' | 'week' | 'month';
 const HOUR_PX = 52;
 
@@ -38,15 +39,15 @@ export default function CalendarPage() {
 
   return (
     <div className="fade-in">
-      <PageHeader title="Календарь" subtitle="Реальные сохранённые задачи, включая повторяющиеся. Расписание меняется только по вашему действию." />
+      <PageHeader title={T('Календарь')} subtitle={T('Реальные сохранённые задачи, включая повторяющиеся. Расписание меняется только по вашему действию.')} />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1">
-          <button className="btn btn-outline btn-icon" onClick={() => step(-1)} aria-label="Назад"><ChevronLeft size={18} /></button>
-          <button className="btn btn-outline" onClick={() => set(today)} disabled={date === today && view !== 'week'}>Сегодня</button>
-          <button className="btn btn-outline btn-icon" onClick={() => step(1)} aria-label="Вперёд"><ChevronRight size={18} /></button>
+          <button className="btn btn-outline btn-icon" onClick={() => step(-1)} aria-label={T('Назад')}><ChevronLeft size={18} /></button>
+          <button className="btn btn-outline" onClick={() => set(today)} disabled={date === today && view !== 'week'}>{T('Сегодня')}</button>
+          <button className="btn btn-outline btn-icon" onClick={() => step(1)} aria-label={T('Вперёд')}><ChevronRight size={18} /></button>
           <h2 className="ms-2 text-[16px] font-bold sm:text-lg" aria-live="polite">{title}</h2>
         </div>
-        <Tabs label="Режим календаря" value={view} onChange={(nv) => set(date, nv)} items={[['day', 'День'], ['week', 'Неделя'], ['month', 'Месяц']]} />
+        <Tabs label={T('Режим календаря')} value={view} onChange={(nv) => set(date, nv)} items={[['day', T('День')], ['week', T('Неделя')], ['month', T('Месяц')]]} />
       </div>
       {view === 'month' && <MonthView date={date} onPick={(nd) => set(nd)} onOpen={setAct} />}
       {view === 'week' && <WeekGrid date={date} onOpen={setAct} onDay={(nd) => set(nd, 'day')} />}
@@ -85,7 +86,7 @@ function MonthView({ date, onPick, onOpen }: { date: ISODate; onPick: (d: ISODat
             const late = list.some((i) => isOverdue(i, today, nowMin));
             return (
               <div key={d} className={`flex min-h-[64px] flex-col rounded-xl border p-1 text-start transition-colors sm:min-h-[104px] sm:p-1.5 ${d === date ? 'border-accent bg-accent-soft/50' : 'border-transparent hover:bg-soft'} ${inMonth ? '' : 'opacity-40'}`}>
-                <button onClick={() => onPick(d)} className="flex items-center justify-between gap-1" aria-label={`${fmtDate(d, { day: 'numeric', month: 'long' })}: задач ${list.length}`} aria-pressed={d === date}>
+                <button onClick={() => onPick(d)} className="flex items-center justify-between gap-1" aria-label={T('{0}: задач {1}', fmtDate(d, { day: 'numeric', month: 'long' }), list.length)} aria-pressed={d === date}>
                   <span className={`grid size-7 place-items-center rounded-full text-[13px] font-bold tabular-nums ${d === today ? 'bg-accent text-accent-fg' : ''}`}>{Number(d.slice(8))}</span>
                   {list.length > 0 && <span className={`hidden text-[10px] font-bold tabular-nums sm:inline ${frac >= 1 ? 'text-ok' : late ? 'text-danger' : 'text-muted'}`}>{Math.round(frac * 100)}%</span>}
                 </button>
@@ -96,7 +97,7 @@ function MonthView({ date, onPick, onOpen }: { date: ISODate; onPick: (d: ISODat
                       {i.startTime && <span className="tabular-nums">{i.startTime} </span>}{i.title}
                     </button>
                   ))}
-                  {list.length > 3 && <button onClick={() => onPick(d)} className="px-1 text-start text-[11px] font-semibold text-muted">ещё {list.length - 3}</button>}
+                  {list.length > 3 && <button onClick={() => onPick(d)} className="px-1 text-start text-[11px] font-semibold text-muted">{T('ещё')}{' '}{list.length - 3}</button>}
                 </div>
                 <div className="mt-auto flex flex-wrap justify-center gap-0.5 pb-1 sm:hidden">
                   {list.slice(0, 4).map((i) => <span key={i.key} className="size-1.5 rounded-full" style={{ background: i.status === 'done' ? 'var(--ok)' : categoryColor(i.task.category) }} />)}
@@ -119,13 +120,13 @@ function DayAgenda({ date }: { date: ISODate }) {
   return (
     <section className="card !p-0">
       <div className="flex items-center justify-between gap-2 px-4 pt-4">
-        <div><h2 className="h2">{fmtDate(date, { weekday: 'long', day: 'numeric', month: 'long' })}</h2><p className="text-[12px] text-muted">Нагрузка: {fmtMinutes(load)}</p></div>
-        <button className="btn btn-soft btn-sm" onClick={() => openTask({ date })}><Plus size={15} />Задача</button>
+        <div><h2 className="h2">{fmtDate(date, { weekday: 'long', day: 'numeric', month: 'long' })}</h2><p className="text-[12px] text-muted">{T('Нагрузка:')}{' '}{fmtMinutes(load)}</p></div>
+        <button className="btn btn-soft btn-sm" onClick={() => openTask({ date })}><Plus size={15} />{T('Задача')}</button>
       </div>
       <OverlapNote pairs={overlaps} />
       <div className="px-2 pb-3 pt-2">
         {all.length ? <ul className="grid">{all.map((i) => <TaskItem key={i.key} inst={i} compact />)}</ul>
-          : <p className="px-3 py-8 text-center text-sm text-muted">На этот день задач нет</p>}
+          : <p className="px-3 py-8 text-center text-sm text-muted">{T('На этот день задач нет')}</p>}
       </div>
     </section>
   );
@@ -137,8 +138,8 @@ function OverlapNote({ pairs }: { pairs: [Instance, Instance][] }) {
     <div className="mx-4 mt-3 flex gap-2 rounded-xl border border-warn/30 bg-warn-soft px-3 py-2 text-[13px]" role="note">
       <AlertTriangle size={16} className="mt-0.5 shrink-0 text-warn" />
       <div>
-        <p className="font-semibold">Пересечение по времени: {pairs.length}</p>
-        <p className="text-muted">{pairs.slice(0, 2).map(([a, b]) => `«${a.title}» и «${b.title}»`).join('; ')}. Откройте задачу и выберите «Перенести» — приложение подскажет свободное окно.</p>
+        <p className="font-semibold">{T('Пересечение по времени:')}{' '}{pairs.length}</p>
+        <p className="text-muted">{pairs.slice(0, 2).map(([a, b]) => T('«{0}» и «{1}»', a.title, b.title)).join('; ')}{T('. Откройте задачу и выберите «Перенести» — приложение подскажет свободное окно.')}</p>
       </div>
     </div>
   );
@@ -212,11 +213,11 @@ function DayTimeline({ date, onOpen }: { date: ISODate; onOpen: (i: Instance) =>
   const untimed = all.filter((i) => parseTime(i.startTime) === null);
   const { from, to } = hoursRange(settings.dayStart, settings.dayEnd, placed);
   const overlaps = findOverlaps(all);
-  if (!all.length) return <Empty title="На этот день задач нет" text="Создайте задачу — она появится на временной шкале." action={<button className="btn btn-primary" onClick={() => openTask({ date })}><Plus size={18} />Добавить</button>} />;
+  if (!all.length) return <Empty title={T('На этот день задач нет')} text={T('Создайте задачу — она появится на временной шкале.')} action={<button className="btn btn-primary" onClick={() => openTask({ date })}><Plus size={18} />{T('Добавить')}</button>} />;
   return (
     <section className="card !p-0">
       <OverlapNote pairs={overlaps} />
-      {untimed.length > 0 && <div className="border-b border-line px-4 py-3"><p className="eyebrow mb-1.5">Без времени</p><Untimed list={untimed} onOpen={onOpen} /></div>}
+      {untimed.length > 0 && <div className="border-b border-line px-4 py-3"><p className="eyebrow mb-1.5">{T('Без времени')}</p><Untimed list={untimed} onOpen={onOpen} /></div>}
       <div className="flex px-2 py-4 sm:px-4">
         <HourLabels from={from} to={to} />
         <div className="relative flex-1 border-s border-line" style={{ height: (to - from) * HOUR_PX }}>
@@ -243,7 +244,7 @@ function WeekGrid({ date, onOpen, onDay }: { date: ISODate; onOpen: (i: Instance
         <div className="sticky top-0 z-10 flex border-b border-line bg-card">
           <div className="w-11 shrink-0" />
           {days.map((d) => (
-            <button key={d} onClick={() => onDay(d)} className="flex-1 py-2.5 text-center hover:bg-soft" aria-label={`Открыть день ${fmtDate(d, { day: 'numeric', month: 'long' })}`}>
+            <button key={d} onClick={() => onDay(d)} className="flex-1 py-2.5 text-center hover:bg-soft" aria-label={T('Открыть день {0}', fmtDate(d, { day: 'numeric', month: 'long' }))}>
               <p className="text-[11px] font-bold uppercase text-muted">{WEEKDAY_NAMES[weekday(d)]}</p>
               <p className={`mx-auto mt-0.5 grid size-8 place-items-center rounded-full text-[15px] font-extrabold tabular-nums ${d === today ? 'bg-accent text-accent-fg' : ''}`}>{Number(d.slice(8))}</p>
             </button>
@@ -251,7 +252,7 @@ function WeekGrid({ date, onOpen, onDay }: { date: ISODate; onOpen: (i: Instance
         </div>
         {anyUntimed && (
           <div className="flex border-b border-line">
-            <div className="w-11 shrink-0 pt-2 text-center text-[10px] font-semibold text-muted">весь<br />день</div>
+            <div className="w-11 shrink-0 pt-2 text-center text-[10px] font-semibold text-muted">{T('весь')}<br />{T('день')}</div>
             {days.map((d) => <div key={d} className="min-w-0 flex-1 border-s border-line p-1"><Untimed list={(byDay.get(d) ?? []).filter((i) => parseTime(i.startTime) === null)} onOpen={onOpen} /></div>)}
           </div>
         )}

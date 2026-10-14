@@ -107,3 +107,28 @@ export function Logo({ size = 36 }: { size?: number }) {
     </svg>
   );
 }
+
+/** Фон приветствия: каллиграфическая буква «ن» или название «نِظَام» поверх геометрического орнамента. */
+export function HeroCalligraphy({ variant, className = '' }: { variant: 'letter' | 'name'; className?: string }) {
+  const id = useId().replace(/:/g, '');
+  return (
+    <div className={`pointer-events-none overflow-hidden ${className}`} aria-hidden>
+      <div className="absolute inset-y-0 end-0 w-[70%] text-gold [mask-image:linear-gradient(to_left,black_40%,transparent)] rtl:[mask-image:linear-gradient(to_right,black_40%,transparent)]">
+        <StarPattern opacity={0.16} size={48} />
+      </div>
+      <svg className="absolute -bottom-[6%] end-[-2%] h-[118%] w-auto max-w-[62%] sm:end-[3%]" viewBox={variant === 'letter' ? '0 0 260 300' : '0 0 520 260'}>
+        <defs>
+          <linearGradient id={`g${id}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="var(--gold)" stopOpacity="0.95" />
+            <stop offset="1" stopColor="var(--accent)" stopOpacity="0.75" />
+          </linearGradient>
+        </defs>
+        <circle cx={variant === 'letter' ? 130 : 260} cy={variant === 'letter' ? 160 : 140} r={variant === 'letter' ? 118 : 120} fill="var(--gold)" opacity="0.08" />
+        <text x="50%" y={variant === 'letter' ? '74%' : '70%'} textAnchor="middle" fill={`url(#g${id})`} direction="rtl"
+          style={{ fontFamily: 'var(--font-quran)', fontSize: variant === 'letter' ? 250 : 150 }}>
+          {variant === 'letter' ? 'ن' : 'نِظَام'}
+        </text>
+      </svg>
+    </div>
+  );
+}

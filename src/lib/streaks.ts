@@ -2,6 +2,7 @@
 import type { Habit, HabitLog, ISODate } from '../db/schema';
 import { addDays, dateRange, diffDays, maxISO, startOfWeek } from './dates';
 
+import { t as T } from '../i18n';
 export type DayState = 'done' | 'partial' | 'rest' | 'none';
 
 export function dayState(h: Habit, log?: HabitLog): DayState {
@@ -16,7 +17,7 @@ export interface HabitStats {
   best: number;
   rate: number; // соблюдение за период (0..1)
   doneDays: number;
-  unit: 'дн.' | 'нед.';
+  unit: string; // «дн.» или «нед.» (переведено)
 }
 
 export function logsMap(logs: HabitLog[], habitId: string) {
@@ -27,7 +28,7 @@ export function logsMap(logs: HabitLog[], habitId: string) {
 
 /** rateDays — окно для процента соблюдения (по умолчанию 30 дней). */
 export function habitStats(h: Habit, logs: Map<ISODate, HabitLog>, today: ISODate, weekStart: 0 | 1, rateDays = 30): HabitStats {
-  if (h.startDate > today) return { current: 0, best: 0, rate: 0, doneDays: 0, unit: h.frequency === 'weekly' ? 'нед.' : 'дн.' };
+  if (h.startDate > today) return { current: 0, best: 0, rate: 0, doneDays: 0, unit: h.frequency === 'weekly' ? T('нед.') : T('дн.') };
   return h.frequency === 'weekly' ? weeklyStats(h, logs, today, weekStart, rateDays) : dailyStats(h, logs, today, rateDays);
 }
 
@@ -50,7 +51,7 @@ function dailyStats(h: Habit, logs: Map<ISODate, HabitLog>, today: ISODate, rate
     eligible++;
     if (st === 'done') ok++;
   }
-  return { current, best, rate: eligible ? ok / eligible : 0, doneDays, unit: 'дн.' };
+  return { current, best, rate: eligible ? ok / eligible : 0, doneDays, unit: T('дн.') };
 }
 
 function weeklyStats(h: Habit, logs: Map<ISODate, HabitLog>, today: ISODate, weekStart: 0 | 1, rateDays: number): HabitStats {
@@ -78,7 +79,7 @@ function weeklyStats(h: Habit, logs: Map<ISODate, HabitLog>, today: ISODate, wee
       if (success) ok++;
     }
   }
-  return { current: run, best, rate: eligible ? ok / eligible : 0, doneDays, unit: 'нед.' };
+  return { current: run, best, rate: eligible ? ok / eligible : 0, doneDays, unit: T('нед.') };
 }
 
 /** Отметки текущей недели для недельной привычки. */

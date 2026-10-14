@@ -3,6 +3,7 @@ import { db, TABLES, type TableName } from './db';
 import { SCHEMA_VERSION } from './schema';
 import { isValidISO } from '../lib/dates';
 
+import { t as T } from '../i18n';
 export interface BackupFile {
   app: 'nizam';
   schemaVersion: number;
@@ -39,18 +40,18 @@ const RULES: Record<TableName, (r: Record<string, unknown>) => boolean> = {
 };
 
 export function validateBackup(raw: unknown): { ok: true; file: BackupFile; counts: Record<string, number> } | { ok: false; error: string } {
-  if (!isObj(raw)) return { ok: false, error: 'Файл не является объектом JSON' };
-  if (raw.app !== 'nizam') return { ok: false, error: 'Это не резервная копия НИЗАМ' };
+  if (!isObj(raw)) return { ok: false, error: T('Файл не является объектом JSON') };
+  if (raw.app !== 'nizam') return { ok: false, error: T('Это не резервная копия НИЗАМ') };
   if (!fin(raw.schemaVersion) || (raw.schemaVersion as number) > SCHEMA_VERSION)
-    return { ok: false, error: 'Неподдерживаемая версия резервной копии' };
-  if (!isObj(raw.data)) return { ok: false, error: 'Нет раздела data' };
+    return { ok: false, error: T('Неподдерживаемая версия резервной копии') };
+  if (!isObj(raw.data)) return { ok: false, error: T('Нет раздела data') };
   const counts: Record<string, number> = {};
   for (const t of TABLES) {
     const rows = raw.data[t] ?? [];
-    if (!Array.isArray(rows)) return { ok: false, error: `Раздел «${t}» должен быть массивом` };
+    if (!Array.isArray(rows)) return { ok: false, error: T('Раздел «{0}» должен быть массивом', t) };
     for (let i = 0; i < rows.length; i++) {
       const r = rows[i];
-      if (!isObj(r) || !RULES[t](r)) return { ok: false, error: `Ошибка в разделе «${t}», запись №${i + 1}` };
+      if (!isObj(r) || !RULES[t](r)) return { ok: false, error: T('Ошибка в разделе «{0}», запись №{1}', t, i + 1) };
     }
     counts[t] = rows.length;
   }

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   BookOpen, CalendarPlus, Download, Feather, Flame, GraduationCap, ListChecks, Pencil, Play, Plus, Sparkles, Timer,
 } from 'lucide-react';
-import { HeroArt, StarPattern } from '../components/Art';
+import { HeroArt, HeroCalligraphy, StarPattern } from '../components/Art';
 import { ChartLegend, MiniCalendar, useMediaQuery, useThemeColors } from '../components/charts';
 import { useQuickAdd } from '../components/Layout';
 import { TaskItem } from '../components/TaskItem';
@@ -15,12 +15,13 @@ import { fmtDate, fmtHijri, fmtMinutes, HIJRI_METHOD, parseTime, showTime, start
 import { AREA_UNITS, num } from '../lib/labels';
 import { areaProgress } from '../lib/progress';
 import type { Instance } from '../lib/recurrence';
-import { reminderFor } from '../lib/reminders';
+import { reminderFor, reminderMeaning } from '../lib/reminders';
 import { applyMinimal, dayStat, nextUp, topThree, type DayStat } from '../lib/stats';
 import { habitsToday } from '../lib/streaks';
 import type { Errors } from '../lib/validate';
 import { useData, useInstances } from '../state/data';
 
+import { getLang, t as T } from '../i18n';
 type Filter = 'all' | 'open' | 'done';
 
 const LazyWeekChart = lazy(() => import('../components/WeekChart'));
@@ -57,8 +58,8 @@ export function Dashboard() {
     <div className="grid gap-5">
       {minimal && (
         <div className="fade-in flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-warn/30 bg-warn-soft px-4 py-3 text-sm">
-          <span className="flex items-center gap-2"><Feather size={16} className="text-warn" /><span><b>Минимальный день.</b> Показаны только самые важные дела — главное не прерывать ритм.</span></span>
-          <button className="btn btn-sm btn-outline" onClick={() => saveSettings({ minimalDate: undefined })}>Обычный режим</button>
+          <span className="flex items-center gap-2"><Feather size={16} className="text-warn" /><span><b>{T('Минимальный день.')}</b>{' '}{T('Показаны только самые важные дела — главное не прерывать ритм.')}</span></span>
+          <button className="btn btn-sm btn-outline" onClick={() => saveSettings({ minimalDate: undefined })}>{T('Обычный режим')}</button>
         </div>
       )}
       {empty ? (
@@ -87,7 +88,7 @@ export function Dashboard() {
           {tasksCard}
           {top}
           <StudyCard />
-          <div className="card"><SectionHeader title="Неделя" action={<Link to="/stats" className="link">Статистика</Link>} /><WeekChart from={startOfWeek(today, settings.weekStart)} /><WeekLegend /></div>
+          <div className="card"><SectionHeader title={T('Неделя')} action={<Link to="/stats" className="link">{T('Статистика')}</Link>} /><WeekChart from={startOfWeek(today, settings.weekStart)} /><WeekLegend /></div>
           {settings.showReminder && <ReminderCard />}
         </div>
       )}
@@ -97,10 +98,10 @@ export function Dashboard() {
 
 /* ---------- Приветствие ---------- */
 function dayStatus(st: DayStat) {
-  if (!st.planned) return 'На сегодня задач нет — можно спокойно спланировать день';
-  if (st.done === st.planned) return 'Все задачи выполнены. Машаллах!';
+  if (!st.planned) return T('На сегодня задач нет — можно спокойно спланировать день');
+  if (st.done === st.planned) return T('Все задачи выполнены. Машаллах!');
   const left = st.planned - st.done - st.skipped;
-  return `Запланировано ${st.planned} · выполнено ${st.done}${left > 0 ? ` · осталось ${left}` : ''}${st.overdue ? ` · просрочено ${st.overdue}` : ''}`;
+  return T('Запланировано {0} · выполнено {1}{2}{3}', st.planned, st.done, left > 0 ? T(' · осталось {0}', left) : '', st.overdue ? T(' · просрочено {0}', st.overdue) : '');
 }
 
 function Hero({ st }: { st: DayStat }) {
@@ -109,20 +110,22 @@ function Hero({ st }: { st: DayStat }) {
   const hijri = settings.showHijri ? fmtHijri(today) : null;
   return (
     <>
-      <section className="fade-in relative min-h-[196px] overflow-hidden rounded-[22px] border border-line" style={{ background: 'linear-gradient(180deg, var(--art-sky1), var(--art-sky2))' }} aria-label="Приветствие">
-        <HeroArt className="absolute inset-y-0 end-0 h-full w-[78%] sm:w-full" />
+      <section className="fade-in relative min-h-[196px] overflow-hidden rounded-[22px] border border-line" style={{ background: 'linear-gradient(180deg, var(--art-sky1), var(--art-sky2))' }} aria-label={T('Приветствие')}>
+        {settings.heroStyle === 'landscape'
+          ? <HeroArt className="absolute inset-y-0 end-0 h-full w-[78%] sm:w-full rtl:-scale-x-100" />
+          : <HeroCalligraphy variant={settings.heroStyle === 'letter' ? 'letter' : 'name'} className="absolute inset-0" />}
         <div className="absolute inset-y-0 start-0 w-[72%] bg-gradient-to-r rtl:bg-gradient-to-l from-[var(--art-sky1)] via-[var(--art-sky1)]/85 to-transparent sm:hidden" aria-hidden />
         <div className="relative flex h-full flex-col justify-between gap-5 p-5 sm:p-6">
           <div className="max-w-[64%] sm:max-w-[min(460px,54%)]">
             <div className="flex items-start gap-2">
-              <h1 className="text-[22px] font-extrabold leading-tight tracking-tight text-accent-strong dark:text-fg sm:text-[26px]">{settings.greetTitle || 'Ас-саляму алейкум!'}</h1>
-              <button className="btn btn-ghost btn-icon -mt-1 !min-h-8 !min-w-8 !p-1 text-muted opacity-70 hover:opacity-100" onClick={() => setEdit(true)} aria-label="Изменить приветствие"><Pencil size={15} /></button>
+              <h1 className="text-[22px] font-extrabold leading-tight tracking-tight text-accent-strong dark:text-fg sm:text-[26px]">{T(settings.greetTitle || 'Ас-саляму алейкум!')}</h1>
+              <button className="btn btn-ghost btn-icon -mt-1 !min-h-8 !min-w-8 !p-1 text-muted opacity-70 hover:opacity-100" onClick={() => setEdit(true)} aria-label={T('Изменить приветствие')}><Pencil size={15} /></button>
             </div>
-            {settings.greetText && <p className="mt-1.5 text-[13px] text-fg/80 sm:text-[14px]">{settings.greetText}</p>}
+            {settings.greetText && <p className="mt-1.5 text-[13px] text-fg/80 sm:text-[14px]">{T(settings.greetText)}</p>}
           </div>
           <div className="max-w-[72%] sm:max-w-[min(480px,58%)]">
             <p className="text-[15px] font-bold">{fmtDate(today, { weekday: 'long' })}, {fmtDate(today, { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-            {hijri && <p className="text-[13px] font-medium text-muted" title={`Календарь: ${HIJRI_METHOD}. Возможна разница ±1 день с местным календарём.`}>{hijri}</p>}
+            {hijri && <p className="text-[13px] font-medium text-muted" title={T('Календарь: {0}. Возможна разница ±1 день с местным календарём.', T(HIJRI_METHOD))}>{hijri}</p>}
             <p className="mt-2 inline-flex rounded-full bg-card/80 px-3 py-1 text-[12px] font-semibold text-accent backdrop-blur dark:bg-black/25">{dayStatus(st)}</p>
           </div>
         </div>
@@ -134,15 +137,20 @@ function Hero({ st }: { st: DayStat }) {
 
 function ReminderCard() {
   const { today } = useData();
+  const lang = getLang();
   const r = reminderFor(today);
+  const meaning = reminderMeaning(r, lang);
+  const [full, setFull] = useState(false);
+  const long = r.ar.length > 260 || (meaning?.length ?? 0) > 320;
   return (
-    <section className="fade-in relative overflow-hidden rounded-[22px] bg-brand-900 p-5 text-white" aria-label="Напоминание дня">
+    <section className="fade-in relative overflow-hidden rounded-[22px] bg-brand-900 p-5 text-white" aria-label={T('Напоминание дня')}>
       <StarPattern className="absolute inset-0" opacity={0.14} color="#c4a56b" size={40} />
       <div className="relative">
-        <p className="eyebrow !text-gold/90">{r.kind === 'quran' ? 'Аят дня' : 'Хадис дня'}</p>
-        <p className="arabic mt-2 text-[20px] leading-[2] text-gold" lang="ar" dir="rtl">{r.arabic}</p>
-        <p className="mt-1.5 text-[14px] leading-relaxed text-white/90">«{r.meaning}»</p>
-        <p className="mt-2 text-[11.5px] text-white/60">{r.source} · смысловой перевод</p>
+        <p className="eyebrow !text-gold/90">{r.kind === 'quran' ? T('Аят дня') : T('Хадис дня')}</p>
+        <p className={`${r.kind === 'quran' ? 'quran' : 'arabic'} mt-2 text-[20px] leading-[2] text-gold ${!full && long ? 'line-clamp-4' : ''}`} lang="ar" dir="rtl">{r.ar}</p>
+        {meaning && <p className={`mt-1.5 text-[14px] leading-relaxed text-white/90 ${!full && long ? 'line-clamp-4' : ''}`}>{meaning}</p>}
+        {long && <button className="mt-1 text-[12.5px] font-semibold text-gold hover:underline" onClick={() => setFull(!full)}>{full ? T('Свернуть') : T('Читать полностью')}</button>}
+        <p className="mt-2 text-[11.5px] text-white/60">{r.source[lang]}</p>
       </div>
     </section>
   );
@@ -155,17 +163,17 @@ function GreetingForm({ onClose }: { onClose: () => void }) {
   const [x, setX] = useState(settings.greetText);
   const [errors, setErrors] = useState<Errors>({});
   return (
-    <Modal open onClose={onClose} title="Приветствие на главной">
+    <Modal open onClose={onClose} title={T('Приветствие на главной')}>
       <form className="grid gap-3" onSubmit={async (e) => {
         e.preventDefault();
-        try { await saveSettings({ greetTitle: t.trim(), greetText: x.trim() }); toast('Приветствие сохранено'); onClose(); }
+        try { await saveSettings({ greetTitle: t.trim(), greetText: x.trim() }); toast(T('Приветствие сохранено')); onClose(); }
         catch (err) { setErrors(errFields(err)); toast(errMsg(err), 'error'); }
       }}>
-        <Field label="Заголовок" error={errors.greetTitle} id="g-t"><input id="g-t" className="input" value={t} maxLength={80} onChange={(e) => setT(e.target.value)} /></Field>
-        <Field label="Текст" error={errors.greetText} id="g-x"><textarea id="g-x" className="input min-h-20" value={x} maxLength={200} onChange={(e) => setX(e.target.value)} /></Field>
+        <Field label={T('Заголовок')} error={errors.greetTitle} id="g-t"><input id="g-t" className="input" value={t} maxLength={80} onChange={(e) => setT(e.target.value)} /></Field>
+        <Field label={T('Текст')} error={errors.greetText} id="g-x"><textarea id="g-x" className="input min-h-20" value={x} maxLength={200} onChange={(e) => setX(e.target.value)} /></Field>
         <div className="flex flex-wrap justify-between gap-2">
-          <button type="button" className="btn btn-ghost" onClick={() => { setT('Ас-саляму алейкум!'); setX('Сегодня хороший день, чтобы сделать ещё один шаг к своим целям.'); }}>По умолчанию</button>
-          <div className="flex gap-2"><button type="button" className="btn btn-outline" onClick={onClose}>Отмена</button><button className="btn btn-primary">Сохранить</button></div>
+          <button type="button" className="btn btn-ghost" onClick={() => { setT(T('Ас-саляму алейкум!')); setX(T('Сегодня хороший день, чтобы сделать ещё один шаг к своим целям.')); }}>{T('По умолчанию')}</button>
+          <div className="flex gap-2"><button type="button" className="btn btn-outline" onClick={onClose}>{T('Отмена')}</button><button className="btn btn-primary">{T('Сохранить')}</button></div>
         </div>
       </form>
     </Modal>
@@ -195,17 +203,17 @@ function Metrics({ st, hab, study }: { st: DayStat; hab: Hab; study: Study }) {
   const pct = Math.round(st.progress * 100);
   return (
     <div className="stagger grid grid-cols-2 gap-4 2xl:grid-cols-4 xl:grid-cols-4">
-      <MetricCard to="/tasks" label="Прогресс за сегодня" value={`${pct}%`}
-        sub={st.planned ? `${st.done} из ${st.planned} задач${st.partial ? ` · частично ${st.partial}` : ''}` : 'задач нет'}
-        icon={<Ring value={st.progress} size={40} stroke={5} label="Прогресс дня" />} />
-      <MetricCard to="/focus" label="Время концентрации" value={st.actualMin ? fmtMinutes(st.actualMin) : '0 мин'}
-        sub={st.plannedMin ? `план ${fmtMinutes(st.plannedMin)}` : 'сохранённое время'}
+      <MetricCard to="/tasks" label={T('Прогресс за сегодня')} value={`${pct}%`}
+        sub={st.planned ? T('{0} из {1} задач{2}', st.done, st.planned, st.partial ? T(' · частично {0}', st.partial) : '') : T('задач нет')}
+        icon={<Ring value={st.progress} size={40} stroke={5} label={T('Прогресс дня')} />} />
+      <MetricCard to="/focus" label={T('Время концентрации')} value={st.actualMin ? fmtMinutes(st.actualMin) : T('0 мин')}
+        sub={st.plannedMin ? T('план {0}', fmtMinutes(st.plannedMin)) : T('сохранённое время')}
         icon={<IconBadge tone="gold" size={40}><Timer size={19} /></IconBadge>} />
-      <MetricCard to="/habits" label="Привычки" value={hab.total ? `${hab.done} из ${hab.total}` : '—'}
-        sub={hab.total ? 'выполнено сегодня' : 'привычек пока нет'}
+      <MetricCard to="/habits" label={T('Привычки')} value={hab.total ? T('{0} из {1}', hab.done, hab.total) : '—'}
+        sub={hab.total ? T('выполнено сегодня') : T('привычек пока нет')}
         icon={<IconBadge size={40}><Flame size={19} /></IconBadge>} />
-      <MetricCard to="/study" label="Учебные цели" value={study ? `${Math.round(study.value * 100)}%` : '—'}
-        sub={study ? `${study.count} направлений сегодня` : 'направлений пока нет'}
+      <MetricCard to="/study" label={T('Учебные цели')} value={study ? `${Math.round(study.value * 100)}%` : '—'}
+        sub={study ? T('{0} направлений сегодня', study.count) : T('направлений пока нет')}
         icon={<IconBadge tone="info" size={40}><BookOpen size={19} /></IconBadge>} />
     </div>
   );
@@ -213,19 +221,19 @@ function Metrics({ st, hab, study }: { st: DayStat; hab: Hab; study: Study }) {
 
 function MobileSummary({ st, hab, study }: { st: DayStat; hab: Hab; study: Study }) {
   return (
-    <section className="card fade-in grid grid-cols-[auto_1fr] items-center gap-4 !p-4" aria-label="Общий прогресс">
-      <Ring value={st.progress} size={92} stroke={9} label="Прогресс дня">
+    <section className="card fade-in grid grid-cols-[auto_1fr] items-center gap-4 !p-4" aria-label={T('Общий прогресс')}>
+      <Ring value={st.progress} size={92} stroke={9} label={T('Прогресс дня')}>
         <div><p className="text-[22px] font-extrabold tabular-nums leading-none">{Math.round(st.progress * 100)}%</p><p className="mt-0.5 text-[10px] font-semibold text-muted">{st.done}/{st.planned}</p></div>
       </Ring>
       <div className="grid grid-cols-3 gap-2 text-center">
-        <Link to="/habits" className="rounded-xl bg-soft px-1 py-2.5"><Flame size={16} className="mx-auto text-accent" /><p className="mt-1 text-[15px] font-extrabold tabular-nums">{hab.total ? `${hab.done}/${hab.total}` : '—'}</p><p className="text-[10.5px] font-semibold text-muted">Привычки</p></Link>
-        <Link to="/focus" className="rounded-xl bg-soft px-1 py-2.5"><Timer size={16} className="mx-auto text-gold" /><p className="mt-1 text-[15px] font-extrabold tabular-nums">{fmtShortMin(st.actualMin)}</p><p className="text-[10.5px] font-semibold text-muted">Фокус</p></Link>
-        <Link to="/study" className="rounded-xl bg-soft px-1 py-2.5"><BookOpen size={16} className="mx-auto text-info" /><p className="mt-1 text-[15px] font-extrabold tabular-nums">{study ? `${Math.round(study.value * 100)}%` : '—'}</p><p className="text-[10.5px] font-semibold text-muted">Учёба</p></Link>
+        <Link to="/habits" className="rounded-xl bg-soft px-1 py-2.5"><Flame size={16} className="mx-auto text-accent" /><p className="mt-1 text-[15px] font-extrabold tabular-nums">{hab.total ? `${hab.done}/${hab.total}` : '—'}</p><p className="text-[10.5px] font-semibold text-muted">{T('Привычки')}</p></Link>
+        <Link to="/focus" className="rounded-xl bg-soft px-1 py-2.5"><Timer size={16} className="mx-auto text-gold" /><p className="mt-1 text-[15px] font-extrabold tabular-nums">{fmtShortMin(st.actualMin)}</p><p className="text-[10.5px] font-semibold text-muted">{T('Фокус')}</p></Link>
+        <Link to="/study" className="rounded-xl bg-soft px-1 py-2.5"><BookOpen size={16} className="mx-auto text-info" /><p className="mt-1 text-[15px] font-extrabold tabular-nums">{study ? `${Math.round(study.value * 100)}%` : '—'}</p><p className="text-[10.5px] font-semibold text-muted">{T('Учёба')}</p></Link>
       </div>
     </section>
   );
 }
-const fmtShortMin = (m: number) => (m >= 60 ? `${Math.floor(m / 60)}ч${m % 60 ? ` ${m % 60}м` : ''}` : `${Math.round(m)}м`);
+const fmtShortMin = (m: number) => (m >= 60 ? T('{0}ч{1}', Math.floor(m / 60), m % 60 ? T(' {0}м', m % 60) : '') : T('{0}м', Math.round(m)));
 
 /* ---------- Задачи ---------- */
 function TodayTasks({ list }: { list: Instance[] }) {
@@ -237,30 +245,29 @@ function TodayTasks({ list }: { list: Instance[] }) {
   const shown = f === 'all' ? list : f === 'open' ? open : done;
   const minimal = settings.minimalDate === today;
   return (
-    <section className="card fade-in min-w-0 !p-0" aria-label="Мои задачи на сегодня">
+    <section className="card fade-in min-w-0 !p-0" aria-label={T('Мои задачи на сегодня')}>
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
-        <h2 className="h2 text-[16px]">Мои задачи на сегодня</h2>
-        <button className="btn btn-primary btn-sm !min-h-9 !px-3.5" onClick={() => openTask({ date: today })}><Plus size={16} />Добавить задачу</button>
+        <h2 className="h2 text-[16px]">{T('Мои задачи на сегодня')}</h2>
+        <button className="btn btn-primary btn-sm !min-h-9 !px-3.5" onClick={() => openTask({ date: today })}><Plus size={16} />{T('Добавить задачу')}</button>
       </div>
       <div className="px-4 pt-3 sm:px-5">
-        <Tabs label="Фильтр задач" value={f} onChange={setF}
-          items={[['all', `Все ${list.length}`], ['open', `В работе ${open.length}`], ['done', `Завершено ${done.length}`]]} />
+        <Tabs label={T('Фильтр задач')} value={f} onChange={setF}
+          items={[['all', T('Все {0}', list.length)], ['open', T('В работе {0}', open.length)], ['done', T('Завершено {0}', done.length)]]} />
       </div>
       <div className="px-2 pb-3 pt-2 sm:px-3">
         {shown.length ? (
           <ul className="grid">{shown.map((i) => <TaskItem key={i.key} inst={i} />)}</ul>
         ) : list.length ? (
-          <p className="px-3 py-8 text-center text-sm text-muted">{f === 'done' ? 'Пока ничего не завершено — начните с ближайшей задачи.' : 'Все задачи завершены. Отличная работа!'}</p>
+          <p className="px-3 py-8 text-center text-sm text-muted">{f === 'done' ? T('Пока ничего не завершено — начните с ближайшей задачи.') : T('Все задачи завершены. Отличная работа!')}</p>
         ) : (
-          <div className="p-2"><Empty icon={<CalendarPlus size={26} />} title="На сегодня задач нет" text="Добавьте задачу или запланируйте повторяющееся занятие."
-            action={<button className="btn btn-primary" onClick={() => openTask({ date: today })}><Plus size={18} />Добавить задачу</button>} /></div>
+          <div className="p-2"><Empty icon={<CalendarPlus size={26} />} title={T('На сегодня задач нет')} text={T('Добавьте задачу или запланируйте повторяющееся занятие.')}
+            action={<button className="btn btn-primary" onClick={() => openTask({ date: today })}><Plus size={18} />{T('Добавить задачу')}</button>} /></div>
         )}
       </div>
       {!minimal && list.length > 3 && (
         <div className="border-t border-line px-4 py-2.5 sm:px-5">
           <button className="flex items-center gap-2 text-[13px] font-semibold text-muted hover:text-accent" onClick={() => saveSettings({ minimalDate: today })}>
-            <Feather size={15} />Тяжёлый день? Оставить только главное
-          </button>
+            <Feather size={15} />{T('Тяжёлый день? Оставить только главное')}</button>
         </div>
       )}
     </section>
@@ -283,18 +290,18 @@ function NextUp({ list }: { list: Instance[] }) {
   let status = '';
   if (next) {
     const s = parseTime(next.startTime);
-    if (s === null) status = `${fmtMinutes(next.durationMin)} · время не назначено`;
-    else if (s > nowMin) status = `Начало через ${fmtMinutes(s - nowMin)}`;
-    else status = `Идёт · осталось ${fmtMinutes(Math.max(0, s + next.durationMin - nowMin))}`;
+    if (s === null) status = T('{0} · время не назначено', fmtMinutes(next.durationMin));
+    else if (s > nowMin) status = T('Начало через {0}', fmtMinutes(s - nowMin));
+    else status = T('Идёт · осталось {0}', fmtMinutes(Math.max(0, s + next.durationMin - nowMin)));
   }
   return (
-    <section className="card fade-in" aria-label="Ближайшее занятие">
-      <SectionHeader title="Ближайшее занятие" />
+    <section className="card fade-in" aria-label={T('Ближайшее занятие')}>
+      <SectionHeader title={T('Ближайшее занятие')} />
       {timer ? (
         <div className="flex items-center gap-3">
           <IconBadge size={46}><Timer size={22} /></IconBadge>
-          <div className="min-w-0 flex-1"><p className="truncate font-bold">{timer.label}</p><p className="text-[13px] text-muted">{timer.runningSince ? 'Сеанс концентрации идёт' : 'Сеанс на паузе'}</p></div>
-          <button className="btn btn-primary" onClick={() => nav('/focus')}>Открыть</button>
+          <div className="min-w-0 flex-1"><p className="truncate font-bold">{timer.label}</p><p className="text-[13px] text-muted">{timer.runningSince ? T('Сеанс концентрации идёт') : T('Сеанс на паузе')}</p></div>
+          <button className="btn btn-primary" onClick={() => nav('/focus')}>{T('Открыть')}</button>
         </div>
       ) : next ? (
         <>
@@ -308,12 +315,12 @@ function NextUp({ list }: { list: Instance[] }) {
             </div>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
-            <button className="btn btn-deep" onClick={() => start(next)}><Play size={16} />Начать занятие</button>
+            <button className="btn btn-deep" onClick={() => start(next)}><Play size={16} />{T('Начать занятие')}</button>
             <span className="text-[12.5px] font-semibold text-muted">{status}</span>
           </div>
         </>
       ) : (
-        <p className="py-3 text-sm text-muted">{list.length ? 'На сегодня больше нет запланированных занятий.' : 'Добавьте задачу со временем начала — она появится здесь.'}</p>
+        <p className="py-3 text-sm text-muted">{list.length ? T('На сегодня больше нет запланированных занятий.') : T('Добавьте задачу со временем начала — она появится здесь.')}</p>
       )}
     </section>
   );
@@ -323,8 +330,8 @@ function TopThree({ list }: { list: Instance[] }) {
   const top = topThree(list);
   if (!top.length) return null;
   return (
-    <section className="card fade-in" aria-label="Три важнейшие задачи дня">
-      <SectionHeader title="Три важнейшие задачи дня" />
+    <section className="card fade-in" aria-label={T('Три важнейшие задачи дня')}>
+      <SectionHeader title={T('Три важнейшие задачи дня')} />
       <ol className="grid gap-2">
         {top.map((i, n) => (
           <li key={i.key} className="flex items-center gap-3 rounded-xl bg-card-2 px-2 py-1.5">
@@ -341,16 +348,16 @@ function TopThree({ list }: { list: Instance[] }) {
 /* ---------- Правая панель ---------- */
 function WeekLegend() {
   const c = useThemeColors();
-  return <ChartLegend items={[['Выполнено', c.accent], ['Частично', c.gold], ['Пропущено', c.danger], ['Осталось', c.muted]]} />;
+  return <ChartLegend items={[[T('Выполнено'), c.accent], [T('Частично'), c.gold], [T('Пропущено'), c.danger], [T('Осталось'), c.muted]]} />;
 }
 
 function SidePanel() {
   const { today, settings } = useData();
   return (
     <>
-      <section className="card fade-in" aria-label="Календарь"><MiniCalendar /></section>
-      <section className="card fade-in" aria-label="Мой прогресс за неделю">
-        <SectionHeader title="Мой прогресс" action={<Link to="/stats" className="link">Неделя</Link>} />
+      <section className="card fade-in" aria-label={T('Календарь')}><MiniCalendar /></section>
+      <section className="card fade-in" aria-label={T('Мой прогресс за неделю')}>
+        <SectionHeader title={T('Мой прогресс')} action={<Link to="/stats" className="link">{T('Неделя')}</Link>} />
         <WeekChart from={startOfWeek(today, settings.weekStart)} height={160} />
         <WeekLegend />
       </section>
@@ -374,7 +381,7 @@ function AreaRow({ a }: { a: StudyArea }) {
         <div className="mt-1 flex items-center gap-2">
           <ProgressBar value={p.pctToday} size="sm" color={a.color} label={a.name} />
         </div>
-        <p className="mt-0.5 text-[11px] text-muted tabular-nums">{num(p.doneToday)} / {num(p.targetToday)} {u} сегодня</p>
+        <p className="mt-0.5 text-[11px] text-muted tabular-nums">{num(p.doneToday)} / {num(p.targetToday)} {u}{' '}{T('сегодня')}</p>
       </div>
     </li>
   );
@@ -384,10 +391,10 @@ function StudyCard() {
   const { areas } = useData();
   const list = areas.filter((a) => a.dailyTarget > 0).slice(0, 6);
   return (
-    <section className="card fade-in" aria-label="Учебные направления">
-      <SectionHeader title="Учебные направления" action={<Link to="/study" className="link">Все</Link>} />
+    <section className="card fade-in" aria-label={T('Учебные направления')}>
+      <SectionHeader title={T('Учебные направления')} action={<Link to="/study" className="link">{T('Все')}</Link>} />
       {list.length ? <ul className="grid gap-3.5">{list.map((a) => <AreaRow key={a.id} a={a} />)}</ul>
-        : <p className="text-sm text-muted">Направлений пока нет. <Link to="/study" className="link">Добавить</Link></p>}
+        : <p className="text-sm text-muted">{T('Направлений пока нет.')}{' '}<Link to="/study" className="link">{T('Добавить')}</Link></p>}
     </section>
   );
 }
@@ -400,19 +407,19 @@ function Welcome() {
   async function demo() {
     try {
       const n = await seedDemoPlan(today);
-      toast(n ? `Добавлен учебный план: ${n} направлений` : 'Демо-план уже добавлен');
+      toast(n ? T('Добавлен учебный план: {0} направлений', n) : T('Демо-план уже добавлен'));
     } catch (e) { toast(errMsg(e), 'error'); }
   }
   const steps = [
-    { icon: <ListChecks size={20} />, t: 'Запланируйте день', x: 'Создайте задачу — например, «Арабский язык — 60 минут».' },
-    { icon: <Timer size={20} />, t: 'Занимайтесь в фокусе', x: 'Таймер сохраняет реальное время и учитывает его в прогрессе.' },
-    { icon: <Sparkles size={20} />, t: 'Смотрите прогресс', x: 'Статистика строится только по вашим сохранённым данным.' },
+    { icon: <ListChecks size={20} />, t: T('Запланируйте день'), x: T('Создайте задачу — например, «Арабский язык — 60 минут».') },
+    { icon: <Timer size={20} />, t: T('Занимайтесь в фокусе'), x: T('Таймер сохраняет реальное время и учитывает его в прогрессе.') },
+    { icon: <Sparkles size={20} />, t: T('Смотрите прогресс'), x: T('Статистика строится только по вашим сохранённым данным.') },
   ];
   return (
     <section className="card fade-in grid gap-5">
       <div>
-        <h2 className="text-lg font-extrabold tracking-tight">Добро пожаловать в НИЗАМ</h2>
-        <p className="muted mt-1">Начните с одной задачи — или установите пример учебного плана и настройте его под себя.</p>
+        <h2 className="text-lg font-extrabold tracking-tight">{T('Добро пожаловать в НИЗАМ')}</h2>
+        <p className="muted mt-1">{T('Начните с одной задачи — или установите пример учебного плана и настройте его под себя.')}</p>
       </div>
       <ol className="grid gap-3 sm:grid-cols-3">
         {steps.map((s, i) => (
@@ -424,11 +431,11 @@ function Welcome() {
         ))}
       </ol>
       <div className="flex flex-wrap gap-2">
-        <button className="btn btn-primary" onClick={() => openTask({ date: today })}><Plus size={18} />Создать задачу</button>
-        <button className="btn btn-outline" onClick={demo}><ListChecks size={18} />Установить пример плана</button>
-        <Link to="/settings" className="btn btn-ghost"><Download size={18} />Восстановить из копии</Link>
+        <button className="btn btn-primary" onClick={() => openTask({ date: today })}><Plus size={18} />{T('Создать задачу')}</button>
+        <button className="btn btn-outline" onClick={demo}><ListChecks size={18} />{T('Установить пример плана')}</button>
+        <Link to="/settings" className="btn btn-ghost"><Download size={18} />{T('Восстановить из копии')}</Link>
       </div>
-      <p className="text-xs text-muted">Пример плана (Коран, арабский язык, перевод, программирование и др.) — редактируемый образец, а не обязательные нормы. Время занятий не назначается автоматически.</p>
+      <p className="text-xs text-muted">{T('Пример плана (Коран, арабский язык, перевод, программирование и др.) — редактируемый образец, а не обязательные нормы. Время занятий не назначается автоматически.')}</p>
     </section>
   );
 }

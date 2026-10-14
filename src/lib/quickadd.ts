@@ -28,20 +28,22 @@ export function parseQuick(raw: string, today: ISODate): QuickParsed {
   s = s.replace(/\s!+(?=\s)/g, () => { out.priority = 'high'; return ' '; });
 
   // Дата
-  s = s.replace(/\s(сегодня|завтра|послезавтра)(?=[\s,.;]|$)/giu, (_, w: string) => {
-    const k = w.toLowerCase();
-    out.date = k === 'сегодня' ? today : addDays(today, k === 'завтра' ? 1 : 2);
+  const DAY_WORDS: Record<string, number> = {
+    'сегодня': 0, 'завтра': 1, 'послезавтра': 2, 'today': 0, 'tomorrow': 1, 'اليوم': 0, 'غدا': 1, 'غداً': 1, 'بعد غد': 2,
+  };
+  s = s.replace(/\s(послезавтра|сегодня|завтра|today|tomorrow|بعد غد|اليوم|غداً|غدا)(?=[\s,.;]|$)/giu, (_, w: string) => {
+    out.date = addDays(today, DAY_WORDS[w.toLowerCase()] ?? 0);
     return ' ';
   });
 
   // Время начала: «в 9:00», «в 18.30», «09:00»
-  s = s.replace(/\s(?:в\s+)?([01]?\d|2[0-3])[:.]([0-5]\d)(?=[\s,.;]|$)/giu, (_, h: string, m: string) => {
+  s = s.replace(/\s(?:(?:в|at|في)\s+)?([01]?\d|2[0-3])[:.]([0-5]\d)(?=[\s,.;]|$)/giu, (_, h: string, m: string) => {
     out.startTime = `${pad(Number(h))}:${m}`;
     return ' ';
   });
 
   // Длительность: «1 ч 30 мин», «1,5 ч», «90 мин», «2 часа», «45м»
-  const durRe = /\s(\d+(?:[.,]\d+)?)\s*(ч|час|часа|часов|h)\.?(?:\s*(\d+)\s*(м|мин|минут|минуты|min)\.?)?(?=[\s,.;]|$)|\s(\d+)\s*(м|мин|минут|минуты|min)\.?(?=[\s,.;]|$)/iu;
+  const durRe = /\s(\d+(?:[.,]\d+)?)\s*(ч|час|часа|часов|h|hr|hrs|hours?|ساعة|ساعات)\.?(?:\s*(\d+)\s*(м|мин|минут|минуты|min|mins|minutes?|دقيقة|دقائق)\.?)?(?=[\s,.;]|$)|\s(\d+)\s*(м|мин|минут|минуты|min|mins|minutes?|دقيقة|دقائق)\.?(?=[\s,.;]|$)/iu;
   const dm = s.match(durRe);
   if (dm) {
     let min = 0;

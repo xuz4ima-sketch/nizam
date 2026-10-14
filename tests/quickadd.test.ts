@@ -40,7 +40,7 @@ describe('даты и отображение', () => {
   });
   it('напоминание дня стабильно и с источником', () => {
     expect(reminderFor(T)).toBe(reminderFor(T));
-    for (const r of REMINDERS) expect(r.source.length).toBeGreaterThan(5);
+    for (const r of REMINDERS) { expect(r.ar.length).toBeGreaterThan(5); expect(r.source.ru.length).toBeGreaterThan(5); expect(r.ru ?? r.en).toBeTruthy(); }
   });
 });
 
@@ -72,5 +72,16 @@ describe('пересечения в календаре', () => {
     expect(l.find((p) => p.inst.key === 'b')).toMatchObject({ lane: 1, lanes: 2 });
     expect(l.find((p) => p.inst.key === 'c')).toMatchObject({ lane: 1, lanes: 2 });
     expect(l.find((p) => p.inst.key === 'd')).toMatchObject({ lane: 0, lanes: 1 });
+  });
+});
+
+describe('быстрое добавление на английском и арабском', () => {
+  it('English', () => {
+    expect(parseQuick('Arabic grammar tomorrow at 7:30 90 min', T)).toMatchObject({ title: 'Arabic grammar', date: '2026-10-15', startTime: '07:30', durationMin: 90 });
+    expect(parseQuick('Reading 1.5 h', T).durationMin).toBe(90);
+  });
+  it('العربية', () => {
+    expect(parseQuick('مراجعة الحفظ غدا 30 دقيقة', T)).toMatchObject({ title: 'مراجعة الحفظ', date: '2026-10-15', durationMin: 30 });
+    expect(parseQuick('قراءة 2 ساعة', T).durationMin).toBe(120);
   });
 });

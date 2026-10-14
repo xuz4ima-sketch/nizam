@@ -13,6 +13,7 @@ import { habitStats, logsMap } from '../lib/streaks';
 import { dateRange, isoFromMs } from '../lib/dates';
 import { useData, useInstances } from '../state/data';
 
+import { t as T } from '../i18n';
 export default function Stats() {
   const { today, nowMin, sessions, areas, habits, habitLogs, settings, occurrences, tasks } = useData();
   const [span, setSpan] = useState<'1' | '7' | '30'>('7');
@@ -58,7 +59,7 @@ export default function Stats() {
     for (const ss of sessions) {
       if (ss.date < from || ss.date > today || ss.minutes <= 0) continue;
       const t = ss.taskId ? taskMap.get(ss.taskId) : undefined;
-      const key = t?.category ?? areas.find((a) => a.id === ss.areaId)?.name ?? 'Без категории';
+      const key = t?.category ?? areas.find((a) => a.id === ss.areaId)?.name ?? T('Без категории');
       m.set(key, (m.get(key) ?? 0) + ss.minutes);
     }
     return [...m.entries()].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
@@ -70,43 +71,43 @@ export default function Stats() {
 
   return (
     <div className="fade-in grid gap-5">
-      <PageHeader title="Статистика" subtitle="Все показатели рассчитаны по вашим сохранённым данным — без выдуманных цифр." actions={<Tabs label="Период" value={span} onChange={setSpan} items={[['1', 'День'], ['7', 'Неделя'], ['30', 'Месяц']]} />} />
+      <PageHeader title={T('Статистика')} subtitle={T('Все показатели рассчитаны по вашим сохранённым данным — без выдуманных цифр.')} actions={<Tabs label={T('Период')} value={span} onChange={setSpan} items={[['1', T('День')], ['7', T('Неделя')], ['30', T('Месяц')]]} />} />
       {!hasData ? (
-        <Empty icon={<ChartColumn size={28} />} title="Пока нет данных" text="Отмечайте выполнение задач, записывайте занятия и привычки — здесь появятся графики." />
+        <Empty icon={<ChartColumn size={28} />} title={T('Пока нет данных')} text={T('Отмечайте выполнение задач, записывайте занятия и привычки — здесь появятся графики.')} />
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Stat label="Продуктивность" value={pct(sum.progress)} sub={`выполнено ${sum.done} из ${sum.planned}`} />
-            <Stat label="Пропущено" value={sum.skipped + sum.overdue} sub={sum.partial ? `частично: ${sum.partial}` : 'задач за период'} />
-            <Stat label="Продуктивное время" value={fmtMinutes(sum.actualMin)} sub={`план: ${fmtMinutes(sum.plannedMin)}`} />
-            <Stat label="Дневные нормы" value={norms.total ? pct(norms.met / norms.total) : '—'} sub={norms.total ? `${norms.met} из ${norms.total} (без сегодня)` : areas.some((a) => a.dailyTarget > 0) ? 'появятся после первого полного дня' : 'нет направлений с нормой'} />
+            <Stat label={T('Продуктивность')} value={pct(sum.progress)} sub={T('выполнено {0} из {1}', sum.done, sum.planned)} />
+            <Stat label={T('Пропущено')} value={sum.skipped + sum.overdue} sub={sum.partial ? T('частично: {0}', sum.partial) : T('задач за период')} />
+            <Stat label={T('Продуктивное время')} value={fmtMinutes(sum.actualMin)} sub={T('план: {0}', fmtMinutes(sum.plannedMin))} />
+            <Stat label={T('Дневные нормы')} value={norms.total ? pct(norms.met / norms.total) : '—'} sub={norms.total ? T('{0} из {1} (без сегодня)', norms.met, norms.total) : areas.some((a) => a.dailyTarget > 0) ? T('появятся после первого полного дня') : T('нет направлений с нормой')} />
           </div>
 
           <WeeklyReport />
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
             <section className="card min-w-0">
-              <SectionHeader title="Выполнение задач по дням" />
-              <div className="h-60" role="img" aria-label="Столбчатый график выполнения задач">
+              <SectionHeader title={T('Выполнение задач по дням')} />
+              <div className="h-60" role="img" aria-label={T('Столбчатый график выполнения задач')}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chart} margin={{ left: 0, right: 4, top: 4 }} barCategoryGap="24%">
                     <CartesianGrid stroke={c.grid} vertical={false} strokeDasharray="3 4" />
                     <XAxis dataKey="name" tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
                     <YAxis allowDecimals={false} tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} width={24} />
                     <Tooltip {...tooltip} />
-                    <Bar dataKey="Выполнено" stackId="a" fill={c.accent} isAnimationActive={false} />
-                    <Bar dataKey="Частично" stackId="a" fill={c.gold} isAnimationActive={false} />
-                    <Bar dataKey="Пропущено" stackId="a" fill={c.danger} fillOpacity={0.75} radius={[5, 5, 0, 0]} isAnimationActive={false} />
+                    <Bar dataKey="Выполнено" name={T('Выполнено')} stackId="a" fill={c.accent} isAnimationActive={false} />
+                    <Bar dataKey="Частично" name={T('Частично')} stackId="a" fill={c.gold} isAnimationActive={false} />
+                    <Bar dataKey="Пропущено" name={T('Пропущено')} stackId="a" fill={c.danger} fillOpacity={0.75} radius={[5, 5, 0, 0]} isAnimationActive={false} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <ChartLegend items={[['Выполнено', c.accent], ['Частично', c.gold], ['Пропущено / не завершено', c.danger]]} />
+              <ChartLegend items={[[T('Выполнено'), c.accent], [T('Частично'), c.gold], [T('Пропущено / не завершено'), c.danger]]} />
             </section>
             <section className="card min-w-0">
-              <SectionHeader title="Время по категориям" />
-              {!byCategory.length ? <p className="grid h-60 place-items-center text-center text-sm text-muted">За период время не записано</p> : (
+              <SectionHeader title={T('Время по категориям')} />
+              {!byCategory.length ? <p className="grid h-60 place-items-center text-center text-sm text-muted">{T('За период время не записано')}</p> : (
                 <div className="grid grid-cols-[150px_minmax(0,1fr)] items-center gap-4">
-                  <div className="relative h-[150px]" role="img" aria-label="Кольцевая диаграмма времени по категориям">
+                  <div className="relative h-[150px]" role="img" aria-label={T('Кольцевая диаграмма времени по категориям')}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie data={byCategory} dataKey="value" nameKey="name" innerRadius={48} outerRadius={70} paddingAngle={2} stroke="none" isAnimationActive={false}>
@@ -115,11 +116,11 @@ export default function Stats() {
                         <Tooltip {...tooltip} formatter={(v) => fmtMinutes(Number(v))} />
                       </PieChart>
                     </ResponsiveContainer>
-                    <div className="pointer-events-none absolute inset-0 grid place-items-center text-center"><div><p className="text-[15px] font-extrabold tabular-nums">{fmtMinutes(catTotal)}</p><p className="text-[10px] text-muted">всего</p></div></div>
+                    <div className="pointer-events-none absolute inset-0 grid place-items-center text-center"><div><p className="text-[15px] font-extrabold tabular-nums">{fmtMinutes(catTotal)}</p><p className="text-[10px] text-muted">{T('всего')}</p></div></div>
                   </div>
                   <ul className="grid gap-1.5 text-[13px]">
                     {byCategory.slice(0, 6).map((e) => (
-                      <li key={e.name} className="flex items-center gap-2"><span className="size-2.5 shrink-0 rounded-full" style={{ background: categoryColor(e.name) }} /><span className="min-w-0 flex-1 truncate">{e.name}</span><span className="shrink-0 font-semibold tabular-nums">{Math.round((e.value / catTotal) * 100)}%</span></li>
+                      <li key={e.name} className="flex items-center gap-2"><span className="size-2.5 shrink-0 rounded-full" style={{ background: categoryColor(e.name) }} /><span className="min-w-0 flex-1 truncate">{T(e.name)}</span><span className="shrink-0 font-semibold tabular-nums">{Math.round((e.value / catTotal) * 100)}%</span></li>
                     ))}
                   </ul>
                 </div>
@@ -128,8 +129,8 @@ export default function Stats() {
           </div>
 
           <section className="card min-w-0">
-            <SectionHeader title="Время занятий, мин" />
-            <div className="h-52" role="img" aria-label="Линейный график времени занятий">
+            <SectionHeader title={T('Время занятий, мин')} />
+            <div className="h-52" role="img" aria-label={T('Линейный график времени занятий')}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chart} margin={{ left: 0, right: 8, top: 4 }}>
                   <defs><linearGradient id="minFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={c.accent} stopOpacity={0.28} /><stop offset="1" stopColor={c.accent} stopOpacity={0} /></linearGradient></defs>
@@ -137,7 +138,7 @@ export default function Stats() {
                   <XAxis dataKey="name" tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
                   <YAxis allowDecimals={false} tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} width={32} />
                   <Tooltip {...tooltip} />
-                  <Area type="monotone" dataKey="Минуты" stroke={c.accent} strokeWidth={2.5} fill="url(#minFill)" dot={{ r: 3, fill: c.accent }} isAnimationActive={false} />
+                  <Area type="monotone" dataKey="Минуты" name={T('Минуты')} stroke={c.accent} strokeWidth={2.5} fill="url(#minFill)" dot={{ r: 3, fill: c.accent }} isAnimationActive={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -147,8 +148,8 @@ export default function Stats() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <section className="card">
-              <SectionHeader title="Самые продуктивные дни недели" />
-              <p className="-mt-2 mb-3 text-[12px] text-muted">По записанному времени за последние 4 недели</p>
+              <SectionHeader title={T('Самые продуктивные дни недели')} />
+              <p className="-mt-2 mb-3 text-[12px] text-muted">{T('По записанному времени за последние 4 недели')}</p>
               <ul className="grid gap-2">
                 {[1, 2, 3, 4, 5, 6, 0].map((w) => {
                   const max = Math.max(1, ...byWd);
@@ -163,8 +164,8 @@ export default function Stats() {
               </ul>
             </section>
             <section className="card">
-              <SectionHeader title="Причины пропусков" />
-              {!reasons.length ? <p className="text-sm text-muted">За период пропусков с указанной причиной нет.</p> : (
+              <SectionHeader title={T('Причины пропусков')} />
+              {!reasons.length ? <p className="text-sm text-muted">{T('За период пропусков с указанной причиной нет.')}</p> : (
                 <ul className="grid gap-2.5">
                   {reasons.map(([r, k]) => (
                     <li key={r} className="text-[13px]">
@@ -178,22 +179,22 @@ export default function Stats() {
           </div>
 
           <section className="card">
-            <h2 className="h2 mb-3">Эта неделя и прошлая</h2>
+            <h2 className="h2 mb-3">{T('Эта неделя и прошлая')}</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm [&_td]:pe-3 [&_th]:pe-3">
-                <thead className="text-start text-xs text-muted"><tr><th className="py-1 font-medium">Показатель</th><th className="font-medium">Эта</th><th className="font-medium">Прошлая</th><th className="font-medium">Изменение</th></tr></thead>
+                <thead className="text-start text-xs text-muted"><tr><th className="py-1 font-medium">{T('Показатель')}</th><th className="font-medium">{T('Эта')}</th><th className="font-medium">{T('Прошлая')}</th><th className="font-medium">{T('Изменение')}</th></tr></thead>
                 <tbody className="tabular-nums">
                   {([
-                    ['Выполнено задач', thisWeek.done, prevWeek.done, (v: number) => String(v)],
-                    ['Процент выполнения', thisWeek.doneRate, prevWeek.doneRate, pct],
-                    ['Продуктивное время', thisWeek.actualMin, prevWeek.actualMin, fmtMinutes],
-                    ['Пропущено', thisWeek.skipped, prevWeek.skipped, (v: number) => String(v)],
+                    [T('Выполнено задач'), thisWeek.done, prevWeek.done, (v: number) => String(v)],
+                    [T('Процент выполнения'), thisWeek.doneRate, prevWeek.doneRate, pct],
+                    [T('Продуктивное время'), thisWeek.actualMin, prevWeek.actualMin, fmtMinutes],
+                    [T('Пропущено'), thisWeek.skipped, prevWeek.skipped, (v: number) => String(v)],
                   ] as [string, number, number, (v: number) => string][]).map(([l, a, b, f]) => {
                     const diff = a - b;
                     return (
                       <tr key={l} className="border-t border-line">
                         <td className="py-2">{l}</td><td>{f(a)}</td><td className="text-muted">{f(b)}</td>
-                        <td className={diff > 0 ? (l === 'Пропущено' ? 'text-danger' : 'text-ok') : diff < 0 ? (l === 'Пропущено' ? 'text-ok' : 'text-danger') : 'text-muted'}>
+                        <td className={diff > 0 ? (l === T('Пропущено') ? 'text-danger' : 'text-ok') : diff < 0 ? (l === T('Пропущено') ? 'text-ok' : 'text-danger') : 'text-muted'}>
                           {diff > 0 ? '▲' : diff < 0 ? '▼' : '—'} {diff !== 0 && f(Math.abs(diff))}
                         </td>
                       </tr>
@@ -202,13 +203,13 @@ export default function Stats() {
                 </tbody>
               </table>
             </div>
-            <p className="mt-2 text-xs text-muted">Эта неделя — с {fmtShort(thisWeekFrom)} по сегодня.</p>
+            <p className="mt-2 text-xs text-muted">{T('Эта неделя — с')}{' '}{fmtShort(thisWeekFrom)}{' '}{T('по сегодня.')}</p>
           </section>
 
           <div className="grid gap-4 md:grid-cols-2">
             <section className="card">
-              <h2 className="h2 mb-3">Прогресс по направлениям</h2>
-              {!areas.length ? <p className="muted">Направлений нет.</p> : (
+              <h2 className="h2 mb-3">{T('Прогресс по направлениям')}</h2>
+              {!areas.length ? <p className="muted">{T('Направлений нет.')}</p> : (
                 <ul className="grid gap-3">
                   {areas.map((a) => {
                     const v = areaDone(a, sessions, from, today);
@@ -224,13 +225,13 @@ export default function Stats() {
               )}
             </section>
             <section className="card">
-              <h2 className="h2 mb-3">Самые стабильные привычки</h2>
-              {!habitRank.length ? <p className="muted">Привычек нет.</p> : (
+              <h2 className="h2 mb-3">{T('Самые стабильные привычки')}</h2>
+              {!habitRank.length ? <p className="muted">{T('Привычек нет.')}</p> : (
                 <ol className="grid gap-2 text-sm">
                   {habitRank.slice(0, 6).map(({ h, s }) => (
                     <li key={h.id} className="flex items-center justify-between gap-2">
                       <span className="truncate">{h.name}</span>
-                      <span className="shrink-0 tabular-nums text-muted">{pct(s.rate)} · серия {s.current} {s.unit}</span>
+                      <span className="shrink-0 tabular-nums text-muted">{pct(s.rate)}{' '}{T('· серия')}{' '}{s.current} {s.unit}</span>
                     </li>
                   ))}
                 </ol>
@@ -239,13 +240,13 @@ export default function Stats() {
           </div>
 
           <section className="card">
-            <h2 className="h2 mb-3">Чаще всего откладываемые занятия</h2>
-            {!postponed.length ? <p className="muted">За период нет пропусков, просрочек или переносов.</p> : (
+            <h2 className="h2 mb-3">{T('Чаще всего откладываемые занятия')}</h2>
+            {!postponed.length ? <p className="muted">{T('За период нет пропусков, просрочек или переносов.')}</p> : (
               <ul className="grid gap-2 text-sm">
                 {postponed.map((p) => (
                   <li key={p.title} className="flex flex-wrap items-center justify-between gap-2">
                     <span className="truncate font-medium">{p.title}</span>
-                    <span className="text-xs text-muted">пропущено {p.skipped} · просрочено {p.overdue} · перенесено {p.moved}</span>
+                    <span className="text-xs text-muted">{T('пропущено')}{' '}{p.skipped}{' '}{T('· просрочено')}{' '}{p.overdue}{' '}{T('· перенесено')}{' '}{p.moved}</span>
                   </li>
                 ))}
               </ul>
@@ -274,9 +275,9 @@ function ActivityHeatmap() {
   const activeDays = [...mins.values()].filter((v) => v > 0).length;
   return (
     <section className="card min-w-0">
-      <SectionHeader title="Календарь активности" action={<span className="text-[12px] text-muted">{activeDays} акт. дней · {fmtMinutes(total)}</span>} />
+      <SectionHeader title={T('Календарь активности')} action={<span className="text-[12px] text-muted">{activeDays}{' '}{T('акт. дней ·')}{' '}{fmtMinutes(total)}</span>} />
       <div className="thin-scroll overflow-x-auto pb-1">
-        <div className="flex gap-[3px]" role="img" aria-label={`Активность за ${weeks} недель: ${activeDays} дней с занятиями`}>
+        <div className="flex gap-[3px]" role="img" aria-label={T('Активность за {0} недель: {1} дней с занятиями', weeks, activeDays)}>
           {Array.from({ length: weeks }, (_, w) => (
             <div key={w} className="grid gap-[3px]">
               {Array.from({ length: 7 }, (_, d) => {
@@ -288,7 +289,7 @@ function ActivityHeatmap() {
           ))}
         </div>
       </div>
-      <div className="mt-2 flex items-center justify-end gap-1 text-[11px] text-muted">меньше {shades.map((sh, i) => <span key={i} className="size-[11px] rounded-[3px]" style={{ background: sh }} />)} больше</div>
+      <div className="mt-2 flex items-center justify-end gap-1 text-[11px] text-muted">{T('меньше')}{' '}{shades.map((sh, i) => <span key={i} className="size-[11px] rounded-[3px]" style={{ background: sh }} />)}{' '}{T('больше')}</div>
     </section>
   );
 }
@@ -310,11 +311,11 @@ function WeeklyReport() {
   const diff = sum.actualMin - prev.actualMin;
   return (
     <section className="card grid gap-3 border-gold/30 bg-gradient-to-br from-gold-soft/60 to-card">
-      <SectionHeader icon={<Lightbulb size={18} className="text-gold" />} title="Отчёт за неделю" action={<Link to="/review" className="link">Подробнее</Link>} />
+      <SectionHeader icon={<Lightbulb size={18} className="text-gold" />} title={T('Отчёт за неделю')} action={<Link to="/review" className="link">{T('Подробнее')}</Link>} />
       <ul className="grid gap-1.5 text-[14px]">
-        <li>Занятия: <b className="tabular-nums">{fmtMinutes(sum.actualMin)}</b>{prev.actualMin > 0 && <span className={diff >= 0 ? 'text-ok' : 'text-danger'}> ({diff >= 0 ? '+' : '−'}{fmtMinutes(Math.abs(diff))} к прошлой неделе)</span>}</li>
-        <li>Задачи: выполнено <b className="tabular-nums">{sum.done}</b> из {sum.planned}{sum.planned ? ` (${pct(sum.doneRate)})` : ''}{sum.skipped + sum.overdue ? `, не выполнено ${sum.skipped + sum.overdue}` : ''}</li>
-        {best && best.actualMin > 0 && <li>Лучший день: <b>{fmtDate(best.date, { weekday: 'long' })}</b> — {fmtMinutes(best.actualMin)}</li>}
+        <li>{T('Занятия:')}{' '}<b className="tabular-nums">{fmtMinutes(sum.actualMin)}</b>{prev.actualMin > 0 && <span className={diff >= 0 ? 'text-ok' : 'text-danger'}> ({diff >= 0 ? '+' : '−'}{fmtMinutes(Math.abs(diff))}{' '}{T('к прошлой неделе)')}</span>}</li>
+        <li>{T('Задачи: выполнено')}{' '}<b className="tabular-nums">{sum.done}</b>{' '}{T('из')}{' '}{sum.planned}{sum.planned ? ` (${pct(sum.doneRate)})` : ''}{sum.skipped + sum.overdue ? T(', не выполнено {0}', sum.skipped + sum.overdue) : ''}</li>
+        {best && best.actualMin > 0 && <li>{T('Лучший день:')}{' '}<b>{fmtDate(best.date, { weekday: 'long' })}</b> — {fmtMinutes(best.actualMin)}</li>}
       </ul>
       {recs.length > 0 && (
         <div className="grid gap-1.5">

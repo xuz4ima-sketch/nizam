@@ -2,6 +2,7 @@
 import type { ISODate, Occurrence, Priority, SkipReason, StudySession, Task, TaskStatus } from '../db/schema';
 import { dateRange, diffDays, maxISO, minISO, parseTime, weekday } from './dates';
 
+import { t as T } from '../i18n';
 export const occKey = (taskId: string, date: ISODate) => `${taskId}|${date}`;
 
 export function occursOn(task: Task, d: ISODate): boolean {
@@ -141,10 +142,10 @@ export function recurrenceLabel(t: Task): string {
   const r = t.recurrence;
   switch (r.kind) {
     case 'none': return '';
-    case 'daily': return 'Ежедневно';
-    case 'interval': return r.every === 1 ? 'Ежедневно' : `Каждые ${r.every} дн.`;
+    case 'daily': return T('Ежедневно');
+    case 'interval': return r.every === 1 ? T('Ежедневно') : T('Каждые {0} дн.', r.every);
     case 'weekdays': {
-      const names = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+      const names = [T('Вс'), T('Пн'), T('Вт'), T('Ср'), T('Чт'), T('Пт'), T('Сб')];
       return [1, 2, 3, 4, 5, 6, 0].filter((d) => r.days.includes(d)).map((d) => names[d]).join(', ');
     }
   }

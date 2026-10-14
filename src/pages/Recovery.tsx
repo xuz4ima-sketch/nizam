@@ -12,6 +12,7 @@ import { findFreeSlot } from '../lib/slots';
 import { applyMinimal, skipReasonCounts } from '../lib/stats';
 import { useData, useInstances } from '../state/data';
 
+import { t as T } from '../i18n';
 export default function Recovery() {
   const { today, nowMin, settings, occurrences, areas, sessions, timer } = useData();
   const { toast } = useUI();
@@ -30,7 +31,7 @@ export default function Recovery() {
 
   async function startFive() {
     const inst = open.find((i) => i.key === five);
-    if (!inst) return toast('Выберите задачу', 'error');
+    if (!inst) return toast(T('Выберите задачу'), 'error');
     if (timer) { nav('/focus'); return; }
     try {
       await startTimer({ mode: 'five', label: inst.title, taskId: inst.task.id, occKey: inst.key, areaId: inst.task.studyAreaId });
@@ -42,51 +43,51 @@ export default function Recovery() {
     const slot = findFreeSlot(list.filter((i) => i.key !== inst.key), inst.durationMin, settings.dayStart, settings.dayEnd, date === today ? nowMin : 0);
     try {
       await moveInstance(inst, date, slot !== null ? fmtTime(slot) : undefined);
-      toast(`Перенесено на ${date === today ? 'сегодня' : 'завтра'}${slot !== null ? ` в ${fmtTime(slot)}` : ' (без времени)'}`);
+      toast(T('Перенесено на {0}{1}', date === today ? T('сегодня') : T('завтра'), slot !== null ? T(' в {0}', fmtTime(slot)) : T(' (без времени)')));
     } catch (e) { toast(errMsg(e), 'error'); }
   }
 
   return (
     <div className="fade-in grid gap-5">
-      <PageHeader title="Восстановление дисциплины" subtitle="Срывы случаются. Главное — мягко вернуться в ритм, а не копить бесконечный долг." />
+      <PageHeader title={T('Восстановление дисциплины')} subtitle={T('Срывы случаются. Главное — мягко вернуться в ритм, а не копить бесконечный долг.')} />
 
       <div className="grid gap-4 md:grid-cols-2">
         <section className="card grid content-start gap-3">
-          <h2 className="h2 flex items-center gap-2"><Zap size={18} className="text-accent" />Начни с 5 минут</h2>
-          <p className="muted">Выберите большую задачу и сделайте её самую маленькую часть. Пять минут — и можно остановиться.</p>
+          <h2 className="h2 flex items-center gap-2"><Zap size={18} className="text-accent" />{T('Начни с 5 минут')}</h2>
+          <p className="muted">{T('Выберите большую задачу и сделайте её самую маленькую часть. Пять минут — и можно остановиться.')}</p>
           {open.length ? (
             <>
-              <Field label="Задача" id="r-five">
+              <Field label={T('Задача')} id="r-five">
                 <select id="r-five" className="input" value={five} onChange={(e) => setFive(e.target.value)}>
                   {open.map((i) => <option key={i.key} value={i.key}>{i.title}</option>)}
                 </select>
               </Field>
-              <button className="btn btn-primary" onClick={startFive}><Zap size={18} />Начать 5 минут</button>
+              <button className="btn btn-primary" onClick={startFive}><Zap size={18} />{T('Начать 5 минут')}</button>
             </>
-          ) : <p className="text-sm text-muted">На сегодня нет открытых задач.</p>}
+          ) : <p className="text-sm text-muted">{T('На сегодня нет открытых задач.')}</p>}
         </section>
 
         <section className="card grid content-start gap-3">
-          <h2 className="h2 flex items-center gap-2"><Feather size={18} className="text-accent" />Минимальный день</h2>
-          <p className="muted">Устали или не успеваете? Оставьте на сегодня только важнейшие дела (отмеченные «Минимальный день», либо три самых приоритетных).</p>
+          <h2 className="h2 flex items-center gap-2"><Feather size={18} className="text-accent" />{T('Минимальный день')}</h2>
+          <p className="muted">{T('Устали или не успеваете? Оставьте на сегодня только важнейшие дела (отмеченные «Минимальный день», либо три самых приоритетных).')}</p>
           {!minimal ? (
             <>
               <ul className="text-sm">{applyMinimal(open).map((i) => <li key={i.key}>· {i.title}</li>)}</ul>
-              <button className="btn btn-primary" onClick={() => saveSettings({ minimalDate: today }).then(() => toast('Минимальный день включён'))}>Включить на сегодня</button>
+              <button className="btn btn-primary" onClick={() => saveSettings({ minimalDate: today }).then(() => toast(T('Минимальный день включён')))}>{T('Включить на сегодня')}</button>
             </>
           ) : (
-            <button className="btn btn-outline" onClick={() => saveSettings({ minimalDate: undefined })}>Вернуть обычный режим</button>
+            <button className="btn btn-outline" onClick={() => saveSettings({ minimalDate: undefined })}>{T('Вернуть обычный режим')}</button>
           )}
         </section>
       </div>
 
       <section className="grid gap-3">
         <div>
-          <h2 className="h2 flex items-center gap-2"><LifeBuoy size={18} className="text-accent" />Невыполненное за {RECOVERY_WINDOW_DAYS} дней</h2>
-          <p className="muted">Перенос выполняется только по вашему нажатию. Старше {RECOVERY_WINDOW_DAYS} дней задачи здесь не накапливаются.</p>
+          <h2 className="h2 flex items-center gap-2"><LifeBuoy size={18} className="text-accent" />{T('Невыполненное за')}{' '}{RECOVERY_WINDOW_DAYS}{' '}{T('дней')}</h2>
+          <p className="muted">{T('Перенос выполняется только по вашему нажатию. Старше')}{' '}{RECOVERY_WINDOW_DAYS}{' '}{T('дней задачи здесь не накапливаются.')}</p>
         </div>
         {!missed.length ? (
-          <Empty icon={<HeartHandshake size={28} />} title="Долгов нет" text="Все задачи последних дней выполнены, перенесены или отпущены." />
+          <Empty icon={<HeartHandshake size={28} />} title={T('Долгов нет')} text={T('Все задачи последних дней выполнены, перенесены или отпущены.')} />
         ) : (
           <ul className="grid gap-2">
             {missed.map((i) => {
@@ -96,15 +97,15 @@ export default function Recovery() {
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <p className="font-medium">{i.title}</p>
                     <span className="text-xs text-muted">
-                      {fmtShort(i.date)} · {fmtMinutes(i.durationMin)} · {i.status === 'skipped' ? `пропуск${i.skipReason ? `: ${SKIP_REASONS[i.skipReason].toLowerCase()}` : ''}` : 'просрочено'}
+                      {fmtShort(i.date)} · {fmtMinutes(i.durationMin)} · {i.status === 'skipped' ? T('пропуск{0}', i.skipReason ? `: ${SKIP_REASONS[i.skipReason].toLowerCase()}` : '') : T('просрочено')}
                     </span>
                   </div>
-                  {recurringToday && <p className="text-xs text-muted">Это повторяющееся занятие — сегодня оно уже есть в плане. Возможно, его лучше отпустить.</p>}
+                  {recurringToday && <p className="text-xs text-muted">{T('Это повторяющееся занятие — сегодня оно уже есть в плане. Возможно, его лучше отпустить.')}</p>}
                   <div className="flex flex-wrap gap-2">
-                    {i.date < today && <button className="btn btn-sm btn-outline" onClick={() => moveTo(i, today, todayInsts)}><CalendarClock size={14} />На сегодня</button>}
-                    <button className="btn btn-sm btn-outline" onClick={() => moveTo(i, addDays(today, 1), tomorrowInsts)}><CalendarClock size={14} />На завтра</button>
-                    {i.status !== 'skipped' && <button className="btn btn-sm btn-ghost" onClick={() => setAct(i)}><CircleSlash size={14} />Указать причину</button>}
-                    <button className="btn btn-sm btn-ghost" onClick={() => letGo(i, i.skipReason ?? 'other').then(() => toast('Задача отпущена'))}>Отпустить</button>
+                    {i.date < today && <button className="btn btn-sm btn-outline" onClick={() => moveTo(i, today, todayInsts)}><CalendarClock size={14} />{T('На сегодня')}</button>}
+                    <button className="btn btn-sm btn-outline" onClick={() => moveTo(i, addDays(today, 1), tomorrowInsts)}><CalendarClock size={14} />{T('На завтра')}</button>
+                    {i.status !== 'skipped' && <button className="btn btn-sm btn-ghost" onClick={() => setAct(i)}><CircleSlash size={14} />{T('Указать причину')}</button>}
+                    <button className="btn btn-sm btn-ghost" onClick={() => letGo(i, i.skipReason ?? 'other').then(() => toast(T('Задача отпущена')))}>{T('Отпустить')}</button>
                   </div>
                 </li>
               );
@@ -115,16 +116,16 @@ export default function Recovery() {
 
       {debts.length > 0 && (
         <section className="card grid gap-2">
-          <h2 className="h2">Компенсация норм</h2>
-          <p className="muted">Для этих направлений вы включили перенос недовыполненного. Подтвердите его в разделе «Обучение».</p>
-          <ul className="text-sm">{debts.map(({ a, p }) => <li key={a.id}>· {a.name}: вчера недовыполнено {num(p.yesterdayDeficit)} {AREA_UNITS[a.unit].short}</li>)}</ul>
-          <Link to="/study" className="btn btn-sm btn-outline justify-self-start">Открыть «Обучение»</Link>
+          <h2 className="h2">{T('Компенсация норм')}</h2>
+          <p className="muted">{T('Для этих направлений вы включили перенос недовыполненного. Подтвердите его в разделе «Обучение».')}</p>
+          <ul className="text-sm">{debts.map(({ a, p }) => <li key={a.id}>· {a.name}{T(': вчера недовыполнено')}{' '}{num(p.yesterdayDeficit)} {AREA_UNITS[a.unit].short}</li>)}</ul>
+          <Link to="/study" className="btn btn-sm btn-outline justify-self-start">{T('Открыть «Обучение»')}</Link>
         </section>
       )}
 
       <section className="card grid gap-3">
-        <h2 className="h2">Анализ пропусков за 30 дней</h2>
-        {!reasons.length ? <p className="muted">Пропусков с указанной причиной нет.</p> : (
+        <h2 className="h2">{T('Анализ пропусков за 30 дней')}</h2>
+        {!reasons.length ? <p className="muted">{T('Пропусков с указанной причиной нет.')}</p> : (
           <ul className="grid gap-2">
             {reasons.map(([r, n]) => (
               <li key={r} className="grid grid-cols-[minmax(0,10rem)_1fr_2rem] items-center gap-2 text-sm">
