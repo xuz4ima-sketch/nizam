@@ -8,6 +8,10 @@
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon-192.png" />
     <title>НИЗАМ — نِظَام</title>
+    <script>
+      // Язык и направление письма — до загрузки приложения, чтобы вёрстка не «прыгала».
+      try { var l = localStorage.getItem('nizam-lang'); if (l === 'ar' || l === 'en') { document.documentElement.lang = l; document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr'; } } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

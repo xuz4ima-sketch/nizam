@@ -34,6 +34,8 @@ const RULES: Record<TableName, (r: Record<string, unknown>) => boolean> = {
   reviews: (r) => isValidISO(r.date),
   settings: (r) => r.id === 'main',
   timer: (r) => r.id === 'current',
+  prefs: (r) => str(r.id),
+  memo: (r) => str(r.id) && str(r.textId) && fin(r.idx),
 };
 
 export function validateBackup(raw: unknown): { ok: true; file: BackupFile; counts: Record<string, number> } | { ok: false; error: string } {
@@ -70,8 +72,9 @@ export async function importAll(raw: unknown) {
 }
 
 export async function clearAll(keepSettings = true) {
-  await db.transaction('rw', TABLES.map((t) => db.table(t)), async () => {
+  await db.transaction('rw', [...TABLES.map((t) => db.table(t)), db.media], async () => {
     for (const t of TABLES) if (!(keepSettings && t === 'settings')) await db.table(t).clear();
+    await db.media.clear();
   });
 }
 

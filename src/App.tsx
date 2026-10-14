@@ -1,6 +1,8 @@
-import { Component, lazy, Suspense, type ComponentType, type ReactNode } from 'react';
+import { Component, Fragment, lazy, Suspense, useEffect, useState, type ComponentType, type ReactNode } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { DataProvider } from './state/data';
+import { DataProvider, useData } from './state/data';
+import { getLang, loadLang, t } from './i18n';
+import type { Lang } from './db/schema';
 import { UIProvider } from './components/ui';
 import { Layout, MorePage } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
@@ -33,12 +35,12 @@ const HistoryPage = page(() => import('./pages/History'));
 /** Скелет загрузки в форме будущего содержимого — без «прыжков» интерфейса. */
 function Loading() {
   return (
-    <div className="grid gap-4" role="status" aria-live="polite" aria-label="Загрузка">
+    <div className="grid gap-4" role="status" aria-live="polite" aria-label={t('Загрузка')}>
       <div className="skeleton h-8 w-48" />
       <div className="skeleton h-40 w-full !rounded-[22px]" />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <div key={i} className="skeleton h-24" />)}</div>
       <div className="skeleton h-64 w-full" />
-      <span className="sr-only">Загрузка…</span>
+      <span className="sr-only">{t('Загрузка…')}</span>
     </div>
   );
 }
@@ -48,10 +50,25 @@ function BootLoading() {
     <div className="grid min-h-dvh place-items-center bg-bg" role="status" aria-live="polite">
       <div className="flex flex-col items-center gap-3">
         <span className="size-8 animate-spin rounded-full border-[3px] border-line border-t-accent" />
-        <p className="text-sm font-semibold text-muted">НИЗАМ загружается…</p>
+        <p className="text-sm font-semibold text-muted">{t('НИЗАМ загружается…')}</p>
       </div>
     </div>
   );
+}
+
+/** Загружает словарь выбранного языка; смена языка перемонтирует интерфейс целиком. */
+function I18nGate({ children }: { children: ReactNode }) {
+  const { settings } = useData();
+  const want = settings.language;
+  const [ready, setReady] = useState<Lang | null>(() => (getLang() === want ? want : null));
+  useEffect(() => {
+    if (ready === want && getLang() === want) return;
+    let alive = true;
+    loadLang(want).then(() => { if (alive) setReady(want); }).catch(() => { if (alive) setReady(getLang()); });
+    return () => { alive = false; };
+  }, [want, ready]);
+  if (!ready) return <BootLoading />;
+  return <Fragment key={ready}>{children}</Fragment>;
 }
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -62,13 +79,12 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
     return (
       <div className="mx-auto mt-16 max-w-lg px-4">
         <div className="card">
-          <h1 className="h1 mb-2">Что-то пошло не так</h1>
+          <h1 className="h1 mb-2">{t('Что-то пошло не так')}</h1>
           <p className="muted mb-3">
-            Ваши данные хранятся в браузере и не были удалены. Попробуйте перезагрузить страницу.
-            Если вы открыли приложение в приватном режиме, хранилище может быть недоступно.
+            {t('Ваши данные хранятся в браузере и не были удалены. Попробуйте перезагрузить страницу. Если вы открыли приложение в приватном режиме, хранилище может быть недоступно.')}
           </p>
           <pre className="mb-4 overflow-auto rounded-lg bg-soft p-3 text-xs">{this.state.error.message}</pre>
-          <button className="btn btn-primary" onClick={() => location.reload()}>Перезагрузить</button>
+          <button className="btn btn-primary" onClick={() => location.reload()}>{t('Перезагрузить')}</button>
         </div>
       </div>
     );
@@ -80,6 +96,7 @@ export function App() {
     <ErrorBoundary>
       <UIProvider>
         <DataProvider fallback={<BootLoading />}>
+          <I18nGate>
           <HashRouter>
             <Layout>
               <Suspense fallback={<Loading />}>
@@ -104,6 +121,7 @@ export function App() {
               </Suspense>
             </Layout>
           </HashRouter>
+          </I18nGate>
         </DataProvider>
       </UIProvider>
     </ErrorBoundary>

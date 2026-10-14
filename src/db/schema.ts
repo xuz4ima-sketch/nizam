@@ -2,6 +2,7 @@
 // метки времени — миллисекунды epoch (UTC).
 
 export type ISODate = string;
+export type Lang = 'ru' | 'en' | 'ar';
 export type Priority = 'low' | 'medium' | 'high';
 export type TaskStatus = 'planned' | 'done' | 'partial' | 'skipped' | 'cancelled' | 'deleted';
 export type SkipReason = 'time' | 'tired' | 'phone' | 'hard' | 'unexpected' | 'motivation' | 'other';
@@ -136,7 +137,7 @@ export interface DailyReview {
 export interface Settings {
   id: 'main';
   name: string;
-  language: 'ru';
+  language: Lang;
   theme: 'system' | 'light' | 'dark';
   timeZone: string;
   weekStart: 0 | 1;
@@ -153,6 +154,7 @@ export interface Settings {
   showReminder: boolean; // показывать проверенное напоминание (аят/хадис с источником)
   showHijri: boolean;
   timeFormat: '24' | '12';
+  heroStyle: 'letter' | 'name' | 'landscape'; // фон приветствия: буква «ن», название «نظام» или пейзаж
 }
 
 export interface TimerState {
@@ -170,7 +172,32 @@ export interface TimerState {
   completedPomodoros: number;
 }
 
-export const SCHEMA_VERSION = 1;
+/** Настройки чтения и закладки (id: 'quran' | 'hadith' | 'library' | …). Значение — произвольный JSON. */
+export interface Pref { id: string; value: unknown; updatedAt: number }
+
+/** Прогресс заучивания: id = `${textId}|${индекс строки}`. */
+export interface MemoEntry {
+  id: string;
+  textId: string;
+  idx: number;
+  status: 'learning' | 'memorized';
+  reps: number;
+  updatedAt: number;
+}
+
+/** Аудио пользователя: запись своего голоса или прикреплённый файл (не входит в JSON-копию). */
+export interface MediaItem {
+  id: string;
+  textId: string;
+  idx?: number; // строка; без индекса — аудио всего текста
+  kind: 'recording' | 'attached';
+  name: string;
+  mime: string;
+  blob: Blob;
+  createdAt: number;
+}
+
+export const SCHEMA_VERSION = 2;
 
 export const DEFAULT_SETTINGS: Settings = {
   id: 'main',
@@ -190,4 +217,5 @@ export const DEFAULT_SETTINGS: Settings = {
   showReminder: true,
   showHijri: true,
   timeFormat: '24',
+  heroStyle: 'name',
 };

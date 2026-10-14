@@ -1,0 +1,122 @@
+[
+ {
+  "id": "usul3",
+  "title": "الأصول الثلاثة",
+  "author": "محمد بن عبد الوهاب",
+  "category": "aqida",
+  "kind": "prose",
+  "sections": 4,
+  "abyat": 0,
+  "paragraphs": 84
+ },
+ {
+  "id": "qawaid4",
+  "title": "القواعد الأربع",
+  "author": "محمد بن عبد الوهاب",
+  "category": "aqida",
+  "kind": "prose",
+  "sections": 1,
+  "abyat": 0,
+  "paragraphs": 18
+ },
+ {
+  "id": "nawaqid",
+  "title": "نواقض الإسلام",
+  "author": "محمد بن عبد الوهاب",
+  "category": "aqida",
+  "kind": "prose",
+  "sections": 11,
+  "abyat": 0,
+  "paragraphs": 12
+ },
+ {
+  "id": "kashf",
+  "title": "كشف الشبهات",
+  "author": "محمد بن عبد الوهاب",
+  "category": "aqida",
+  "kind": "prose",
+  "sections": 1,
+  "abyat": 0,
+  "paragraphs": 77
+ },
+ {
+  "id": "wasitiya",
+  "title": "العقيدة الواسطية",
+  "author": "ابن تيمية",
+  "category": "aqida",
+  "kind": "prose",
+  "sections": 1,
+  "abyat": 0,
+  "paragraphs": 82
+ },
+ {
+  "id": "tahawiya",
+  "title": "العقيدة الطحاوية",
+  "author": "أبو جعفر الطحاوي",
+  "category": "aqida",
+  "kind": "prose",
+  "sections": 32,
+  "abyat": 0,
+  "paragraphs": 87
+ },
+ {
+  "id": "lumah",
+  "title": "لمعة الاعتقاد",
+  "author": "ابن قدامة المقدسي",
+  "category": "aqida",
+  "kind": "prose",
+  "sections": 52,
+  "abyat": 0,
+  "paragraphs": 77
+ },
+ {
+  "id": "nawawi40",
+  "title": "الأربعون النووية",
+  "author": "يحيى بن شرف النووي",
+  "category": "hadith",
+  "kind": "prose",
+  "sections": 42,
+  "abyat": 0,
+  "paragraphs": 44
+ },
+ {
+  "id": "bayquni",
+  "title": "المنظومة البيقونية",
+  "author": "عمر بن محمد البيقوني",
+  "category": "hadith",
+  "kind": "poem",
+  "sections": 1,
+  "abyat": 34,
+  "paragraphs": 0
+ },
+ {
+  "id": "ajurrumiya",
+  "title": "المقدمة الآجرومية",
+  "author": "ابن آجروم",
+  "category": "arabic",
+  "kind": "prose",
+  "sections": 26,
+  "abyat": 0,
+  "paragraphs": 26
+ },
+ {
+  "id": "tuhfa",
+  "title": "تحفة الأطفال والغلمان",
+  "author": "سليمان الجمزوري",
+  "category": "tajwid",
+  "kind": "poem",
+  "sections": 10,
+  "abyat": 61,
+  "paragraphs": 0
+ },
+ {
+  "id": "jazariya",
+  "title": "المقدمة الجزرية",
+  "author": "ابن الجزري",
+  "category": "tajwid",
+  "kind": "poem",
+  "sections": 16,
+  "abyat": 108,
+  "paragraphs": 0
+ }
+]

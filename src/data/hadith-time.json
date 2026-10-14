@@ -1,0 +1,270 @@
+{
+ "source": {
+  "name": "fawazahmed0/hadith-api",
+  "url": "https://github.com/fawazahmed0/hadith-api",
+  "license": "Unlicense"
+ },
+ "items": [
+  {
+   "id": "bukhari-6412",
+   "collection": "bukhari",
+   "number": 6412,
+   "canonical": "6412",
+   "theme": "time",
+   "reference": {
+    "book": 81,
+    "hadith": 1
+   },
+   "grades": [],
+   "ar": "حَدَّثَنَا الْمَكِّيُّ بْنُ إِبْرَاهِيمَ، أَخْبَرَنَا عَبْدُ اللَّهِ بْنُ سَعِيدٍ ـ هُوَ ابْنُ أَبِي هِنْدٍ ـ عَنْ أَبِيهِ، عَنِ ابْنِ عَبَّاسٍ ـ رضى الله عنهما ـ قَالَ قَالَ النَّبِيُّ صلى الله عليه وسلم ‏ \"‏ نِعْمَتَانِ مَغْبُونٌ فِيهِمَا كَثِيرٌ مِنَ النَّاسِ، الصِّحَّةُ وَالْفَرَاغُ ‏\"‏‏.‏ قَالَ عَبَّاسٌ الْعَنْبَرِيُّ حَدَّثَنَا صَفْوَانُ بْنُ عِيسَى، عَنْ عَبْدِ اللَّهِ بْنِ سَعِيدِ بْنِ أَبِي هِنْدٍ، عَنْ أَبِيهِ، سَمِعْتُ ابْنَ عَبَّاسٍ، عَنِ النَّبِيِّ صلى الله عليه وسلم مِثْلَهُ‏.‏",
+   "ru": "Передают со слов Ибн ‘Аббаса, да будет доволен Аллах ими обоими, что Посланник Аллаха ﷺ сказал: «Многие люди обделены двумя милостями: здоровьем и свободным временем»",
+   "en": "Narrated Ibn `Abbas:The Prophet (ﷺ) said: \"There are two blessings that many people are deceived into losing: health and free time"
+  },
+  {
+   "id": "tirmidhi-2417",
+   "collection": "tirmidhi",
+   "number": 2417,
+   "canonical": "2417",
+   "theme": "account",
+   "reference": {
+    "book": 37,
+    "hadith": 3
+   },
+   "grades": [
+    {
+     "name": "Ahmad Muhammad Shakir",
+     "grade": "Sahih"
+    },
+    {
+     "name": "Al-Albani",
+     "grade": "Sahih"
+    },
+    {
+     "name": "Bashar Awad Maarouf",
+     "grade": "Hasan Sahih"
+    },
+    {
+     "name": "Zubair Ali Zai",
+     "grade": "Daif"
+    }
+   ],
+   "ar": "حَدَّثَنَا عَبْدُ اللَّهِ بْنُ عَبْدِ الرَّحْمَنِ، أَخْبَرَنَا الأَسْوَدُ بْنُ عَامِرٍ، حَدَّثَنَا أَبُو بَكْرِ بْنُ عَيَّاشٍ، عَنِ الأَعْمَشِ، عَنْ سَعِيدِ بْنِ عَبْدِ اللَّهِ بْنِ جُرَيْجٍ، عَنْ أَبِي بَرْزَةَ الأَسْلَمِيِّ، قَالَ قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم ‏ \"‏ لاَ تَزُولُ قَدَمَا عَبْدٍ يَوْمَ الْقِيَامَةِ حَتَّى يُسْأَلَ عَنْ عُمْرِهِ فِيمَا أَفْنَاهُ وَعَنْ عِلْمِهِ فِيمَا فَعَلَ وَعَنْ مَالِهِ مِنْ أَيْنَ اكْتَسَبَهُ وَفِيمَا أَنْفَقَهُ وَعَنْ جِسْمِهِ فِيمَا أَبْلاَهُ ‏\"‏ ‏.‏ قَالَ هَذَا حَدِيثٌ حَسَنٌ صَحِيحٌ ‏.‏ وَسَعِيدُ بْنُ عَبْدِ اللَّهِ بْنِ جُرَيْجٍ هُوَ بَصْرِيٌّ وَهُوَ مَوْلَى أَبِي بَرْزَةَ وَأَبُو بَرْزَةَ اسْمُهُ نَضْلَةُ بْنُ عُبَيْدٍ ‏.‏",
+   "ru": null,
+   "en": "Abu Barzah Al-Aslami narrated that the Messenger of Allah (s.a.w) said:\"The feet of the slave of Allah shall not move [on the Day of Judgement] until he is asked about five things: about his life and what he did with it, about his knowledge and what he did with it, about his wealth and how he earned it and where he spent it on, about his body and for what did he wear it out.\" [He said:] This Hadith is Hasan Sahih. Sa'eed bin Abdullah bin Juraij (a narrator in the chain) [is from Al-Basrah], and he is the freed slave of Abu Barzah AlAslami, and Abu Barzah AlAslami's name is Nadlah bin 'Ubaid"
+  },
+  {
+   "id": "bukhari-6416",
+   "collection": "bukhari",
+   "number": 6416,
+   "canonical": "6416",
+   "theme": "time",
+   "reference": {
+    "book": 81,
+    "hadith": 5
+   },
+   "grades": [],
+   "ar": "حَدَّثَنَا عَلِيُّ بْنُ عَبْدِ اللَّهِ، حَدَّثَنَا مُحَمَّدُ بْنُ عَبْدِ الرَّحْمَنِ أَبُو الْمُنْذِرِ الطُّفَاوِيُّ، عَنْ سُلَيْمَانَ الأَعْمَشِ، قَالَ حَدَّثَنِي مُجَاهِدٌ، عَنْ عَبْدِ اللَّهِ بْنِ عُمَرَ ـ رضى الله عنهما ـ قَالَ أَخَذَ رَسُولُ اللَّهِ صلى الله عليه وسلم بِمَنْكِبِي فَقَالَ ‏ \"‏ كُنْ فِي الدُّنْيَا كَأَنَّكَ غَرِيبٌ، أَوْ عَابِرُ سَبِيلٍ ‏\"‏‏.‏ وَكَانَ ابْنُ عُمَرَ يَقُولُ إِذَا أَمْسَيْتَ فَلاَ تَنْتَظِرِ الصَّبَاحَ، وَإِذَا أَصْبَحْتَ فَلاَ تَنْتَظِرِ الْمَسَاءَ، وَخُذْ مِنْ صِحَّتِكَ لِمَرَضِكَ، وَمِنْ حَيَاتِكَ لِمَوْتِكَ‏.‏",
+   "ru": "Сообщается, что ‘Абдуллах бин ‘Умар, да будет доволен Аллах ими обоими, сказал: «(Однажды) Посланник Аллаха ﷺ взял меня за плечо и сказал: “Будь в этом мире (таким), будто ты чужеземец или путник”».\\n(Передатчик этого хадиса сказал, что) Ибн ‘Умар, да будет доволен Аллах ими обоими, часто говорил: «Если ты дожил до вечера, то не жди(, что доживёшь и) до утра, а если ты дожил до утра, то не жди(, что доживёшь и) до вечера, и бери у твоего здоровья (то, что пригодится) для твоей болезни, а у твоей жизни — (то, что пригодится) для твоей смерти»",
+   "en": "Narrated Mujahid:`Abdullah bin `Umar said, \"Allah's Messenger (ﷺ) took hold of my shoulder and said, 'Be in this world as if you were a stranger or a traveler.\" The sub-narrator added: Ibn `Umar used to say, \"If you survive till the evening, do not expect to be alive in the morning, and if you survive till the morning, do not expect to be alive in the evening, and take from your health for your sickness, and (take) from your life for your death"
+  },
+  {
+   "id": "muslim-6774",
+   "collection": "muslim",
+   "number": 6774,
+   "canonical": "2664",
+   "theme": "benefit",
+   "reference": {
+    "book": 46,
+    "hadith": 52
+   },
+   "grades": [],
+   "ar": "حَدَّثَنَا أَبُو بَكْرِ بْنُ أَبِي شَيْبَةَ، وَابْنُ، نُمَيْرٍ قَالاَ حَدَّثَنَا عَبْدُ اللَّهِ بْنُ إِدْرِيسَ، عَنْ رَبِيعَةَ بْنِ عُثْمَانَ، عَنْ مُحَمَّدِ بْنِ يَحْيَى بْنِ حَبَّانَ، عَنِ الأَعْرَجِ، عَنْ أَبِي هُرَيْرَةَ، قَالَ قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم ‏ \"‏ الْمُؤْمِنُ الْقَوِيُّ خَيْرٌ وَأَحَبُّ إِلَى اللَّهِ مِنَ الْمُؤْمِنِ الضَّعِيفِ وَفِي كُلٍّ خَيْرٌ احْرِصْ عَلَى مَا يَنْفَعُكَ وَاسْتَعِنْ بِاللَّهِ وَلاَ تَعْجِزْ وَإِنْ أَصَابَكَ شَىْءٌ فَلاَ تَقُلْ لَوْ أَنِّي فَعَلْتُ كَانَ كَذَا وَكَذَا ‏.‏ وَلَكِنْ قُلْ قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ فَإِنَّ لَوْ تَفْتَحُ عَمَلَ الشَّيْطَانِ ‏\"‏ ‏.‏",
+   "ru": "Передаётся от Абу Хурайры (да будет доволен им Аллах), что Посланник Аллаха ﷺ сказал: «Сильный верующий лучше и любимее перед Аллахом, чем верующий слабый, однако в каждом из них есть благо. Будь упорным в том, что приносит тебе пользу, испрашивай помощи у Аллаха и не сдавайся. А если постигнет тебя нечто, то не говори: “Если бы я сделал так-то, то всё было бы так-то и так-то…”, отнюдь говори: “Это предопределил Аллах, и Он сделал так, как Ему было угодно”, поскольку “если бы...” открывает возможность для козней шайтана»",
+   "en": "Abu Huraira reported Allah's Messenger (ﷺ) as saying:A strong believer is better and is more lovable to Allah than a weak believer, and there is good in everyone, (but) cherish that which gives you benefit (in the Hereafter) and seek help from Allah and do not lose heart, and if anything (in the form of trouble) comes to you, don't say: If I had not done that, it would not have happened so and so, but say: Allah did that what He had ordained to do and your\" if\" opens the (gate) for the Satan"
+  },
+  {
+   "id": "tirmidhi-2317",
+   "collection": "tirmidhi",
+   "number": 2317,
+   "canonical": "2317",
+   "theme": "benefit",
+   "reference": {
+    "book": 36,
+    "hadith": 14
+   },
+   "grades": [
+    {
+     "name": "Ahmad Muhammad Shakir",
+     "grade": "Sahih"
+    },
+    {
+     "name": "Al-Albani",
+     "grade": "Sahih"
+    },
+    {
+     "name": "Bashar Awad Maarouf",
+     "grade": "Hasan"
+    },
+    {
+     "name": "Zubair Ali Zai",
+     "grade": "Daif"
+    }
+   ],
+   "ar": "حَدَّثَنَا أَحْمَدُ بْنُ نَصْرٍ النَّيْسَابُورِيُّ، وَغَيْرُ، وَاحِدٍ، قَالُوا حَدَّثَنَا أَبُو مُسْهِرٍ، عَنْ إِسْمَاعِيلَ بْنِ عَبْدِ اللَّهِ بْنِ سَمَاعَةَ، عَنِ الأَوْزَاعِيِّ، عَنْ قُرَّةَ، عَنِ الزُّهْرِيِّ، عَنْ أَبِي سَلَمَةَ، عَنْ أَبِي هُرَيْرَةَ، قَالَ قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم ‏ \"‏ مِنْ حُسْنِ إِسْلاَمِ الْمَرْءِ تَرْكُهُ مَا لاَ يَعْنِيهِ ‏\"‏ ‏.‏ قَالَ هَذَا حَدِيثٌ غَرِيبٌ لاَ نَعْرِفُهُ مِنْ حَدِيثِ أَبِي سَلَمَةَ عَنْ أَبِي هُرَيْرَةَ عَنِ النَّبِيِّ صلى الله عليه وسلم إِلاَّ مِنْ هَذَا الْوَجْهِ ‏.‏",
+   "ru": null,
+   "en": "Abu Hurairah narrated that the Messenger of Allah (s.a.w) said:\"Indeed among the excellence of a person's Islam is that he leaves what does not concern him"
+  },
+  {
+   "id": "muslim-313",
+   "collection": "muslim",
+   "number": 313,
+   "canonical": "118",
+   "theme": "hasten",
+   "reference": {
+    "book": 1,
+    "hadith": 220
+   },
+   "grades": [],
+   "ar": "حَدَّثَنِي يَحْيَى بْنُ أَيُّوبَ، وَقُتَيْبَةُ، وَابْنُ، حُجْرٍ جَمِيعًا عَنْ إِسْمَاعِيلَ بْنِ جَعْفَرٍ، - قَالَ ابْنُ أَيُّوبَ حَدَّثَنَا إِسْمَاعِيلُ، - قَالَ أَخْبَرَنِي الْعَلاَءُ، عَنْ أَبِيهِ، عَنْ أَبِي هُرَيْرَةَ، أَنَّ رَسُولَ اللَّهِ صلى الله عليه وسلم قَالَ ‏ \"‏ بَادِرُوا بِالأَعْمَالِ فِتَنًا كَقِطَعِ اللَّيْلِ الْمُظْلِمِ يُصْبِحُ الرَّجُلُ مُؤْمِنًا وَيُمْسِي كَافِرًا أَوْ يُمْسِي مُؤْمِنًا وَيُصْبِحُ كَافِرًا يَبِيعُ دِينَهُ بِعَرَضٍ مِنَ الدُّنْيَا ‏\"‏ ‏.‏",
+   "ru": null,
+   "en": "It is narrated on the authority of Abu Huraira that the Messenger of Allah (ﷺ) observed:Be prompt in doing good deeds (before you are overtaken) by turbulence which would be like a part of the dark night. During (that stormy period) a man would be a Muslim in the morning and an unbeliever in the evening or he would be a believer in the evening and an unbeliever in the morning, and would sell his faith for worldly goods"
+  },
+  {
+   "id": "bukhari-6417",
+   "collection": "bukhari",
+   "number": 6417,
+   "canonical": "6417",
+   "theme": "hope",
+   "reference": {
+    "book": 81,
+    "hadith": 6
+   },
+   "grades": [],
+   "ar": "حَدَّثَنَا صَدَقَةُ بْنُ الْفَضْلِ، أَخْبَرَنَا يَحْيَى، عَنْ سُفْيَانَ، قَالَ حَدَّثَنِي أَبِي، عَنْ مُنْذِرٍ، عَنْ رَبِيعِ بْنِ خُثَيْمٍ، عَنْ عَبْدِ اللَّهِ ـ رضى الله عنه ـ قَالَ خَطَّ النَّبِيُّ صلى الله عليه وسلم خَطًّا مُرَبَّعًا، وَخَطَّ خَطًّا فِي الْوَسَطِ خَارِجًا مِنْهُ، وَخَطَّ خُطُطًا صِغَارًا إِلَى هَذَا الَّذِي فِي الْوَسَطِ، مِنْ جَانِبِهِ الَّذِي فِي الْوَسَطِ وَقَالَ ‏ \"‏ هَذَا الإِنْسَانُ، وَهَذَا أَجَلُهُ مُحِيطٌ بِهِ ـ أَوْ قَدْ أَحَاطَ بِهِ ـ وَهَذَا الَّذِي هُوَ خَارِجٌ أَمَلُهُ، وَهَذِهِ الْخُطُطُ الصِّغَارُ الأَعْرَاضُ، فَإِنْ أَخْطَأَهُ هَذَا نَهَشَهُ هَذَا، وَإِنْ أَخْطَأَهُ هَذَا نَهَشَهُ هَذَا ‏\"‏‏.‏",
+   "ru": "Сообщается, что ‘Абдуллах (ибн Мас‘уд), да будет доволен им Аллах, сказал: «(Однажды) Пророк ﷺ начертил прямоугольник, (потом) он начертил в середине (его) линию, выходящую за его (пределы, потом) он начертил (несколько) маленьких линий, (доходящих) до той (линии,) которая была посередине, после чего сказал: “Это — человек; то, что его окружает (или: то, что его окружило), есть его срок; то, что выходит за пределы (прямоугольника), является его надеждами, а эти маленькие чёрточки — превратностями судьбы, (которые его постигают,) и если минует его одно, то схватит зубами другое, если же минует его (второе), то схватит зубами (первое)”»",
+   "en": "Narrated `Abdullah:The Prophet (ﷺ) drew a square and then drew a line in the middle of it and let it extend outside the square and then drew several small lines attached to that central line, and said, \"This is the human being, and this, (the square) in his lease of life, encircles him from all sides (or has encircled him), and this (line), which is outside (the square), is his hope, and these small lines are the calamities and troubles (which may befall him), and if one misses him, an-other will snap (i.e. overtake) him, and if the other misses him, a third will snap (i.e. overtake) him"
+  },
+  {
+   "id": "bukhari-6418",
+   "collection": "bukhari",
+   "number": 6418,
+   "canonical": "6418",
+   "theme": "hope",
+   "reference": {
+    "book": 81,
+    "hadith": 7
+   },
+   "grades": [],
+   "ar": "حَدَّثَنَا مُسْلِمٌ، حَدَّثَنَا هَمَّامٌ، عَنْ إِسْحَاقَ بْنِ عَبْدِ اللَّهِ بْنِ أَبِي طَلْحَةَ، عَنْ أَنَسٍ، قَالَ خَطَّ النَّبِيُّ صلى الله عليه وسلم خُطُوطًا فَقَالَ ‏ \"‏ هَذَا الأَمَلُ وَهَذَا أَجَلُهُ، فَبَيْنَمَا هُوَ كَذَلِكَ إِذْ جَاءَهُ الْخَطُّ الأَقْرَبُ ‏\"‏‏.‏",
+   "ru": "Сообщается, что Анас ибн Малик, да будет доволен им Аллах, сказал: «(Однажды) Пророк ﷺ начертил (несколько) линий и сказал: “Это — надежды человека, а это — его срок, и в то время, как находится он в подобном положении, неожиданно подходит к нему ближайшая линия”»",
+   "en": "Narrated Anas bin Malik:The Prophet (ﷺ) drew a few lines and said, \"This is (man's) hope, and this is the instant of his death, and while he is in this state (of hope), the nearer line (death) comes to Him"
+  },
+  {
+   "id": "bukhari-6419",
+   "collection": "bukhari",
+   "number": 6419,
+   "canonical": "6419",
+   "theme": "hope",
+   "reference": {
+    "book": 81,
+    "hadith": 8
+   },
+   "grades": [],
+   "ar": "حَدَّثَنِي عَبْدُ السَّلاَمِ بْنُ مُطَهَّرٍ، حَدَّثَنَا عُمَرُ بْنُ عَلِيٍّ، عَنْ مَعْنِ بْنِ مُحَمَّدٍ الْغِفَارِيِّ، عَنْ سَعِيدِ بْنِ أَبِي سَعِيدٍ الْمَقْبُرِيِّ، عَنْ أَبِي هُرَيْرَةَ، عَنِ النَّبِيِّ صلى الله عليه وسلم فَقَالَ ‏ \"‏ أَعْذَرَ اللَّهُ إِلَى امْرِئٍ أَخَّرَ أَجَلَهُ حَتَّى بَلَّغَهُ سِتِّينَ سَنَةً ‏\"‏‏.‏ تَابَعَهُ أَبُو حَازِمٍ وَابْنُ عَجْلاَنَ عَنِ الْمَقْبُرِيِّ‏.‏",
+   "ru": "Передают со слов Абу Хурайры, да будет доволен им Аллах, что Пророк ﷺ сказал: «Аллах принимает оправдания человека, откладывая срок его до тех пор, пока не доживёт он до шестидесяти лет»",
+   "en": "Narrated Abu Huraira:The Prophet (ﷺ) said, \"Allah will not accept the excuse of any person whose instant of death is delayed till he is sixty years of age"
+  },
+  {
+   "id": "bukhari-6420",
+   "collection": "bukhari",
+   "number": 6420,
+   "canonical": "6420",
+   "theme": "hope",
+   "reference": {
+    "book": 81,
+    "hadith": 9
+   },
+   "grades": [],
+   "ar": "حَدَّثَنَا عَلِيُّ بْنُ عَبْدِ اللَّهِ، حَدَّثَنَا أَبُو صَفْوَانَ عَبْدُ اللَّهِ بْنُ سَعِيدٍ، حَدَّثَنَا يُونُسُ، عَنِ ابْنِ شِهَابٍ، قَالَ أَخْبَرَنِي سَعِيدُ بْنُ الْمُسَيَّبِ، أَنَّ أَبَا هُرَيْرَةَ ـ رضى الله عنه ـ قَالَ سَمِعْتُ رَسُولَ اللَّهِ صلى الله عليه وسلم يَقُولُ ‏ \"‏ لاَ يَزَالُ قَلْبُ الْكَبِيرِ شَابًّا فِي اثْنَتَيْنِ فِي حُبِّ الدُّنْيَا، وَطُولِ الأَمَلِ ‏\"‏‏.‏ قَالَ اللَّيْثُ حَدَّثَنِي يُونُسُ وَابْنُ وَهْبٍ عَنْ يُونُسَ عَنِ ابْنِ شِهَابٍ قَالَ أَخْبَرَنِي سَعِيدٌ وَأَبُو سَلَمَةَ‏.‏",
+   "ru": "Сообщается, что Абу Хурайра, да будет доволен им Аллах, сказал: «Я слышал, как Посланник Аллаха ﷺ сказал: “Сердце старика продолжает оставаться молодым в двух (отношениях): в том, что касается любви к миру этому, и (в том, что касается) больших надежд”»",
+   "en": "Narrated Abu Huraira:I heard Allah's Messenger (ﷺ) saying, \"The heart of an old man remains young in two respects, i.e., his love for the world (its wealth, amusements and luxuries) and his incessant hope"
+  },
+  {
+   "id": "bukhari-6464",
+   "collection": "bukhari",
+   "number": 6464,
+   "canonical": "6464",
+   "theme": "order",
+   "reference": {
+    "book": 81,
+    "hadith": 53
+   },
+   "grades": [],
+   "ar": "حَدَّثَنَا عَبْدُ الْعَزِيزِ بْنُ عَبْدِ اللَّهِ، حَدَّثَنَا سُلَيْمَانُ، عَنْ مُوسَى بْنِ عُقْبَةَ، عَنْ أَبِي سَلَمَةَ بْنِ عَبْدِ الرَّحْمَنِ، عَنْ عَائِشَةَ، أَنَّ رَسُولَ اللَّهِ صلى الله عليه وسلم قَالَ ‏ \"‏ سَدِّدُوا وَقَارِبُوا، وَاعْلَمُوا أَنْ لَنْ يُدْخِلَ أَحَدَكُمْ عَمَلُهُ الْجَنَّةَ، وَأَنَّ أَحَبَّ الأَعْمَالِ أَدْوَمُهَا إِلَى اللَّهِ، وَإِنْ قَلَّ ‏\"‏",
+   "ru": "Сообщается со слов ‘Аиши, да будет доволен ею Аллах, что Посланник Аллаха ﷺ сказал: «Совершайте (благие дела) правильно, искренне и умеренно и знайте, что благодаря вашим делам вы не войдете в Рай, и что самое любимое дело для Аллаха — это те, которые совершаются с наибольшим постоянством, даже если их и будет мало»",
+   "en": "Narrated `Aisha:Allah's Messenger (ﷺ) said, \"Do good deeds properly, sincerely and moderately and know that your deeds will not make you enter Paradise, and that the most beloved deed to Allah is the most regular and constant even if it were little"
+  },
+  {
+   "id": "bukhari-6465",
+   "collection": "bukhari",
+   "number": 6465,
+   "canonical": "6465",
+   "theme": "order",
+   "reference": {
+    "book": 81,
+    "hadith": 54
+   },
+   "grades": [],
+   "ar": "حَدَّثَنِي مُحَمَّدُ بْنُ عَرْعَرَةَ، حَدَّثَنَا شُعْبَةُ، عَنْ سَعْدِ بْنِ إِبْرَاهِيمَ، عَنْ أَبِي سَلَمَةَ، عَنْ عَائِشَةَ ـ رضى الله عنها ـ أَنَّهَا قَالَتْ سُئِلَ النَّبِيُّ صلى الله عليه وسلم أَىُّ الأَعْمَالِ أَحَبُّ إِلَى اللَّهِ قَالَ ‏\"‏ أَدْوَمُهَا وَإِنْ قَلَّ ‏\"‏‏.‏ وَقَالَ ‏\"‏ اكْلَفُوا مِنَ الأَعْمَالِ مَا تُطِيقُونَ ‏\"‏‏.‏",
+   "ru": "‘Аиша, да будет доволен ею Аллах, сказала: «Пророка ﷺ спросили: “Какие деяния Аллах любит больше всего?” Он ответил: “Самые регулярные постоянные деяния, даже если их немного”. Он добавил: “Берите на себя только те дела, которые вам по силам",
+   "en": "Narrated `Aisha:The Prophet (ﷺ) was asked, \"What deeds are loved most by Allah?\" He said, \"The most regular constant deeds even though they may be few.\" He added, 'Don't take upon yourselves, except the deeds which are within your ability"
+  },
+  {
+   "id": "bukhari-39",
+   "collection": "bukhari",
+   "number": 39,
+   "canonical": "39",
+   "theme": "order",
+   "reference": {
+    "book": 2,
+    "hadith": 32
+   },
+   "grades": [],
+   "ar": "حَدَّثَنَا عَبْدُ السَّلاَمِ بْنُ مُطَهَّرٍ، قَالَ حَدَّثَنَا عُمَرُ بْنُ عَلِيٍّ، عَنْ مَعْنِ بْنِ مُحَمَّدٍ الْغِفَارِيِّ، عَنْ سَعِيدِ بْنِ أَبِي سَعِيدٍ الْمَقْبُرِيِّ، عَنْ أَبِي هُرَيْرَةَ، عَنِ النَّبِيِّ صلى الله عليه وسلم قَالَ ‏ \"‏ إِنَّ الدِّينَ يُسْرٌ، وَلَنْ يُشَادَّ الدِّينَ أَحَدٌ إِلاَّ غَلَبَهُ، فَسَدِّدُوا وَقَارِبُوا وَأَبْشِرُوا، وَاسْتَعِينُوا بِالْغَدْوَةِ وَالرَّوْحَةِ وَشَىْءٍ مِنَ الدُّلْجَةِ ‏\"‏‏.‏",
+   "ru": "Передают со слов Абу Хурайры, да будет доволен им Аллах, что Пророк ﷺ сказал: «Поистине, религия эта легка, но если кто-нибудь начинает бороться с ней, она неизменно побеждает его, так придерживайтесь же правильного, и приближайтесь, и радуйтесь и обращайтесь (к Аллаху) за помощью утром /аль-гъадва/, вечером /ар-рауха/ и (некоторое время) ночью /ад-дульджа/»",
+   "en": "Narrated Abu Huraira: The Prophet (ﷺ) said, \"Religion is very easy and whoever overburdens himself in his religion will not be able to continue in that way. So you should not be extremists, but try to be near to perfection and receive the good tidings that you will be rewarded; and gain strength by worshipping in the mornings, the afternoons, and during the last hours of the nights.\" (See Fath-ul-Bari, Page 102, Vol)"
+  },
+  {
+   "id": "tirmidhi-2346",
+   "collection": "tirmidhi",
+   "number": 2346,
+   "canonical": "2346",
+   "theme": "gratitude",
+   "reference": {
+    "book": 36,
+    "hadith": 43
+   },
+   "grades": [
+    {
+     "name": "Ahmad Muhammad Shakir",
+     "grade": "Hasan"
+    },
+    {
+     "name": "Al-Albani",
+     "grade": "Hasan"
+    },
+    {
+     "name": "Bashar Awad Maarouf",
+     "grade": "Hasan"
+    },
+    {
+     "name": "Zubair Ali Zai",
+     "grade": "Isnaad Hasan"
+    }
+   ],
+   "ar": "حَدَّثَنَا عَمْرُو بْنُ مَالِكٍ وَمَحْمُودُ بْنُ خِدَاشٍ الْبَغْدَادِيُّ قَالَا حَدَّثَنَا مَرْوَانُ بْنُ مُعَاوِيَةَ حَدَّثَنَا عَبْدُ الرَّحْمَنِ بْنُ أَبِي شُمَيْلَةَ الْأَنْصَارِيُّ عَنْ سَلَمَةَ بْنِ عُبَيْدِ اللَّهِ بْنِ مِحْصَنٍ الْخَطْمِيِّ عَنْ أَبِيهِ وَكَانَتْ لَهُ صُحْبَةٌ قَالَ قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ مَنْ أَصْبَحَ مِنْكُمْ آمِنًا فِي سِرْبِهِ مُعَافًى فِي جَسَدِهِ عِنْدَهُ قُوتُ يَوْمِهِ فَكَأَنَّمَا حِيزَتْ لَهُ الدُّنْيَا قَالَ أَبُو عِيسَى هَذَا حَدِيثٌ حَسَنٌ غَرِيبٌ لَا نَعْرِفُهُ إِلَّا مِنْ حَدِيثِ مَرْوَانَ بْنِ مُعَاوِيَةَ وَحِيزَتْ جُمِعَتْ حَدَّثَنَا بِذَلِكَ مُحَمَّدُ بْنُ إِسْمَعِيلَ حَدَّثَنَا الْحُمَيْدِيُّ حَدَّثَنَا مَرْوَانُ بْنُ مُعَاوِيَةَ نَحْوَهُ وَفِي الْبَاب عَنْ أَبِي الدَّرْدَاءِ",
+   "ru": null,
+   "en": "Salamah bin 'Ubaidullah bin Mihsan Al-Khatmi narrated from his father -and he was a Companion- who said:\"The Messenger of Allah (s.a.w) said: \"Whoever among you wakes up in the morning secured in his dwelling, healthy in his body, having his food for the day,then it is as if the world has been gathered for him"
+  }
+ ]
+}
