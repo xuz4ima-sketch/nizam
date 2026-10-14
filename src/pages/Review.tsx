@@ -51,9 +51,9 @@ function DayReview() {
         try { await saveReview({ date, ...f }); toast(T('Обзор дня сохранён')); } catch (err) { toast(errMsg(err), 'error'); }
       }}>
         <div className="flex items-center justify-between gap-2">
-          <button type="button" className="btn btn-ghost btn-icon" onClick={() => setDate(addDays(date, -1))} aria-label={T('Предыдущий день')}><ChevronLeft size={18} /></button>
+          <button type="button" className="btn btn-ghost btn-icon" onClick={() => setDate(addDays(date, -1))} aria-label={T('Предыдущий день')}><ChevronLeft size={18} className="rtl:-scale-x-100" /></button>
           <p className="text-center font-medium">{fmtLong(date)}</p>
-          <button type="button" className="btn btn-ghost btn-icon" onClick={() => setDate(addDays(date, 1))} disabled={date >= today} aria-label={T('Следующий день')}><ChevronRight size={18} /></button>
+          <button type="button" className="btn btn-ghost btn-icon" onClick={() => setDate(addDays(date, 1))} disabled={date >= today} aria-label={T('Следующий день')}><ChevronRight size={18} className="rtl:-scale-x-100" /></button>
         </div>
         <Field label={T('Что удалось выполнить?')} id="rv-a"><textarea id="rv-a" className="input min-h-20" value={f.achieved} onChange={(e) => set('achieved', e.target.value)} maxLength={3000} /></Field>
         <Field label={T('Что было пропущено?')} id="rv-m"><textarea id="rv-m" className="input min-h-16" value={f.missed} onChange={(e) => set('missed', e.target.value)} maxLength={3000} /></Field>
@@ -120,9 +120,9 @@ function WeekReview() {
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between gap-2">
-        <button className="btn btn-outline btn-icon" onClick={() => setOffset(offset + 1)} aria-label={T('Предыдущая неделя')}><ChevronLeft size={18} /></button>
+        <button className="btn btn-outline btn-icon" onClick={() => setOffset(offset + 1)} aria-label={T('Предыдущая неделя')}><ChevronLeft size={18} className="rtl:-scale-x-100" /></button>
         <p className="font-medium">{fmtShort(from)} — {fmtShort(addDays(from, 6))}</p>
-        <button className="btn btn-outline btn-icon" onClick={() => setOffset(offset - 1)} disabled={offset === 0} aria-label={T('Следующая неделя')}><ChevronRight size={18} /></button>
+        <button className="btn btn-outline btn-icon" onClick={() => setOffset(offset - 1)} disabled={offset === 0} aria-label={T('Следующая неделя')}><ChevronRight size={18} className="rtl:-scale-x-100" /></button>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <section className="card grid content-start gap-2 text-sm">

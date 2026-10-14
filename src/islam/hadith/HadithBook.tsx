@@ -101,8 +101,8 @@ export default function HadithBook() {
             <button className="btn btn-outline mt-4 w-full" onClick={() => setLimit(limit + PAGE)}>{t('Показать ещё ({0})', filtered.length - limit)}</button>
           )}
           <nav className="mt-6 flex justify-between gap-2" aria-label={t('Соседние книги')}>
-            <button className="btn btn-outline" disabled={!prev} onClick={() => prev && nav(`/hadith/${coll}/${prev.n}`)}><ChevronRight size={17} className="ltr:rotate-180" />{t('Предыдущая книга')}</button>
-            <button className="btn btn-outline" disabled={!next} onClick={() => next && nav(`/hadith/${coll}/${next.n}`)}>{t('Следующая книга')}<ChevronLeft size={17} className="ltr:rotate-180" /></button>
+            <button className="btn btn-outline min-w-0 flex-1 whitespace-normal !text-[13px] sm:flex-none" disabled={!prev} onClick={() => prev && nav(`/hadith/${coll}/${prev.n}`)}><ChevronRight size={17} className="ltr:rotate-180" />{t('Предыдущая книга')}</button>
+            <button className="btn btn-outline min-w-0 flex-1 whitespace-normal !text-[13px] sm:flex-none" disabled={!next} onClick={() => next && nav(`/hadith/${coll}/${next.n}`)}>{t('Следующая книга')}<ChevronLeft size={17} className="ltr:rotate-180" /></button>
           </nav>
         </>
       )}

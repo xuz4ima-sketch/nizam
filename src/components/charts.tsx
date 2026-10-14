@@ -82,8 +82,8 @@ export function MiniCalendar({ selected, onSelect }: { selected?: ISODate; onSel
       <div className="mb-2 flex items-center justify-between">
         <p className="text-[15px] font-bold">{fmtDate(first, { month: 'long', year: 'numeric' })}</p>
         <div className="flex">
-          <button className="btn btn-ghost btn-icon !min-h-8 !min-w-8 !p-1" onClick={() => shift(-1)} aria-label={T('Предыдущий месяц')}><ChevronLeft size={18} /></button>
-          <button className="btn btn-ghost btn-icon !min-h-8 !min-w-8 !p-1" onClick={() => shift(1)} aria-label={T('Следующий месяц')}><ChevronRight size={18} /></button>
+          <button className="btn btn-ghost btn-icon !min-h-8 !min-w-8 !p-1" onClick={() => shift(-1)} aria-label={T('Предыдущий месяц')}><ChevronLeft size={18} className="rtl:-scale-x-100" /></button>
+          <button className="btn btn-ghost btn-icon !min-h-8 !min-w-8 !p-1" onClick={() => shift(1)} aria-label={T('Следующий месяц')}><ChevronRight size={18} className="rtl:-scale-x-100" /></button>
         </div>
       </div>
       <div className="grid grid-cols-7 text-center text-[11px] font-semibold text-muted">{heads.map((h) => <div key={h} className="py-1">{h}</div>)}</div>

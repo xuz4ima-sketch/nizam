@@ -106,8 +106,8 @@ export default function SurahStudy() {
         <div className="flex items-center gap-2">
           <Link to="/quran" className="btn btn-ghost btn-icon" aria-label={t('К списку сур')}><ChevronRight size={20} className="ltr:rotate-180" /></Link>
           <div>
-            <h1 className="h1">{chapter ? `${chapter.id}. ${chapter.name_simple}` : t('Сура {0}', ch)}</h1>
-            {chapter && <p className="text-[13px] text-muted">{chapter.translated_name.name} · {t('аятов: {0}', chapter.verses_count)} · {chapter.revelation_place === 'makkah' ? t('мекканская') : t('мединская')}</p>}
+            <h1 className="h1">{chapter ? `${chapter.id}. ${lang === 'ar' ? `سورة ${chapter.name_arabic}` : chapter.name_simple}` : t('Сура {0}', ch)}</h1>
+            {chapter && <p className="text-[13px] text-muted">{lang === 'ar' ? '' : `${chapter.translated_name.name} · `}{t('аятов: {0}', chapter.verses_count)} · {chapter.revelation_place === 'makkah' ? t('мекканская') : t('мединская')}</p>}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -209,8 +209,8 @@ export default function SurahStudy() {
             })}
           </ol>
           <nav className="mt-6 flex justify-between gap-2" aria-label={t('Соседние суры')}>
-            <button className="btn btn-outline" disabled={ch <= 1} onClick={() => nav(`/quran/surah/${ch - 1}`)}><ChevronRight size={17} className="ltr:rotate-180" />{t('Предыдущая сура')}</button>
-            <button className="btn btn-outline" disabled={ch >= 114} onClick={() => nav(`/quran/surah/${ch + 1}`)}>{t('Следующая сура')}<ChevronLeft size={17} className="ltr:rotate-180" /></button>
+            <button className="btn btn-outline min-w-0 flex-1 whitespace-normal !text-[13px] sm:flex-none" disabled={ch <= 1} onClick={() => nav(`/quran/surah/${ch - 1}`)}><ChevronRight size={17} className="ltr:rotate-180" />{t('Предыдущая сура')}</button>
+            <button className="btn btn-outline min-w-0 flex-1 whitespace-normal !text-[13px] sm:flex-none" disabled={ch >= 114} onClick={() => nav(`/quran/surah/${ch + 1}`)}>{t('Следующая сура')}<ChevronLeft size={17} className="ltr:rotate-180" /></button>
           </nav>
         </>
       )}

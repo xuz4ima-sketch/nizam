@@ -82,7 +82,7 @@ export default function Mushaf() {
         <div className="mx-auto flex h-14 max-w-4xl items-center gap-1 px-2 sm:px-4">
           <button className="btn btn-ghost btn-icon" onClick={() => nav('/quran')} aria-label={t('Закрыть Мусхаф')}><X size={20} /></button>
           <div className="min-w-0 flex-1 px-1 text-center">
-            <p className="truncate text-[13px] font-bold">{onPage.map((c) => c.name_simple).join(' · ') || t('Мусхаф')}</p>
+            <p className="truncate text-[13px] font-bold">{onPage.map((c) => (lang === 'ar' ? c.name_arabic : c.name_simple)).join(' · ') || t('Мусхаф')}</p>
             <p className="text-[11.5px] text-muted">{t('Страница {0} · Джуз {1}', page, juz)}</p>
           </div>
           <button className="btn btn-ghost btn-icon" onClick={() => setPref({ pageMarks: marked ? pref.pageMarks.filter((p) => p !== page) : [page, ...pref.pageMarks].slice(0, 50) })}

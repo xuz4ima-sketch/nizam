@@ -42,9 +42,9 @@ export default function CalendarPage() {
       <PageHeader title={T('Календарь')} subtitle={T('Реальные сохранённые задачи, включая повторяющиеся. Расписание меняется только по вашему действию.')} />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1">
-          <button className="btn btn-outline btn-icon" onClick={() => step(-1)} aria-label={T('Назад')}><ChevronLeft size={18} /></button>
+          <button className="btn btn-outline btn-icon" onClick={() => step(-1)} aria-label={T('Назад')}><ChevronLeft size={18} className="rtl:-scale-x-100" /></button>
           <button className="btn btn-outline" onClick={() => set(today)} disabled={date === today && view !== 'week'}>{T('Сегодня')}</button>
-          <button className="btn btn-outline btn-icon" onClick={() => step(1)} aria-label={T('Вперёд')}><ChevronRight size={18} /></button>
+          <button className="btn btn-outline btn-icon" onClick={() => step(1)} aria-label={T('Вперёд')}><ChevronRight size={18} className="rtl:-scale-x-100" /></button>
           <h2 className="ms-2 text-[16px] font-bold sm:text-lg" aria-live="polite">{title}</h2>
         </div>
         <Tabs label={T('Режим календаря')} value={view} onChange={(nv) => set(date, nv)} items={[['day', T('День')], ['week', T('Неделя')], ['month', T('Месяц')]]} />

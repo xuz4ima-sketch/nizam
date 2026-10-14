@@ -71,7 +71,7 @@ function I18nGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (ready === want && getLang() === want) return;
     let alive = true;
-    loadLang(want).then(() => { if (alive) setReady(want); }).catch(() => { if (alive) setReady(getLang()); });
+    loadLang(want).then(() => { if (alive) { setReady(want); document.title = want === 'ar' ? 'نِظَام' : want === 'en' ? 'NIZAM — نِظَام' : 'НИЗАМ — نِظَام'; } }).catch(() => { if (alive) setReady(getLang()); });
     return () => { alive = false; };
   }, [want, ready]);
   if (!ready) return <BootLoading />;

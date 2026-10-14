@@ -210,12 +210,12 @@ function WeekView({ onAdd }: { onAdd: (d: ISODate) => void }) {
   return (
     <section className="grid gap-4">
       <div className="flex items-center justify-between gap-2">
-        <button className="btn btn-outline btn-icon" onClick={() => setOffset(offset - 1)} aria-label={T('Предыдущая неделя')}><ChevronLeft size={18} /></button>
+        <button className="btn btn-outline btn-icon" onClick={() => setOffset(offset - 1)} aria-label={T('Предыдущая неделя')}><ChevronLeft size={18} className="rtl:-scale-x-100" /></button>
         <div className="text-center">
           <p className="font-medium">{fmtShort(from)} — {fmtShort(to)}</p>
           {offset !== 0 && <button className="text-xs text-accent hover:underline" onClick={() => setOffset(0)}>{T('Текущая неделя')}</button>}
         </div>
-        <button className="btn btn-outline btn-icon" onClick={() => setOffset(offset + 1)} aria-label={T('Следующая неделя')}><ChevronRight size={18} /></button>
+        <button className="btn btn-outline btn-icon" onClick={() => setOffset(offset + 1)} aria-label={T('Следующая неделя')}><ChevronRight size={18} className="rtl:-scale-x-100" /></button>
       </div>
       {dateRange(from, to).map((d) => {
         const list = insts.filter((i) => i.date === d);

@@ -100,8 +100,8 @@ function SurahRow({ c }: { c: Chapter }) {
     <li className="card-flat flex items-center gap-3 p-3">
       <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-[13px] font-extrabold tabular-nums text-accent">{c.id}</span>
       <Link to={`/quran/surah/${c.id}`} className="min-w-0 flex-1">
-        <p className="truncate text-[14.5px] font-bold">{c.name_simple}</p>
-        <p className="truncate text-[12px] text-muted">{c.translated_name.name} · {t('аятов: {0}', c.verses_count)} · {c.revelation_place === 'makkah' ? t('мекканская') : t('мединская')}</p>
+        <p className="truncate text-[14.5px] font-bold">{getLang() === 'ar' ? `سورة ${c.name_arabic}` : c.name_simple}</p>
+        <p className="truncate text-[12px] text-muted">{getLang() === 'ar' ? '' : `${c.translated_name.name} · `}{t('аятов: {0}', c.verses_count)} · {c.revelation_place === 'makkah' ? t('мекканская') : t('мединская')}</p>
       </Link>
       <span className="quran shrink-0 text-[21px] leading-none text-accent-strong dark:text-gold" lang="ar">{c.name_arabic}</span>
       <Link to={`/quran/page/${c.pages[0]}`} className="btn btn-ghost btn-icon shrink-0 text-muted" aria-label={t('Открыть суру {0} в Мусхафе', c.name_simple)} title={t('Мусхаф')}>

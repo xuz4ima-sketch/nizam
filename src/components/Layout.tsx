@@ -171,7 +171,7 @@ function SearchPalette({ open, onClose, onTask }: { open: boolean; onClose: () =
                   className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-start ${i === sel ? 'bg-accent-soft' : ''}`}>
                   <span className="text-accent">{h.icon}</span>
                   <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{h.title}</span><span className="block truncate text-xs text-muted">{h.sub}</span></span>
-                  <ChevronRight size={16} className="text-muted" />
+                  <ChevronRight size={16} className="text-muted rtl:-scale-x-100" />
                 </button>
               </li>
             ))}
@@ -466,7 +466,7 @@ export function MorePage() {
               <NavLink to={to} className="flex min-h-14 items-center gap-3 px-4 py-3 hover:bg-soft">
                 <IconBadge size={36}><Icon size={18} /></IconBadge>
                 <span className="flex-1 font-semibold">{T(n.label)}</span>
-                <ChevronRight size={18} className="text-muted" />
+                <ChevronRight size={18} className="text-muted rtl:-scale-x-100" />
               </NavLink>
             </li>
           );

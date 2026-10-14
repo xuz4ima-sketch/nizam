@@ -25,6 +25,23 @@ src/
 tests/         logic.test.ts, repo.test.ts (fake-indexeddb), quickadd.test.ts
 ```
 
+## Раздел «Знание» (`src/islam/`)
+
+```
+islam/content.ts     cachedJSON (Cache Storage, зеркала, без повторов на 4xx), useLoad, usePref (таблица prefs), sanitizeHTML
+islam/quran/         api.ts (Quran.com API v4), QuranHome, Mushaf (портал на весь экран), SurahStudy (перевод, тафсир, аудио)
+islam/hadith/        api.ts (hadith-api, зеркала jsDelivr/GitHub), books.ts (97 + 57 книг), HadithHome, HadithBook
+islam/library/       texts.ts (тексты из src/data/texts, ленивые чанки), LibraryHome, TextReader (чтение и заучивание), audio.ts
+data/texts/*.json    мутуны (scripts/texts/build_texts.py ← ar.wikisource.org, с номером ревизии)
+data/hadith-time.json, data/reminders.json   подборки (scripts/hadith/*.py ← первоисточники, номера сверяются)
+```
+
+Внешний контент кэшируется в Cache Storage при первом открытии — дальше доступен офлайн. Тексты мутунов входят в сборку (PWA-кэш).
+
+## Языки (`src/i18n/`)
+
+Ключ перевода — исходная русская строка; `en.json`/`ar.json` — словари (1125 строк), загружаются лениво. `t()` работает в любом модуле; в старых модулях импортирована как `T` (в коде много локальных переменных `t`). Константы-метки обёрнуты в `tr()` — переводящий Proxy. Смена языка перемонтирует дерево (`I18nGate`), задаёт `lang`/`dir` у `<html>`. Вёрстка на логических классах Tailwind (`ms-`, `ps-`, `start-`, `text-start`) — RTL без отдельных стилей. Скрипты: `scripts/i18n/wrap.mjs` (кодмод), `scripts/i18n/extract.mjs` (проверка полноты словарей).
+
 ## Хранение данных
 
 | Таблица | Назначение |
@@ -36,6 +53,9 @@ tests/         logic.test.ts, repo.test.ts (fake-indexeddb), quickadd.test.ts
 | `habits`, `habitLogs` | Привычки (иконка, цвет, норма) и отметки по дням (`habitId|дата`) |
 | `goals` | Цели: целевой объём, начальное значение, источник прогресса (вручную / направление / задачи), сроки |
 | `reviews`, `settings`, `timer` | Обзоры дня, настройки, состояние текущего таймера |
+| `prefs` (v2) | Настройки чтения и закладки: Коран, хадисы, книги |
+| `memo` (v2) | Прогресс заучивания строк мутунов (`textId|индекс`): статус, число повторов |
+| `media` (v2) | Записи голоса и прикреплённые аудиофайлы (Blob). Не входят в JSON-копию |
 
 Ключевые решения:
 - **Повторения без размножения записей.** Экземпляры вычисляются на лету (`expand`), в базу пишется только то, что изменилось в конкретный день. Перенос или удаление одного дня не трогает серию.
