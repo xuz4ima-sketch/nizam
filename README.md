@@ -53,6 +53,7 @@ npm run dev        # разработка: http://localhost:5173
 npm test           # автотесты (Vitest)
 npm run build      # проверка типов + сборка в dist/
 npm run preview    # просмотр сборки: http://localhost:4173
+node scripts/e2e/smoke.mjs <адрес> chromium|webkit 390   # сквозная проверка сайта
 ```
 
 **Публикация.** Каждый `git push` в ветку `main` запускает GitHub Actions (`.github/workflows/deploy.yml`): тесты → сборка → GitHub Pages. Папка `dist/` — обычный статический сайт (маршруты через `#`, базовый путь относительный), её можно разместить на любом хостинге.

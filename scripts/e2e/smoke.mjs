@@ -70,8 +70,7 @@ await step('арабский интерфейс: справа налево', asy
   await page.waitForSelector('h1');
   await page.click('button[aria-expanded][aria-label^="Язык"] >> visible=true');
   await page.click('button[role="option"][lang="ar"] >> visible=true');
-  await page.waitForFunction(() => document.documentElement.dir === 'rtl', null, { timeout: 15000 });
-  await page.waitForSelector('h1');
+  await page.waitForFunction(() => document.documentElement.dir === 'rtl' && /[؀-ۿ]/.test(document.querySelector('h1')?.textContent ?? ''), null, { timeout: 15000 });
   const h1 = await page.textContent('h1');
   // вернуть русский
   await page.click('button[aria-expanded][aria-label^="اللغة"] >> visible=true');
