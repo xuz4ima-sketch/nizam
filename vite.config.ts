@@ -10,6 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false, // регистрация в src/main.tsx: с автоперезагрузкой после обновления
       includeAssets: ['icon.svg'],
       manifest: {
         name: 'НИЗАМ — نِظَام',
