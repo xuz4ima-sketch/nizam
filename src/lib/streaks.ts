@@ -88,3 +88,17 @@ export function weekCount(h: Habit, logs: Map<ISODate, HabitLog>, today: ISODate
   for (let i = 0; i < 7; i++) if (dayState(h, logs.get(addDays(w, i))) === 'done') c++;
   return c;
 }
+
+/** Привычки, актуальные сегодня: ежедневные — выполнены сегодня; недельные — выполнены сегодня или норма недели уже набрана. */
+export function habitsToday(habits: Habit[], logs: HabitLog[], today: ISODate, weekStart: 0 | 1) {
+  let done = 0, total = 0;
+  for (const h of habits) {
+    if (h.archived || h.startDate > today) continue;
+    const m = logsMap(logs, h.id);
+    const st = dayState(h, m.get(today));
+    if (st === 'rest') continue;
+    total++;
+    if (st === 'done' || (h.frequency === 'weekly' && weekCount(h, m, today, weekStart) >= h.timesPerWeek)) done++;
+  }
+  return { done, total };
+}

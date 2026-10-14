@@ -29,6 +29,8 @@ export async function saveSettings(patch: Partial<Settings>) {
   if (patch.dayStart !== undefined) checkTime(errors, 'dayStart', patch.dayStart, 'Начало дня');
   if (patch.dayEnd !== undefined) checkTime(errors, 'dayEnd', patch.dayEnd, 'Конец дня');
   if (patch.name !== undefined && patch.name.length > 60) errors.name = 'Имя: не длиннее 60 символов';
+  if (patch.greetTitle !== undefined && patch.greetTitle.length > 80) errors.greetTitle = 'Заголовок: не длиннее 80 символов';
+  if (patch.greetText !== undefined && patch.greetText.length > 200) errors.greetText = 'Текст: не длиннее 200 символов';
   assertValid(errors);
   const cur = await getSettings();
   await db.settings.put({ ...cur, ...patch, id: 'main' });

@@ -27,6 +27,8 @@ export const AREA_UNITS: Record<AreaUnit, { label: string; short: string }> = {
   min: { label: 'Минуты', short: 'мин' },
   pages: { label: 'Страницы', short: 'стр.' },
   lessons: { label: 'Уроки', short: 'ур.' },
+  chapters: { label: 'Главы', short: 'гл.' },
+  words: { label: 'Слова', short: 'сл.' },
 };
 
 export const HABIT_UNITS: Record<HabitUnit, { label: string; short: string }> = {
@@ -34,13 +36,27 @@ export const HABIT_UNITS: Record<HabitUnit, { label: string; short: string }> = 
   min: { label: 'Минуты', short: 'мин' },
   pages: { label: 'Страницы', short: 'стр.' },
   reps: { label: 'Повторения', short: 'раз' },
+  glasses: { label: 'Стаканы', short: 'ст.' },
 };
+
+/** Спокойные цвета категорий (одинаковые в календаре, задачах и статистике). */
+const CATEGORY_COLORS: Record<string, string> = {
+  'Учёба': '#176B50', 'Работа': '#4F6D8A', 'Чтение': '#B08A4A', 'Языки': '#2F7F86', 'Программирование': '#5B5F97',
+  'Спорт': '#B4664A', 'Поклонение': '#0C5A45', 'Дом': '#8A7556', 'Личное': '#7A5C82', 'Другое': '#6B7A73',
+};
+const EXTRA_COLORS = ['#3F7A63', '#7A6A3F', '#4A6F86', '#86574A', '#5E6E3F', '#6A5486'];
+export function categoryColor(name: string): string {
+  if (CATEGORY_COLORS[name]) return CATEGORY_COLORS[name];
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return EXTRA_COLORS[h % EXTRA_COLORS.length];
+}
 
 export const GOAL_TYPES: Record<GoalType, string> = {
   daily: 'Ежедневная', weekly: 'Недельная', monthly: 'Месячная', long: 'Долгосрочная',
 };
 
-export const AREA_COLORS = ['#047857', '#0e7490', '#4338ca', '#a16207', '#be123c', '#7c3aed', '#15803d', '#475569'];
+export const AREA_COLORS = ['#176B50', '#2F7F86', '#4F6D8A', '#B08A4A', '#B4664A', '#5B5F97', '#3F7A63', '#6B7A73'];
 
 export const pct = (v: number) => `${(Math.round(v * 1000) / 10).toLocaleString('ru-RU')}%`;
 export const num = (v: number) => (Math.round(v * 10) / 10).toLocaleString('ru-RU');

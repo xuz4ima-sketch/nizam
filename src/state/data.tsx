@@ -5,7 +5,7 @@ import {
   DEFAULT_SETTINGS, type DailyReview, type Goal, type Habit, type HabitLog, type ISODate, type Occurrence,
   type Settings, type StudyArea, type StudySession, type Task, type TimerState,
 } from '../db/schema';
-import { isValidTimeZone, zonedParts } from '../lib/dates';
+import { isValidTimeZone, setTimeFormat, zonedParts } from '../lib/dates';
 import { expand, indexSessions, type SessionIndex } from '../lib/recurrence';
 
 export interface AppData {
@@ -62,18 +62,21 @@ export function DataProvider({ children, fallback }: { children: ReactNode; fall
     const apply = () => {
       const dark = theme === 'dark' || (theme === 'system' && mq.matches);
       document.documentElement.classList.toggle('dark', dark);
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0c1110' : '#065f46');
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0d1513' : '#f8f7f3');
     };
     apply();
     mq.addEventListener('change', apply);
     return () => mq.removeEventListener('change', apply);
   }, [theme]);
 
+  // Индекс сессий зависит только от данных — не пересоздаётся на каждом тике часов.
+  const sidx = useMemo(() => (raw ? indexSessions(raw.sessions) : null), [raw]);
   const value = useMemo<AppData | null>(() => {
-    if (!raw) return null;
+    if (!raw || !sidx) return null;
+    setTimeFormat(raw.settings.timeFormat);
     const { date, minutes } = zonedParts(nowMs, raw.settings.timeZone);
-    return { ...raw, sidx: indexSessions(raw.sessions), today: date, nowMin: minutes, nowMs };
-  }, [raw, nowMs]);
+    return { ...raw, sidx, today: date, nowMin: minutes, nowMs };
+  }, [raw, sidx, nowMs]);
 
   if (!value) return <>{fallback}</>;
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

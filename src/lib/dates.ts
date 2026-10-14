@@ -92,3 +92,31 @@ export function fmtClock(ms: number) {
 }
 
 export const WEEKDAY_NAMES = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+/* ---------- Отображение времени (12/24 ч) — только для показа, поля ввода всегда 24 ч ---------- */
+let h12 = false;
+export const setTimeFormat = (f: '24' | '12') => { h12 = f === '12'; };
+export function showTime(min: number) {
+  if (!h12) return fmtTime(min);
+  const h = Math.floor(min / 60) % 24, m = min % 60;
+  return `${h % 12 || 12}:${pad(m)} ${h < 12 ? 'AM' : 'PM'}`;
+}
+export const showTimeStr = (t?: string) => { const v = parseTime(t); return v === null ? '' : showTime(v); };
+
+/* ---------- Дата по хиджре: календарь Умм аль-Кура (Intl), возможна разница ±1 день с местным началом месяца ---------- */
+let hijriFmt: Intl.DateTimeFormat | null | undefined;
+export const HIJRI_METHOD = 'Умм аль-Кура';
+export function fmtHijri(iso: ISODate): string | null {
+  if (hijriFmt === undefined) {
+    try {
+      const f = new Intl.DateTimeFormat('ru-RU-u-ca-islamic-umalqura', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' });
+      hijriFmt = f.resolvedOptions().calendar === 'islamic-umalqura' ? f : null;
+    } catch { hijriFmt = null; }
+  }
+  if (!hijriFmt) return null;
+  const p: Record<string, string> = {};
+  for (const x of hijriFmt.formatToParts(new Date(toUTC(iso)))) p[x.type] = x.value;
+  if (!p.day || !p.month || !p.year) return null;
+  const month = p.month.charAt(0).toUpperCase() + p.month.slice(1);
+  return `${p.day} ${month} ${p.year} г. х.`;
+}

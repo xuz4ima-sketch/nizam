@@ -64,7 +64,7 @@ export interface StudySession {
   note?: string;
 }
 
-export type AreaUnit = 'min' | 'pages' | 'lessons';
+export type AreaUnit = 'min' | 'pages' | 'lessons' | 'chapters' | 'words';
 export interface StudyArea {
   id: string;
   name: string;
@@ -80,7 +80,7 @@ export interface StudyArea {
   createdAt: number;
 }
 
-export type HabitUnit = 'check' | 'min' | 'pages' | 'reps';
+export type HabitUnit = 'check' | 'min' | 'pages' | 'reps' | 'glasses';
 export interface Habit {
   id: string;
   name: string;
@@ -90,6 +90,8 @@ export interface Habit {
   timesPerWeek: number; // для weekly
   faith: boolean;
   startDate: ISODate;
+  icon?: string; // ключ иконки из HABIT_ICONS
+  color?: string;
   archived: boolean;
   createdAt: number;
 }
@@ -146,6 +148,11 @@ export interface Settings {
   minimalDate?: ISODate; // дата, на которую включён «Минимальный день»
   lastBackupAt?: number;
   maxCarryRatio: number; // максимум компенсации относительно дневной нормы (0.5 = +50%)
+  greetTitle: string; // заголовок приветствия на главной
+  greetText: string;
+  showReminder: boolean; // показывать проверенное напоминание (аят/хадис с источником)
+  showHijri: boolean;
+  timeFormat: '24' | '12';
 }
 
 export interface TimerState {
@@ -178,4 +185,9 @@ export const DEFAULT_SETTINGS: Settings = {
   pomodoroWork: 25,
   pomodoroBreak: 5,
   maxCarryRatio: 0.5,
+  greetTitle: 'Ас-саляму алейкум!',
+  greetText: 'Сегодня хороший день, чтобы сделать ещё один шаг к своим целям.',
+  showReminder: true,
+  showHijri: true,
+  timeFormat: '24',
 };

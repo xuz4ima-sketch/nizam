@@ -1,65 +1,89 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Ban, CalendarClock, Check, CircleSlash, Clock, EllipsisVertical, Pencil, Play, Repeat, RotateCcw, Timer, Trash2, Zap,
+  Ban, CalendarClock, Check, CircleSlash, Clock, Ellipsis, Pencil, Play, Repeat, RotateCcw, Star, Timer, Trash2, Zap,
 } from 'lucide-react';
 import type { SkipReason } from '../db/schema';
 import {
   cancelInstance, completeInstance, deleteInstance, deleteTask, moveInstance, resetInstance, skipInstance, startTimer,
 } from '../db/repo';
-import { addDays, fmtMinutes, fmtShort, fmtTime, parseTime } from '../lib/dates';
-import { AREA_UNITS, SKIP_REASONS, STATUS_LABEL } from '../lib/labels';
+import { addDays, fmtMinutes, fmtShort, fmtTime, parseTime, showTime } from '../lib/dates';
+import { AREA_UNITS, categoryColor, num, SKIP_REASONS, STATUS_LABEL } from '../lib/labels';
 import { completion, isOverdue, recurrenceLabel, type Instance } from '../lib/recurrence';
 import { findFreeSlot } from '../lib/slots';
 import { useData, useInstances } from '../state/data';
 import { TaskForm } from './TaskForm';
 import { errMsg, Field, Modal, ProgressBar, toNum, useUI } from './ui';
 
-export function TaskItem({ inst, showDate = false }: { inst: Instance; showDate?: boolean }) {
-  const { today, nowMin } = useData();
+export function TaskItem({ inst, showDate = false, compact = false }: { inst: Instance; showDate?: boolean; compact?: boolean }) {
+  const { today, nowMin, areas } = useData();
   const { toast } = useUI();
   const [menu, setMenu] = useState(false);
   const overdue = isOverdue(inst, today, nowMin);
   const done = inst.status === 'done';
+  const partial = inst.status === 'partial' || (inst.status === 'planned' && inst.doneMin > 0);
   const inactive = inst.status === 'cancelled' || inst.status === 'skipped';
   const frac = completion(inst);
   const st = parseTime(inst.startTime);
+  const color = categoryColor(inst.task.category);
+  const area = areas.find((a) => a.id === inst.task.studyAreaId);
+  const amountLabel = area && area.unit !== 'min' && inst.doneAmount > 0 ? `${num(inst.doneAmount)} ${AREA_UNITS[area.unit].short}` : '';
 
   async function toggle() {
     try {
       if (done) { await resetInstance(inst); toast('Отметка снята'); }
-      else { await completeInstance(inst); toast('Выполнено ✓'); }
+      else { await completeInstance(inst); toast('Выполнено — так держать!'); }
     } catch (e) { toast(errMsg(e), 'error'); }
   }
 
+  const meta: React.ReactNode[] = [];
+  if (showDate) meta.push(<span key="d">{fmtShort(inst.date)}</span>);
+  if (st !== null) meta.push(<span key="dur" className="tabular-nums font-semibold" style={{ color: `color-mix(in srgb, ${color} 80%, var(--text))` }}>{fmtMinutes(inst.durationMin)}</span>);
+  if (inst.task.category) meta.push(<span key="c" className="inline-flex items-center gap-1"><span className="size-1.5 rounded-full" style={{ background: color }} />{inst.task.category}</span>);
+  if (inst.task.recurrence.kind !== 'none') meta.push(<span key="r" className="inline-flex items-center gap-1"><Repeat size={11} />{recurrenceLabel(inst.task)}</span>);
+  if (inst.doneMin > 0 && !done) meta.push(<span key="f" className="tabular-nums">факт {fmtMinutes(inst.doneMin)}{amountLabel && ` · ${amountLabel}`}</span>);
+
   return (
-    <li className={`group flex items-start gap-3 rounded-xl border px-3 py-2.5 transition-colors ${overdue ? 'border-danger/40 bg-danger/5' : 'border-line bg-card'}`}>
+    <li className={`group relative flex min-w-0 items-center gap-3 rounded-[14px] px-2.5 py-2.5 transition-colors hover:bg-soft/70 ${overdue ? 'bg-danger-soft/60' : ''}`}>
       <button
         onClick={toggle}
         disabled={inactive}
         aria-label={done ? `Снять отметку: ${inst.title}` : `Отметить выполненной: ${inst.title}`}
         aria-pressed={done}
-        className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border-2 transition-colors ${done ? 'border-ok bg-ok text-white' : 'border-line hover:border-accent'} disabled:opacity-40`}
+        className={`relative grid size-[22px] shrink-0 place-items-center overflow-hidden rounded-[7px] border-2 transition-colors ${done ? 'border-accent bg-accent text-accent-fg' : partial ? 'border-gold' : 'border-line hover:border-accent'} disabled:opacity-40`}
       >
-        {done && <Check size={14} strokeWidth={3} />}
+        {done && <Check size={14} strokeWidth={3.2} className="check-pop" />}
+        {!done && partial && <span className="absolute inset-x-0 bottom-0 bg-gold/70" style={{ height: `${Math.max(15, frac * 100)}%` }} />}
       </button>
       <button className="min-w-0 flex-1 text-left" onClick={() => setMenu(true)} aria-label={`Действия: ${inst.title}`}>
-        <p className={`truncate font-medium ${done || inactive ? 'text-muted line-through decoration-1' : ''}`}>{inst.title}</p>
-        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted">
-          {showDate && <span>{fmtShort(inst.date)}</span>}
-          {st !== null ? <span className="tabular-nums">{fmtTime(st)}–{fmtTime(st + inst.durationMin)}</span> : <span>{fmtMinutes(inst.durationMin)}</span>}
-          {inst.task.category && <span className="chip">{inst.task.category}</span>}
-          {inst.task.recurrence.kind !== 'none' && <span className="chip"><Repeat size={11} />{recurrenceLabel(inst.task)}</span>}
-          {inst.priority === 'high' && <span className="chip !bg-amber-500/15 !text-amber-700 dark:!text-amber-300">Важно</span>}
-          {overdue && <span className="chip !bg-danger/15 !text-danger">Просрочено</span>}
-          {inst.status !== 'planned' && inst.status !== 'done' && <span className="chip">{STATUS_LABEL[inst.status]}{inst.skipReason ? `: ${SKIP_REASONS[inst.skipReason].toLowerCase()}` : ''}</span>}
-          {inst.moved && <span className="chip"><CalendarClock size={11} />перенесено с {fmtShort(inst.origDate)}</span>}
-          {inst.doneMin > 0 && <span className="tabular-nums">· факт {fmtMinutes(inst.doneMin)}</span>}
-        </div>
-        {!done && frac > 0 && <div className="mt-2"><ProgressBar value={frac} size="sm" label="Частичное выполнение" /></div>}
+        <p className={`flex items-center gap-1.5 text-[14px] font-semibold ${done || inactive ? 'text-muted line-through decoration-1' : ''}`}>
+          <span className="truncate">{inst.title}</span>
+          {inst.priority === 'high' && !done && <Star size={13} className="shrink-0 fill-gold text-gold" aria-label="Важно" />}
+        </p>
+        {(meta.length > 0 || overdue || inst.moved || (inst.status !== 'planned' && inst.status !== 'done')) && (
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] text-muted">
+            {meta}
+            {overdue && <span className="chip !bg-danger-soft !text-danger">Просрочено</span>}
+            {inst.status !== 'planned' && inst.status !== 'done' && <span className="chip">{STATUS_LABEL[inst.status]}{inst.skipReason ? `: ${SKIP_REASONS[inst.skipReason].toLowerCase()}` : ''}</span>}
+            {inst.moved && <span className="chip"><CalendarClock size={11} />с {fmtShort(inst.origDate)}</span>}
+          </div>
+        )}
+        {!done && frac > 0 && <div className="mt-1.5 max-w-[220px]"><ProgressBar value={frac} size="sm" tone="gold" label="Частичное выполнение" /></div>}
       </button>
-      <button className="btn btn-ghost btn-icon -mr-1" onClick={() => setMenu(true)} aria-label={`Меню задачи ${inst.title}`}>
-        <EllipsisVertical size={18} />
+      {!compact && st === null && (
+        <span className="hidden shrink-0 rounded-lg px-2 py-1 text-[12px] font-semibold tabular-nums sm:inline-block"
+          style={{ background: `color-mix(in srgb, ${color} 13%, transparent)`, color: `color-mix(in srgb, ${color} 85%, var(--text))` }}>
+          {fmtMinutes(inst.durationMin)}
+        </span>
+      )}
+      {(st !== null || compact) && (
+        <span className="shrink-0 rounded-lg bg-soft px-2 py-1 text-[12px] font-semibold tabular-nums text-muted">
+          {st !== null ? (compact ? showTime(st) : <><span className="sm:hidden">{showTime(st)}</span><span className="hidden sm:inline">{showTime(st)}–{showTime(st + inst.durationMin)}</span></>) : fmtMinutes(inst.durationMin)}
+        </span>
+      )}
+      {!compact && st === null && <span className="shrink-0 rounded-lg bg-soft px-2 py-1 text-[12px] font-semibold tabular-nums text-muted sm:hidden">{fmtMinutes(inst.durationMin)}</span>}
+      <button className="btn btn-ghost btn-icon -mr-1 !min-w-9 !px-1.5 text-muted" onClick={() => setMenu(true)} aria-label={`Меню задачи ${inst.title}`}>
+        <Ellipsis size={18} />
       </button>
       {menu && <InstanceActions inst={inst} onClose={() => setMenu(false)} />}
     </li>
@@ -208,7 +232,7 @@ export function InstanceActions({ inst, onClose, initial = 'menu' }: { inst: Ins
           </div>
           {suggestion !== null ? (
             <button type="button" className="btn btn-outline justify-start" onClick={() => setMoveTime(fmtTime(suggestion))}>
-              <Timer size={16} /> Свободное окно: {fmtTime(suggestion)}–{fmtTime(suggestion + inst.durationMin)} — подставить
+              <Timer size={16} /> Свободное окно: {showTime(suggestion)}–{showTime(suggestion + inst.durationMin)} — подставить
             </button>
           ) : <p className="text-sm text-muted">В этот день нет свободного окна на {fmtMinutes(inst.durationMin)} в пределах рабочего дня.</p>}
           <div className="flex justify-end gap-2">
@@ -223,7 +247,7 @@ export function InstanceActions({ inst, onClose, initial = 'menu' }: { inst: Ins
 
 function MenuBtn({ icon, children, onClick, danger }: { icon: React.ReactNode; children: React.ReactNode; onClick: () => void; danger?: boolean }) {
   return (
-    <button className={`btn btn-ghost justify-start ${danger ? '!text-danger' : ''}`} onClick={onClick}>
+    <button className={`btn btn-ghost min-h-11 justify-start font-medium ${danger ? '!text-danger' : ''}`} onClick={onClick}>
       {icon}<span className="text-left">{children}</span>
     </button>
   );

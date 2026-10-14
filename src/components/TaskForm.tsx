@@ -10,6 +10,8 @@ import { errFields, errMsg, Field, Modal, Tabs, toNum, useUI } from './ui';
 
 type RecKind = Recurrence['kind'];
 
+export type TaskPreset = Partial<Draft>;
+
 interface Draft {
   title: string; description: string; category: string; date: string; endDate: string; startTime: string;
   duration: string; priority: Priority; recKind: RecKind; days: number[]; every: string;
