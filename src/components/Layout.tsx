@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Bell, BookOpen, CalendarDays, ChartColumn, ChevronRight, Download, Ellipsis, Flame, GraduationCap, History, House, LifeBuoy,
-  ListChecks, Moon, NotebookPen, Plus, Search, Settings, Sun, Target, Timer, UserRound, X,
+  Bell, BookOpen, BookOpenText, CalendarDays, ChartColumn, ChevronRight, ClipboardList, Download, Ellipsis, Flame, GraduationCap, History,
+  House, Library, LifeBuoy, ListChecks, Moon, NotebookPen, Plus, ScrollText, Search, Settings, Sun, Target, Timer, UserRound, X,
 } from 'lucide-react';
 import { useData, useInstances, useNow } from '../state/data';
 import { fmtClock, fmtShort, parseTime } from '../lib/dates';
@@ -14,6 +14,7 @@ import { Logo, StarPattern } from './Art';
 import { useIsDark } from './charts';
 import { TaskForm, type TaskPreset } from './TaskForm';
 import { IconBadge, errMsg, useUI } from './ui';
+import { t } from '../i18n';
 
 export const NAV = [
   { to: '/', label: 'Главная', icon: House, group: 'main' },
@@ -24,9 +25,13 @@ export const NAV = [
   { to: '/goals', label: 'Цели', icon: Target, group: 'main' },
   { to: '/focus', label: 'Концентрация', icon: Timer, group: 'main' },
   { to: '/stats', label: 'Статистика', icon: ChartColumn, group: 'main' },
+  { to: '/quran', label: 'Коран', icon: BookOpenText, group: 'ilm' },
+  { to: '/hadith', label: 'Хадисы', icon: ScrollText, group: 'ilm' },
+  { to: '/mutun', label: 'Мутуны', icon: NotebookPen, group: 'ilm' },
+  { to: '/library', label: 'Книги', icon: Library, group: 'ilm' },
   { to: '/recovery', label: 'Восстановление', icon: LifeBuoy, group: 'more' },
   { to: '/history', label: 'История', icon: History, group: 'more' },
-  { to: '/review', label: 'Обзор дня', icon: NotebookPen, group: 'more' },
+  { to: '/review', label: 'Обзор дня', icon: ClipboardList, group: 'more' },
   { to: '/faith', label: 'Поклонение', icon: BookOpen, group: 'more' },
   { to: '/settings', label: 'Настройки', icon: Settings, group: 'more' },
 ] as const;
@@ -38,7 +43,7 @@ const MOBILE = [
   { to: '/stats', label: 'Статистика', icon: ChartColumn },
   { to: '/more', label: 'Ещё', icon: Ellipsis },
 ];
-export const MORE_ITEMS = ['/habits', '/study', '/goals', '/calendar', '/history', '/recovery', '/review', '/faith', '/settings'];
+export const MORE_ITEMS = ['/quran', '/hadith', '/mutun', '/library', '/habits', '/study', '/goals', '/calendar', '/history', '/recovery', '/review', '/faith', '/settings'];
 
 /* ---------- Быстрое добавление задачи из любого места ---------- */
 type TaskOpen = { date?: string; task?: Task; preset?: TaskPreset };
@@ -72,7 +77,7 @@ function TimerPill() {
     <NavLink to="/focus" className="flex items-center gap-2 rounded-xl bg-accent-soft px-3 py-2.5 text-sm font-semibold text-accent">
       <span className={`size-2 rounded-full ${timer.runningSince ? 'animate-pulse bg-accent' : 'bg-warn'}`} />
       <span className="truncate">{timer.phase === 'break' ? 'Отдых' : timer.runningSince ? 'Идёт сеанс' : 'Пауза'}</span>
-      <span className="ml-auto tabular-nums">{fmtClock(timerElapsed(timer, Math.max(now, timer.runningSince ?? 0)))}</span>
+      <span className="ms-auto tabular-nums">{fmtClock(timerElapsed(timer, Math.max(now, timer.runningSince ?? 0)))}</span>
     </NavLink>
   );
 }
@@ -81,11 +86,15 @@ function Sidebar() {
   const link = ({ isActive }: { isActive: boolean }) =>
     `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-semibold transition-colors ${isActive ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-soft hover:text-fg'}`;
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r border-line bg-card lg:flex" aria-label="Главное меню">
+    <aside className="fixed inset-y-0 start-0 z-30 hidden w-[248px] flex-col border-e border-line bg-card lg:flex" aria-label="Главное меню">
       <div className="px-5 pb-5 pt-6"><Brand /></div>
       <nav className="thin-scroll flex flex-1 flex-col gap-0.5 overflow-y-auto px-3">
         {NAV.filter((n) => n.group === 'main').map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} end={to === '/'} className={link}><Icon size={19} strokeWidth={1.9} />{label}</NavLink>
+        ))}
+        <p className="eyebrow mb-1 mt-4 px-3">{t('Знание')}</p>
+        {NAV.filter((n) => n.group === 'ilm').map(({ to, label, icon: Icon }) => (
+          <NavLink key={to} to={to} className={link}><Icon size={19} strokeWidth={1.9} />{t(label)}</NavLink>
         ))}
         <p className="eyebrow mt-4 mb-1 px-3">Ещё</p>
         {NAV.filter((n) => n.group === 'more').map(({ to, label, icon: Icon }) => (
@@ -159,7 +168,7 @@ function SearchPalette({ open, onClose, onTask }: { open: boolean; onClose: () =
             {hits.map((h, i) => (
               <li key={h.id} role="option" aria-selected={i === sel}>
                 <button onClick={h.run} onMouseEnter={() => setSel(i)}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left ${i === sel ? 'bg-accent-soft' : ''}`}>
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-start ${i === sel ? 'bg-accent-soft' : ''}`}>
                   <span className="text-accent">{h.icon}</span>
                   <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{h.title}</span><span className="block truncate text-xs text-muted">{h.sub}</span></span>
                   <ChevronRight size={16} className="text-muted" />
@@ -188,7 +197,7 @@ function Popover({ open, onClose, children, label, className = '' }: { open: boo
   if (!open) return null;
   return (
     <div ref={ref} role="dialog" aria-label={label}
-      className={`fade-in fixed inset-x-3 top-[calc(64px+env(safe-area-inset-top))] z-50 rounded-[20px] border border-line bg-card shadow-[var(--shadow-lg)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 sm:w-[360px] ${className}`}>
+      className={`fade-in fixed inset-x-3 top-[calc(64px+env(safe-area-inset-top))] z-50 rounded-[20px] border border-line bg-card shadow-[var(--shadow-lg)] sm:absolute sm:inset-x-auto sm:end-0 sm:top-12 sm:w-[360px] ${className}`}>
       {children}
     </div>
   );
@@ -222,7 +231,7 @@ function NotificationsPanel({ notices, onClose }: { notices: Notice[]; onClose: 
         {!notices.length && <li className="px-3 py-6 text-center text-sm text-muted">Новых уведомлений нет. Хорошего дня!</li>}
         {notices.map((n) => (
           <li key={n.id}>
-            <button className="flex w-full items-start gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-soft" onClick={() => { onClose(); nav(n.to); }}>
+            <button className="flex w-full items-start gap-3 rounded-xl px-2 py-2.5 text-start hover:bg-soft" onClick={() => { onClose(); nav(n.to); }}>
               <IconBadge tone={n.tone === 'gold' ? 'gold' : n.tone === 'danger' ? 'danger' : n.tone === 'warn' ? 'warn' : n.tone === 'info' ? 'info' : 'accent'} size={34}>
                 <Bell size={16} />
               </IconBadge>
@@ -248,7 +257,7 @@ export function Switch({ checked, onChange, label }: { checked: boolean; onChang
   return (
     <button type="button" role="switch" aria-checked={checked} aria-label={label} onClick={onChange}
       className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${checked ? 'bg-accent' : 'bg-line'}`}>
-      <span className={`absolute top-0.5 size-5 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+      <span className={`absolute top-0.5 size-5 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-[22px] rtl:-translate-x-[22px]' : 'translate-x-0.5 rtl:-translate-x-0.5'}`} />
     </button>
   );
 }
@@ -296,7 +305,7 @@ function HeaderActions({ notices, onSearch, mobile = false }: { notices: Notice[
       {mobile && <button className="btn btn-ghost btn-icon" onClick={onSearch} aria-label="Поиск"><Search size={20} /></button>}
       <button className="btn btn-ghost btn-icon relative" onClick={() => setPanel(panel === 'bell' ? null : 'bell')} aria-label={`Уведомления: ${notices.length}`} aria-expanded={panel === 'bell'}>
         <Bell size={20} />
-        {notices.length > 0 && <span className={`absolute right-2 top-2 size-2 rounded-full ring-2 ring-card ${urgent ? 'bg-danger' : 'bg-gold'}`} />}
+        {notices.length > 0 && <span className={`absolute end-2 top-2 size-2 rounded-full ring-2 ring-card ${urgent ? 'bg-danger' : 'bg-gold'}`} />}
       </button>
       {!mobile && (
         <>
@@ -306,7 +315,7 @@ function HeaderActions({ notices, onSearch, mobile = false }: { notices: Notice[
           <button className="btn btn-ghost btn-icon" onClick={() => nav('/settings')} aria-label="Настройки"><Settings size={20} /></button>
         </>
       )}
-      <button className="ml-1 rounded-full" onClick={() => setPanel(panel === 'profile' ? null : 'profile')} aria-label="Профиль" aria-expanded={panel === 'profile'}>
+      <button className="ms-1 rounded-full" onClick={() => setPanel(panel === 'profile' ? null : 'profile')} aria-label="Профиль" aria-expanded={panel === 'profile'}>
         <Avatar size={mobile ? 34 : 38} />
       </button>
       <Popover open={panel === 'bell'} onClose={close} label="Уведомления"><NotificationsPanel notices={notices} onClose={close} /></Popover>
@@ -359,22 +368,22 @@ export function Layout({ children }: { children: ReactNode }) {
 
   useEffect(() => { window.scrollTo({ top: 0 }); }, [loc.pathname]);
 
-  const moreActive = MORE_ITEMS.includes(loc.pathname) || loc.pathname === '/more';
+  const moreActive = MORE_ITEMS.some((p) => loc.pathname === p || loc.pathname.startsWith(p + '/')) || loc.pathname === '/more';
   const showFab = ['/', '/tasks', '/calendar'].includes(loc.pathname);
 
   return (
     <QuickCtx.Provider value={ctx}>
       <div className="min-h-dvh bg-bg text-fg">
-        <a href="#main" className="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[70]">К содержанию</a>
+        <a href="#main" className="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-[70]">К содержанию</a>
         <Sidebar />
 
         {/* Верхняя панель — компьютер */}
-        <header className="sticky top-0 z-20 hidden h-[72px] items-center gap-4 border-b border-line/70 bg-bg/85 px-8 backdrop-blur-md lg:ml-[248px] lg:flex">
+        <header className="sticky top-0 z-20 hidden h-[72px] items-center gap-4 border-b border-line/70 bg-bg/85 px-8 backdrop-blur-md lg:ms-[248px] lg:flex">
           <button onClick={openSearch} className="flex h-11 w-full max-w-[460px] items-center gap-3 rounded-xl border border-line bg-card px-3.5 text-sm text-muted transition-colors hover:border-accent/40" aria-label="Открыть поиск">
             <Search size={18} />Поиск задач, целей, направлений…
-            <kbd className="ml-auto rounded-md border border-line bg-soft px-1.5 py-0.5 font-sans text-[11px]">Ctrl K</kbd>
+            <kbd className="ms-auto rounded-md border border-line bg-soft px-1.5 py-0.5 font-sans text-[11px]">Ctrl K</kbd>
           </button>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ms-auto flex items-center gap-2">
             <button className="btn btn-primary" onClick={() => openTask()}><Plus size={18} />Задача</button>
             <HeaderActions notices={notices} onSearch={openSearch} />
           </div>
@@ -388,13 +397,13 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main id="main" className="lg:ml-[248px]">
+        <main id="main" className="lg:ms-[248px]">
           <div className="mx-auto w-full max-w-[1400px] px-4 pb-[calc(110px+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:px-8 lg:pb-12 lg:pt-6">{children}</div>
         </main>
 
         {showFab && (
           <button onClick={() => openTask()} aria-label="Добавить задачу"
-            className="fixed bottom-[calc(80px+env(safe-area-inset-bottom))] right-4 z-30 grid size-14 place-items-center rounded-2xl bg-accent text-accent-fg shadow-[var(--shadow-lg)] transition-transform active:scale-95 lg:hidden">
+            className="fixed bottom-[calc(80px+env(safe-area-inset-bottom))] end-4 z-30 grid size-14 place-items-center rounded-2xl bg-accent text-accent-fg shadow-[var(--shadow-lg)] transition-transform active:scale-95 lg:hidden">
             <Plus size={26} />
           </button>
         )}

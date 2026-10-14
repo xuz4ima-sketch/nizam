@@ -29,10 +29,10 @@ export default function HistoryPage() {
             const daySessions = sessions.filter((s) => s.date === d.date && s.source !== 'task').sort((a, b) => a.startedAt - b.startedAt);
             return (
               <li key={d.date} className="card !p-0">
-                <button className="flex w-full items-center gap-3.5 p-4 text-left" onClick={() => setOpen(isOpen ? null : d.date)} aria-expanded={isOpen}>
+                <button className="flex w-full items-center gap-3.5 p-4 text-start" onClick={() => setOpen(isOpen ? null : d.date)} aria-expanded={isOpen}>
                   <Ring value={d.progress} size={46} stroke={5}><span className="text-[11px] font-extrabold tabular-nums">{Math.round(d.progress * 100)}%</span></Ring>
                   <div className="min-w-0 flex-1">
-                    <p className="font-bold">{fmtDate(d.date, { weekday: 'long', day: 'numeric', month: 'long' })}{d.date === today && <span className="ml-2 chip !bg-accent-soft !text-accent">сегодня</span>}</p>
+                    <p className="font-bold">{fmtDate(d.date, { weekday: 'long', day: 'numeric', month: 'long' })}{d.date === today && <span className="ms-2 chip !bg-accent-soft !text-accent">сегодня</span>}</p>
                     <p className="text-[12.5px] text-muted">
                       выполнено {d.done} из {d.planned}{d.partial ? ` · частично ${d.partial}` : ''}{d.skipped ? ` · пропущено ${d.skipped}` : ''}{d.overdue ? ` · не завершено ${d.overdue}` : ''} · {fmtMinutes(d.actualMin)}
                     </p>

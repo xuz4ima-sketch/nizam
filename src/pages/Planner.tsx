@@ -78,7 +78,7 @@ function QuickAddBar({ date }: { date: ISODate }) {
   return (
     <form onSubmit={add} className="card !p-2.5 sm:!p-3">
       <div className="flex items-center gap-2 rounded-xl px-1 focus-within:bg-soft/60">
-        <Sparkles size={18} className="ml-1.5 shrink-0 text-gold" aria-hidden />
+        <Sparkles size={18} className="ms-1.5 shrink-0 text-gold" aria-hidden />
         <label htmlFor="quick" className="sr-only">Быстрое добавление задачи</label>
         <input id="quick" className="min-h-10 w-full min-w-0 bg-transparent text-[15px] !outline-none placeholder:text-muted" value={text} onChange={(e) => setText(e.target.value)}
           placeholder="Быстро: «Арабский язык — 60 минут»" maxLength={200} autoComplete="off" />
@@ -247,8 +247,8 @@ function AllTasks() {
     <section className="grid gap-3">
       <label className="relative block">
         <span className="sr-only">Поиск</span>
-        <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-        <input className="input pl-9" placeholder="Поиск по названию или категории" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Search size={16} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
+        <input className="input ps-9" placeholder="Поиск по названию или категории" value={q} onChange={(e) => setQ(e.target.value)} />
       </label>
       {!list.length && <Empty title={tasks.length ? 'Ничего не найдено' : 'Задач пока нет'} text="Создайте первую задачу кнопкой «Задача»." />}
       <ul className="grid gap-2">

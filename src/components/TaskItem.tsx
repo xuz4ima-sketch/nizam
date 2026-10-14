@@ -55,7 +55,7 @@ export function TaskItem({ inst, showDate = false, compact = false }: { inst: In
         {done && <Check size={14} strokeWidth={3.2} className="check-pop" />}
         {!done && partial && <span className="absolute inset-x-0 bottom-0 bg-gold/70" style={{ height: `${Math.max(15, frac * 100)}%` }} />}
       </button>
-      <button className="min-w-0 flex-1 text-left" onClick={() => setMenu(true)} aria-label={`Действия: ${inst.title}`}>
+      <button className="min-w-0 flex-1 text-start" onClick={() => setMenu(true)} aria-label={`Действия: ${inst.title}`}>
         <p className={`flex items-center gap-1.5 text-[14px] font-semibold ${done || inactive ? 'text-muted line-through decoration-1' : ''}`}>
           <span className="line-clamp-2 break-words leading-snug sm:line-clamp-1">{inst.title}</span>
           {inst.priority === 'high' && !done && <Star size={13} className="shrink-0 fill-gold text-gold" aria-label="Важно" />}
@@ -82,7 +82,7 @@ export function TaskItem({ inst, showDate = false, compact = false }: { inst: In
         </span>
       )}
       {!compact && st === null && <span className="shrink-0 rounded-lg bg-soft px-2 py-1 text-[12px] font-semibold tabular-nums text-muted sm:hidden">{fmtMinutes(inst.durationMin)}</span>}
-      <button className="btn btn-ghost btn-icon -mr-1 !min-w-9 !px-1.5 text-muted" onClick={() => setMenu(true)} aria-label={`Меню задачи ${inst.title}`}>
+      <button className="btn btn-ghost btn-icon -me-1 !min-w-9 !px-1.5 text-muted" onClick={() => setMenu(true)} aria-label={`Меню задачи ${inst.title}`}>
         <Ellipsis size={18} />
       </button>
       {menu && <InstanceActions inst={inst} onClose={() => setMenu(false)} />}
@@ -248,7 +248,7 @@ export function InstanceActions({ inst, onClose, initial = 'menu' }: { inst: Ins
 function MenuBtn({ icon, children, onClick, danger }: { icon: React.ReactNode; children: React.ReactNode; onClick: () => void; danger?: boolean }) {
   return (
     <button className={`btn btn-ghost min-h-11 justify-start font-medium ${danger ? '!text-danger' : ''}`} onClick={onClick}>
-      {icon}<span className="text-left">{children}</span>
+      {icon}<span className="text-start">{children}</span>
     </button>
   );
 }

@@ -156,7 +156,7 @@ export default function Stats() {
                     <li key={w} className="grid grid-cols-[28px_minmax(0,1fr)_64px] items-center gap-2 text-[13px]">
                       <span className="font-semibold text-muted">{WEEKDAY_NAMES[w]}</span>
                       <ProgressBar value={byWd[w] / max} size="sm" tone={byWd[w] === max && byWd[w] > 0 ? 'gold' : 'brand'} label={WEEKDAY_NAMES[w]} />
-                      <span className="text-right tabular-nums text-muted">{fmtMinutes(byWd[w])}</span>
+                      <span className="text-end tabular-nums text-muted">{fmtMinutes(byWd[w])}</span>
                     </li>
                   );
                 })}
@@ -180,8 +180,8 @@ export default function Stats() {
           <section className="card">
             <h2 className="h2 mb-3">Эта неделя и прошлая</h2>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm [&_td]:pr-3 [&_th]:pr-3">
-                <thead className="text-left text-xs text-muted"><tr><th className="py-1 font-medium">Показатель</th><th className="font-medium">Эта</th><th className="font-medium">Прошлая</th><th className="font-medium">Изменение</th></tr></thead>
+              <table className="w-full text-sm [&_td]:pe-3 [&_th]:pe-3">
+                <thead className="text-start text-xs text-muted"><tr><th className="py-1 font-medium">Показатель</th><th className="font-medium">Эта</th><th className="font-medium">Прошлая</th><th className="font-medium">Изменение</th></tr></thead>
                 <tbody className="tabular-nums">
                   {([
                     ['Выполнено задач', thisWeek.done, prevWeek.done, (v: number) => String(v)],

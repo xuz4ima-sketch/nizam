@@ -130,7 +130,7 @@ export default function Recovery() {
               <li key={r} className="grid grid-cols-[minmax(0,10rem)_1fr_2rem] items-center gap-2 text-sm">
                 <span className="truncate">{SKIP_REASONS[r]}</span>
                 <div className="h-2.5 rounded-full bg-soft"><div className="h-full rounded-full bg-amber-500" style={{ width: `${(n / maxR) * 100}%` }} /></div>
-                <span className="text-right tabular-nums">{n}</span>
+                <span className="text-end tabular-nums">{n}</span>
               </li>
             ))}
           </ul>

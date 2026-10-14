@@ -110,8 +110,8 @@ function Hero({ st }: { st: DayStat }) {
   return (
     <>
       <section className="fade-in relative min-h-[196px] overflow-hidden rounded-[22px] border border-line" style={{ background: 'linear-gradient(180deg, var(--art-sky1), var(--art-sky2))' }} aria-label="Приветствие">
-        <HeroArt className="absolute inset-y-0 right-0 h-full w-[78%] sm:w-full" />
-        <div className="absolute inset-y-0 left-0 w-[72%] bg-gradient-to-r from-[var(--art-sky1)] via-[var(--art-sky1)]/85 to-transparent sm:hidden" aria-hidden />
+        <HeroArt className="absolute inset-y-0 end-0 h-full w-[78%] sm:w-full" />
+        <div className="absolute inset-y-0 start-0 w-[72%] bg-gradient-to-r rtl:bg-gradient-to-l from-[var(--art-sky1)] via-[var(--art-sky1)]/85 to-transparent sm:hidden" aria-hidden />
         <div className="relative flex h-full flex-col justify-between gap-5 p-5 sm:p-6">
           <div className="max-w-[64%] sm:max-w-[min(460px,54%)]">
             <div className="flex items-start gap-2">

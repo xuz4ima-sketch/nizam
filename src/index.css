@@ -1,6 +1,10 @@
 @import "@fontsource-variable/manrope/index.css";
 @import "@fontsource/noto-naskh-arabic/arabic-400.css";
 @import "@fontsource/noto-naskh-arabic/arabic-600.css";
+@import "@fontsource/amiri-quran/arabic-400.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-400.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-600.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-700.css";
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -19,6 +23,8 @@
   --color-brand-900: #0c342c;
   --font-sans: "Manrope Variable", "Manrope", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   --font-arabic: "Noto Naskh Arabic", "Amiri", "Traditional Arabic", serif;
+  --font-quran: "Amiri Quran", "Noto Naskh Arabic", "Traditional Arabic", serif;
+  --font-ui-ar: "IBM Plex Sans Arabic", "Manrope Variable", "Segoe UI", sans-serif;
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -46,6 +52,8 @@
   --shadow: 0 1px 2px rgb(24 38 33 / 0.04), 0 4px 16px -6px rgb(24 38 33 / 0.06);
   --shadow-lg: 0 12px 40px -12px rgb(12 52 44 / 0.25);
   --logo-bg: #0c342c;
+  --paper: #fdfaf1;
+  --paper-ink: #1d2b25;
   --art-sky1: #f6f1e6;
   --art-sky2: #e3efe7;
   --art-sun: #e8cf98;
@@ -79,6 +87,8 @@
   --shadow: 0 1px 2px rgb(0 0 0 / 0.25);
   --shadow-lg: 0 12px 40px -12px rgb(0 0 0 / 0.6);
   --logo-bg: #0c342c;
+  --paper: #121b18;
+  --paper-ink: #e9e3d2;
   --art-sky1: #13211d;
   --art-sky2: #163029;
   --art-sun: #9c8350;
@@ -129,6 +139,16 @@ body {
 /* Арабский: собственный шрифт, увеличенная высота строки — диакритика не обрезается */
 .arabic, [lang="ar"] { font-family: var(--font-arabic); line-height: 1.9; font-feature-settings: normal; }
 .tabular { font-variant-numeric: tabular-nums; }
+/* Арабский интерфейс: шрифт без засечек для меню и кнопок; тексты Корана и мутунов — свои шрифты */
+html[lang="ar"] body { font-family: var(--font-ui-ar); }
+.quran { font-family: var(--font-quran); line-height: 2.25; font-feature-settings: normal; word-spacing: 0.04em; }
+.matn { font-family: var(--font-arabic); line-height: 2.1; font-feature-settings: normal; }
+.ayah-end { font-family: var(--font-quran); color: var(--gold); white-space: nowrap; padding-inline: 0.15em; }
+.tafsir p { margin: 0 0 0.8em; }
+.tafsir .q-quote { font-family: var(--font-quran); color: var(--accent); font-size: 1.12em; }
+.tafsir h2, .tafsir h3, .tafsir h4 { font-weight: 700; margin: 0.6em 0 0.3em; }
+.mushaf-paper { background: var(--paper); color: var(--paper-ink); }
+.hl-ayah { background: color-mix(in srgb, var(--gold) 22%, transparent); border-radius: 6px; }
 
 @layer components {
   .card {

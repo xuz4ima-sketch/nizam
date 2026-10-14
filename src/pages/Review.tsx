@@ -84,7 +84,7 @@ function DayReview() {
             <ul className="grid gap-1 text-sm">
               {[...reviews].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 14).map((r) => (
                 <li key={r.date}>
-                  <button className="flex w-full justify-between gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-soft" onClick={() => setDate(r.date)}>
+                  <button className="flex w-full justify-between gap-2 rounded-lg px-2 py-1.5 text-start hover:bg-soft" onClick={() => setDate(r.date)}>
                     <span >{fmtDate(r.date, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
                     <span className="text-amber-500">{'★'.repeat(r.rating)}</span>
                   </button>

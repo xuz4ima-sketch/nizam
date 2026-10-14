@@ -44,7 +44,7 @@ export default function CalendarPage() {
           <button className="btn btn-outline btn-icon" onClick={() => step(-1)} aria-label="Назад"><ChevronLeft size={18} /></button>
           <button className="btn btn-outline" onClick={() => set(today)} disabled={date === today && view !== 'week'}>Сегодня</button>
           <button className="btn btn-outline btn-icon" onClick={() => step(1)} aria-label="Вперёд"><ChevronRight size={18} /></button>
-          <h2 className="ml-2 text-[16px] font-bold sm:text-lg" aria-live="polite">{title}</h2>
+          <h2 className="ms-2 text-[16px] font-bold sm:text-lg" aria-live="polite">{title}</h2>
         </div>
         <Tabs label="Режим календаря" value={view} onChange={(nv) => set(date, nv)} items={[['day', 'День'], ['week', 'Неделя'], ['month', 'Месяц']]} />
       </div>
@@ -84,19 +84,19 @@ function MonthView({ date, onPick, onOpen }: { date: ISODate; onPick: (d: ISODat
             const frac = list.length ? list.reduce((a, i) => a + completion(i), 0) / list.length : 0;
             const late = list.some((i) => isOverdue(i, today, nowMin));
             return (
-              <div key={d} className={`flex min-h-[64px] flex-col rounded-xl border p-1 text-left transition-colors sm:min-h-[104px] sm:p-1.5 ${d === date ? 'border-accent bg-accent-soft/50' : 'border-transparent hover:bg-soft'} ${inMonth ? '' : 'opacity-40'}`}>
+              <div key={d} className={`flex min-h-[64px] flex-col rounded-xl border p-1 text-start transition-colors sm:min-h-[104px] sm:p-1.5 ${d === date ? 'border-accent bg-accent-soft/50' : 'border-transparent hover:bg-soft'} ${inMonth ? '' : 'opacity-40'}`}>
                 <button onClick={() => onPick(d)} className="flex items-center justify-between gap-1" aria-label={`${fmtDate(d, { day: 'numeric', month: 'long' })}: задач ${list.length}`} aria-pressed={d === date}>
                   <span className={`grid size-7 place-items-center rounded-full text-[13px] font-bold tabular-nums ${d === today ? 'bg-accent text-accent-fg' : ''}`}>{Number(d.slice(8))}</span>
                   {list.length > 0 && <span className={`hidden text-[10px] font-bold tabular-nums sm:inline ${frac >= 1 ? 'text-ok' : late ? 'text-danger' : 'text-muted'}`}>{Math.round(frac * 100)}%</span>}
                 </button>
                 <div className="mt-1 hidden flex-col gap-0.5 sm:flex">
                   {list.slice(0, 3).map((i) => (
-                    <button key={i.key} onClick={() => onOpen(i)} className={`truncate rounded-md px-1.5 py-0.5 text-left text-[11px] font-semibold ${i.status === 'done' ? 'line-through opacity-60' : ''}`}
+                    <button key={i.key} onClick={() => onOpen(i)} className={`truncate rounded-md px-1.5 py-0.5 text-start text-[11px] font-semibold ${i.status === 'done' ? 'line-through opacity-60' : ''}`}
                       style={{ background: `color-mix(in srgb, ${categoryColor(i.task.category)} 14%, transparent)`, color: `color-mix(in srgb, ${categoryColor(i.task.category)} 80%, var(--text))` }}>
                       {i.startTime && <span className="tabular-nums">{i.startTime} </span>}{i.title}
                     </button>
                   ))}
-                  {list.length > 3 && <button onClick={() => onPick(d)} className="px-1 text-left text-[11px] font-semibold text-muted">ещё {list.length - 3}</button>}
+                  {list.length > 3 && <button onClick={() => onPick(d)} className="px-1 text-start text-[11px] font-semibold text-muted">ещё {list.length - 3}</button>}
                 </div>
                 <div className="mt-auto flex flex-wrap justify-center gap-0.5 pb-1 sm:hidden">
                   {list.slice(0, 4).map((i) => <span key={i.key} className="size-1.5 rounded-full" style={{ background: i.status === 'done' ? 'var(--ok)' : categoryColor(i.task.category) }} />)}
@@ -161,9 +161,9 @@ function EventBlock({ p, from, onOpen, narrow }: { p: ReturnType<typeof layoutDa
   const late = isOverdue(p.inst, today, nowMin);
   return (
     <button onClick={() => onOpen(p.inst)}
-      className={`absolute overflow-hidden rounded-lg border-l-[3px] px-1.5 py-1 text-left transition-[filter] hover:brightness-95 ${done ? 'opacity-60' : ''}`}
+      className={`absolute overflow-hidden rounded-lg border-s-[3px] px-1.5 py-1 text-start transition-[filter] hover:brightness-95 ${done ? 'opacity-60' : ''}`}
       style={{
-        top, height: h, left: `calc(${(p.lane / p.lanes) * 100}% + 2px)`, width: `calc(${100 / p.lanes}% - 4px)`,
+        top, height: h, insetInlineStart: `calc(${(p.lane / p.lanes) * 100}% + 2px)`, width: `calc(${100 / p.lanes}% - 4px)`,
         background: `color-mix(in srgb, ${color} 15%, var(--card))`, borderColor: late ? 'var(--danger)' : color,
       }}
       aria-label={`${p.inst.title}, ${showTime(p.start)}–${showTime(p.end)}`}>
@@ -177,7 +177,7 @@ function HourLabels({ from, to }: { from: number; to: number }) {
   return (
     <div className="relative w-11 shrink-0" style={{ height: (to - from) * HOUR_PX }} aria-hidden>
       {Array.from({ length: to - from }, (_, k) => (
-        <span key={k} className={`absolute right-2 text-[10.5px] font-semibold tabular-nums text-muted ${k === 0 ? '' : '-translate-y-1/2'}`} style={{ top: k * HOUR_PX }}>{showTime((from + k) * 60)}</span>
+        <span key={k} className={`absolute end-2 text-[10.5px] font-semibold tabular-nums text-muted ${k === 0 ? '' : '-translate-y-1/2'}`} style={{ top: k * HOUR_PX }}>{showTime((from + k) * 60)}</span>
       ))}
     </div>
   );
@@ -187,7 +187,7 @@ function NowLine({ from }: { from: number }) {
   const { nowMin } = useData();
   const top = ((nowMin - from * 60) / 60) * HOUR_PX;
   if (top < 0) return null;
-  return <div className="pointer-events-none absolute inset-x-0 z-10 flex items-center" style={{ top }} aria-hidden><span className="-ml-1 size-2 rounded-full bg-danger" /><span className="h-px flex-1 bg-danger" /></div>;
+  return <div className="pointer-events-none absolute inset-x-0 z-10 flex items-center" style={{ top }} aria-hidden><span className="-ms-1 size-2 rounded-full bg-danger" /><span className="h-px flex-1 bg-danger" /></div>;
 }
 
 function Untimed({ list, onOpen }: { list: Instance[]; onOpen: (i: Instance) => void }) {
@@ -219,7 +219,7 @@ function DayTimeline({ date, onOpen }: { date: ISODate; onOpen: (i: Instance) =>
       {untimed.length > 0 && <div className="border-b border-line px-4 py-3"><p className="eyebrow mb-1.5">Без времени</p><Untimed list={untimed} onOpen={onOpen} /></div>}
       <div className="flex px-2 py-4 sm:px-4">
         <HourLabels from={from} to={to} />
-        <div className="relative flex-1 border-l border-line" style={{ height: (to - from) * HOUR_PX }}>
+        <div className="relative flex-1 border-s border-line" style={{ height: (to - from) * HOUR_PX }}>
           {Array.from({ length: to - from }, (_, k) => <div key={k} className="absolute inset-x-0 border-t border-line/70" style={{ top: k * HOUR_PX }} />)}
           {date === today && <NowLine from={from} />}
           {placed.map((p) => <EventBlock key={p.inst.key} p={p} from={from} onOpen={onOpen} />)}
@@ -252,13 +252,13 @@ function WeekGrid({ date, onOpen, onDay }: { date: ISODate; onOpen: (i: Instance
         {anyUntimed && (
           <div className="flex border-b border-line">
             <div className="w-11 shrink-0 pt-2 text-center text-[10px] font-semibold text-muted">весь<br />день</div>
-            {days.map((d) => <div key={d} className="min-w-0 flex-1 border-l border-line p-1"><Untimed list={(byDay.get(d) ?? []).filter((i) => parseTime(i.startTime) === null)} onOpen={onOpen} /></div>)}
+            {days.map((d) => <div key={d} className="min-w-0 flex-1 border-s border-line p-1"><Untimed list={(byDay.get(d) ?? []).filter((i) => parseTime(i.startTime) === null)} onOpen={onOpen} /></div>)}
           </div>
         )}
-        <div className="flex py-3 pr-2">
+        <div className="flex py-3 pe-2">
           <HourLabels from={hr.from} to={hr.to} />
           {days.map((d, k) => (
-            <div key={d} className="relative min-w-0 flex-1 border-l border-line" style={{ height: (hr.to - hr.from) * HOUR_PX }}>
+            <div key={d} className="relative min-w-0 flex-1 border-s border-line" style={{ height: (hr.to - hr.from) * HOUR_PX }}>
               {Array.from({ length: hr.to - hr.from }, (_, j) => <div key={j} className="absolute inset-x-0 border-t border-line/60" style={{ top: j * HOUR_PX }} />)}
               {d === today && <NowLine from={hr.from} />}
               {placedByDay[k].map((p) => <EventBlock key={p.inst.key} p={p} from={hr.from} onOpen={onOpen} narrow />)}

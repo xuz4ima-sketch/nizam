@@ -171,7 +171,7 @@ function AreaDetails({ a, onClose }: { a: StudyArea; onClose: () => void }) {
                   <div className="h-full rounded-full" style={{ width: `${(w.v / max) * 100}%`, background: a.color }} />
                   {w.target > 0 && <div className="absolute inset-y-[-2px] w-0.5 bg-fg/50" style={{ left: `${(w.target / max) * 100}%` }} title="План" />}
                 </div>
-                <span className="text-right tabular-nums">{num(w.v)}</span>
+                <span className="text-end tabular-nums">{num(w.v)}</span>
               </li>
             ))}
           </ul>

@@ -31,6 +31,13 @@ const Review = page(() => import('./pages/Review'));
 const SettingsPage = page(() => import('./pages/Settings'));
 const CalendarPage = page(() => import('./pages/Calendar'));
 const HistoryPage = page(() => import('./pages/History'));
+const QuranHome = page(() => import('./islam/quran/QuranHome'));
+const Mushaf = page(() => import('./islam/quran/Mushaf'));
+const SurahStudy = page(() => import('./islam/quran/SurahStudy'));
+const HadithHome = page(() => import('./islam/hadith/HadithHome'));
+const HadithBook = page(() => import('./islam/hadith/HadithBook'));
+const LibraryHome = page(() => import('./islam/library/LibraryHome'));
+const TextReader = page(() => import('./islam/library/TextReader'));
 
 /** Скелет загрузки в форме будущего содержимого — без «прыжков» интерфейса. */
 function Loading() {
@@ -116,6 +123,14 @@ export function App() {
                   <Route path="/review" element={<Review />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/more" element={<MorePage />} />
+                  <Route path="/quran" element={<QuranHome />} />
+                  <Route path="/quran/page/:page" element={<Mushaf />} />
+                  <Route path="/quran/surah/:id" element={<SurahStudy />} />
+                  <Route path="/hadith" element={<HadithHome />} />
+                  <Route path="/hadith/:coll/:book" element={<HadithBook />} />
+                  <Route path="/mutun" element={<LibraryHome mode="mutun" />} />
+                  <Route path="/library" element={<LibraryHome mode="books" />} />
+                  <Route path="/library/:id" element={<TextReader />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Suspense>
