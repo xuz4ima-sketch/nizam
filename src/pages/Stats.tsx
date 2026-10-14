@@ -1,31 +1,25 @@
 import { useMemo, useState } from 'react';
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { ChartColumn } from 'lucide-react';
-import { Empty, PageHeader, ProgressBar, Stat, Tabs } from '../components/ui';
-import { addDays, fmtMinutes, fmtShort, startOfWeek } from '../lib/dates';
-import { AREA_UNITS, num, pct } from '../lib/labels';
+import { Link } from 'react-router-dom';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { ChartColumn, Lightbulb } from 'lucide-react';
+import { chartTooltip, ChartLegend, useThemeColors } from '../components/charts';
+import { Empty, PageHeader, ProgressBar, SectionHeader, Stat, Tabs } from '../components/ui';
+import { addDays, fmtDate, fmtMinutes, fmtShort, startOfWeek, WEEKDAY_NAMES } from '../lib/dates';
+import { AREA_UNITS, categoryColor, num, pct, SKIP_REASONS } from '../lib/labels';
 import { areaDone, areaTargetFor } from '../lib/progress';
-import { dayStats, postponedRanking, summarize } from '../lib/stats';
+import { weeklyRecommendations } from '../lib/recommend';
+import { dayStats, minutesByWeekday, postponedRanking, skipReasonCounts, summarize } from '../lib/stats';
 import { habitStats, logsMap } from '../lib/streaks';
 import { dateRange, isoFromMs } from '../lib/dates';
 import { useData, useInstances } from '../state/data';
 
-function useColors() {
-  const { settings } = useData();
-  return useMemo(() => {
-    const cs = getComputedStyle(document.documentElement);
-    const v = (n: string) => cs.getPropertyValue(n).trim();
-    return { accent: v('--accent'), muted: v('--muted'), grid: v('--border'), card: v('--card'), text: v('--text'), soft: v('--soft') };
-  }, [settings.theme]); // eslint-disable-line react-hooks/exhaustive-deps
-}
-
 export default function Stats() {
-  const { today, nowMin, sessions, areas, habits, habitLogs, settings } = useData();
-  const [span, setSpan] = useState<'7' | '30'>('7');
+  const { today, nowMin, sessions, areas, habits, habitLogs, settings, occurrences, tasks } = useData();
+  const [span, setSpan] = useState<'1' | '7' | '30'>('7');
   const n = Number(span);
   const from = addDays(today, -(n - 1));
   const insts = useInstances(addDays(startOfWeek(today, settings.weekStart), -7) < from ? addDays(startOfWeek(today, settings.weekStart), -7) : from, today);
-  const c = useColors();
+  const c = useThemeColors();
 
   const days = useMemo(() => dayStats(from, today, insts, sessions, today, nowMin), [from, today, insts, sessions, nowMin]);
   const sum = summarize(days);
@@ -53,55 +47,135 @@ export default function Stats() {
     .map((h) => ({ h, s: habitStats(h, logsMap(habitLogs, h.id), today, settings.weekStart, n) }))
     .sort((a, b) => b.s.rate - a.s.rate || b.s.current - a.s.current);
 
-  const chart = days.map((d) => ({ name: fmtShort(d.date), Запланировано: d.planned, Выполнено: d.done, Минуты: d.actualMin }));
+  const chart = days.map((d) => ({ name: n === 7 ? fmtDate(d.date, { weekday: 'short' }) : fmtShort(d.date), Запланировано: d.planned, Выполнено: d.done, Частично: d.partial, Пропущено: d.skipped + d.overdue, Минуты: d.actualMin }));
   const hasData = sum.planned > 0 || sum.actualMin > 0 || habitLogs.length > 0;
-  const tooltip = { contentStyle: { background: c.card, border: `1px solid ${c.grid}`, borderRadius: 12, color: c.text }, cursor: { fill: c.soft } };
+  const tooltip = chartTooltip(c);
+
+  // Время по категориям: категория связанной задачи, иначе — название направления.
+  const byCategory = useMemo(() => {
+    const m = new Map<string, number>();
+    const taskMap = new Map(tasks.map((t) => [t.id, t]));
+    for (const ss of sessions) {
+      if (ss.date < from || ss.date > today || ss.minutes <= 0) continue;
+      const t = ss.taskId ? taskMap.get(ss.taskId) : undefined;
+      const key = t?.category ?? areas.find((a) => a.id === ss.areaId)?.name ?? 'Без категории';
+      m.set(key, (m.get(key) ?? 0) + ss.minutes);
+    }
+    return [...m.entries()].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [sessions, tasks, areas, from, today]);
+  const catTotal = byCategory.reduce((a, x) => a + x.value, 0);
+  const reasons = skipReasonCounts(occurrences, from, today);
+  const maxReason = Math.max(1, ...reasons.map((r) => r[1]));
+  const byWd = minutesByWeekday(dayStats(addDays(today, -27), today, insts, sessions, today, nowMin));
 
   return (
     <div className="fade-in grid gap-5">
-      <PageHeader title="Статистика" subtitle="Только реальные сохранённые данные." actions={<Tabs label="Период" value={span} onChange={setSpan} items={[['7', '7 дней'], ['30', '30 дней']]} />} />
+      <PageHeader title="Статистика" subtitle="Все показатели рассчитаны по вашим сохранённым данным — без выдуманных цифр." actions={<Tabs label="Период" value={span} onChange={setSpan} items={[['1', 'День'], ['7', 'Неделя'], ['30', 'Месяц']]} />} />
       {!hasData ? (
         <Empty icon={<ChartColumn size={28} />} title="Пока нет данных" text="Отмечайте выполнение задач, записывайте занятия и привычки — здесь появятся графики." />
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Stat label="Выполнено задач" value={pct(sum.doneRate)} sub={`${sum.done} из ${sum.planned}`} />
-            <Stat label="Общий прогресс" value={pct(sum.progress)} sub="с учётом частичного" />
+            <Stat label="Продуктивность" value={pct(sum.progress)} sub={`выполнено ${sum.done} из ${sum.planned}`} />
+            <Stat label="Пропущено" value={sum.skipped + sum.overdue} sub={sum.partial ? `частично: ${sum.partial}` : 'задач за период'} />
             <Stat label="Продуктивное время" value={fmtMinutes(sum.actualMin)} sub={`план: ${fmtMinutes(sum.plannedMin)}`} />
-            <Stat label="Дневные нормы" value={norms.total ? pct(norms.met / norms.total) : '—'} sub={norms.total ? `${norms.met} из ${norms.total} (без сегодня)` : 'нет направлений'} />
+            <Stat label="Дневные нормы" value={norms.total ? pct(norms.met / norms.total) : '—'} sub={norms.total ? `${norms.met} из ${norms.total} (без сегодня)` : areas.some((a) => a.dailyTarget > 0) ? 'появятся после первого полного дня' : 'нет направлений с нормой'} />
           </div>
 
-          <section className="card">
-            <h2 className="h2 mb-3">Запланировано и выполнено</h2>
-            <div className="h-64">
+          <WeeklyReport />
+
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+            <section className="card min-w-0">
+              <SectionHeader title="Выполнение задач по дням" />
+              <div className="h-60" role="img" aria-label="Столбчатый график выполнения задач">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chart} margin={{ left: 0, right: 4, top: 4 }} barCategoryGap="24%">
+                    <CartesianGrid stroke={c.grid} vertical={false} strokeDasharray="3 4" />
+                    <XAxis dataKey="name" tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+                    <YAxis allowDecimals={false} tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} width={24} />
+                    <Tooltip {...tooltip} />
+                    <Bar dataKey="Выполнено" stackId="a" fill={c.accent} isAnimationActive={false} />
+                    <Bar dataKey="Частично" stackId="a" fill={c.gold} isAnimationActive={false} />
+                    <Bar dataKey="Пропущено" stackId="a" fill={c.danger} fillOpacity={0.75} radius={[5, 5, 0, 0]} isAnimationActive={false} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <ChartLegend items={[['Выполнено', c.accent], ['Частично', c.gold], ['Пропущено / не завершено', c.danger]]} />
+            </section>
+            <section className="card min-w-0">
+              <SectionHeader title="Время по категориям" />
+              {!byCategory.length ? <p className="grid h-60 place-items-center text-center text-sm text-muted">За период время не записано</p> : (
+                <div className="grid grid-cols-[150px_minmax(0,1fr)] items-center gap-4">
+                  <div className="relative h-[150px]" role="img" aria-label="Кольцевая диаграмма времени по категориям">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={byCategory} dataKey="value" nameKey="name" innerRadius={48} outerRadius={70} paddingAngle={2} stroke="none" isAnimationActive={false}>
+                          {byCategory.map((e) => <Cell key={e.name} fill={categoryColor(e.name)} />)}
+                        </Pie>
+                        <Tooltip {...tooltip} formatter={(v) => fmtMinutes(Number(v))} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="pointer-events-none absolute inset-0 grid place-items-center text-center"><div><p className="text-[15px] font-extrabold tabular-nums">{fmtMinutes(catTotal)}</p><p className="text-[10px] text-muted">всего</p></div></div>
+                  </div>
+                  <ul className="grid gap-1.5 text-[13px]">
+                    {byCategory.slice(0, 6).map((e) => (
+                      <li key={e.name} className="flex items-center gap-2"><span className="size-2.5 shrink-0 rounded-full" style={{ background: categoryColor(e.name) }} /><span className="min-w-0 flex-1 truncate">{e.name}</span><span className="shrink-0 font-semibold tabular-nums">{Math.round((e.value / catTotal) * 100)}%</span></li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+          </div>
+
+          <section className="card min-w-0">
+            <SectionHeader title="Время занятий, мин" />
+            <div className="h-52" role="img" aria-label="Линейный график времени занятий">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chart} margin={{ left: -20, right: 4, top: 4 }}>
-                  <CartesianGrid stroke={c.grid} vertical={false} />
+                <AreaChart data={chart} margin={{ left: 0, right: 8, top: 4 }}>
+                  <defs><linearGradient id="minFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={c.accent} stopOpacity={0.28} /><stop offset="1" stopColor={c.accent} stopOpacity={0} /></linearGradient></defs>
+                  <CartesianGrid stroke={c.grid} vertical={false} strokeDasharray="3 4" />
                   <XAxis dataKey="name" tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-                  <YAxis allowDecimals={false} tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} />
+                  <YAxis allowDecimals={false} tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} width={32} />
                   <Tooltip {...tooltip} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="Запланировано" fill={c.muted} fillOpacity={0.3} radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Выполнено" fill={c.accent} radius={[4, 4, 0, 0]} />
-                </BarChart>
+                  <Area type="monotone" dataKey="Минуты" stroke={c.accent} strokeWidth={2.5} fill="url(#minFill)" dot={{ r: 3, fill: c.accent }} isAnimationActive={false} />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </section>
 
-          <section className="card">
-            <h2 className="h2 mb-3">Время продуктивной работы, мин</h2>
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chart} margin={{ left: -20, right: 8, top: 4 }}>
-                  <CartesianGrid stroke={c.grid} vertical={false} />
-                  <XAxis dataKey="name" tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-                  <YAxis allowDecimals={false} tick={{ fill: c.muted, fontSize: 11 }} tickLine={false} axisLine={false} />
-                  <Tooltip {...tooltip} />
-                  <Line type="monotone" dataKey="Минуты" stroke={c.accent} strokeWidth={2.5} dot={{ r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </section>
+          <ActivityHeatmap />
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <section className="card">
+              <SectionHeader title="Самые продуктивные дни недели" />
+              <p className="-mt-2 mb-3 text-[12px] text-muted">По записанному времени за последние 4 недели</p>
+              <ul className="grid gap-2">
+                {[1, 2, 3, 4, 5, 6, 0].map((w) => {
+                  const max = Math.max(1, ...byWd);
+                  return (
+                    <li key={w} className="grid grid-cols-[28px_minmax(0,1fr)_64px] items-center gap-2 text-[13px]">
+                      <span className="font-semibold text-muted">{WEEKDAY_NAMES[w]}</span>
+                      <ProgressBar value={byWd[w] / max} size="sm" tone={byWd[w] === max && byWd[w] > 0 ? 'gold' : 'brand'} label={WEEKDAY_NAMES[w]} />
+                      <span className="text-right tabular-nums text-muted">{fmtMinutes(byWd[w])}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+            <section className="card">
+              <SectionHeader title="Причины пропусков" />
+              {!reasons.length ? <p className="text-sm text-muted">За период пропусков с указанной причиной нет.</p> : (
+                <ul className="grid gap-2.5">
+                  {reasons.map(([r, k]) => (
+                    <li key={r} className="text-[13px]">
+                      <div className="mb-1 flex justify-between gap-2"><span>{SKIP_REASONS[r]}</span><span className="font-semibold tabular-nums">{k}</span></div>
+                      <ProgressBar value={k / maxReason} size="sm" tone="warn" label={SKIP_REASONS[r]} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
 
           <section className="card">
             <h2 className="h2 mb-3">Эта неделя и прошлая</h2>
@@ -180,5 +254,73 @@ export default function Stats() {
         </>
       )}
     </div>
+  );
+}
+
+/** Календарь активности: последние 18 недель, насыщенность — записанное время за день. */
+function ActivityHeatmap() {
+  const { today, sessions, settings } = useData();
+  const weeks = 18;
+  const start = addDays(startOfWeek(today, settings.weekStart), -7 * (weeks - 1));
+  const mins = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const ss of sessions) if (ss.date >= start && ss.date <= today) m.set(ss.date, (m.get(ss.date) ?? 0) + ss.minutes);
+    return m;
+  }, [sessions, start, today]);
+  const max = Math.max(60, ...mins.values());
+  const level = (v: number) => (v <= 0 ? 0 : v < max * 0.25 ? 1 : v < max * 0.5 ? 2 : v < max * 0.75 ? 3 : 4);
+  const shades = ['var(--soft)', 'color-mix(in srgb, var(--accent) 25%, var(--soft))', 'color-mix(in srgb, var(--accent) 50%, var(--soft))', 'color-mix(in srgb, var(--accent) 75%, var(--soft))', 'var(--accent)'];
+  const total = [...mins.values()].reduce((a, b) => a + b, 0);
+  const activeDays = [...mins.values()].filter((v) => v > 0).length;
+  return (
+    <section className="card min-w-0">
+      <SectionHeader title="Календарь активности" action={<span className="text-[12px] text-muted">{activeDays} акт. дней · {fmtMinutes(total)}</span>} />
+      <div className="thin-scroll overflow-x-auto pb-1">
+        <div className="flex gap-[3px]" role="img" aria-label={`Активность за ${weeks} недель: ${activeDays} дней с занятиями`}>
+          {Array.from({ length: weeks }, (_, w) => (
+            <div key={w} className="grid gap-[3px]">
+              {Array.from({ length: 7 }, (_, d) => {
+                const date = addDays(start, w * 7 + d);
+                const v = mins.get(date) ?? 0;
+                return <span key={d} title={`${fmtShort(date)}: ${fmtMinutes(v)}`} className={`block size-[14px] rounded-[4px] ${date > today ? 'opacity-0' : ''} ${date === today ? 'ring-1 ring-fg/40' : ''}`} style={{ background: shades[level(v)] }} />;
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mt-2 flex items-center justify-end gap-1 text-[11px] text-muted">меньше {shades.map((sh, i) => <span key={i} className="size-[11px] rounded-[3px]" style={{ background: sh }} />)} больше</div>
+    </section>
+  );
+}
+
+/** Краткий недельный отчёт: выводы простыми правилами по данным текущей недели. */
+function WeeklyReport() {
+  const { today, nowMin, sessions, occurrences, settings } = useData();
+  const from = startOfWeek(today, settings.weekStart);
+  const prevFrom = addDays(from, -7);
+  const insts = useInstances(prevFrom, today);
+  const days = useMemo(() => dayStats(from, today, insts, sessions, today, nowMin), [from, today, insts, sessions, nowMin]);
+  const prevDays = useMemo(() => dayStats(prevFrom, addDays(from, -1), insts, sessions, today, nowMin), [prevFrom, from, insts, sessions, today, nowMin]);
+  const sum = summarize(days), prev = summarize(prevDays);
+  const recs = weeklyRecommendations({
+    days, prevDays, reasons: skipReasonCounts(occurrences, from, today),
+    postponed: postponedRanking(insts.filter((i) => i.date >= from), today, nowMin), byWeekday: minutesByWeekday(days),
+  });
+  const best = [...days].sort((a, b) => b.actualMin - a.actualMin)[0];
+  const diff = sum.actualMin - prev.actualMin;
+  return (
+    <section className="card grid gap-3 border-gold/30 bg-gradient-to-br from-gold-soft/60 to-card">
+      <SectionHeader icon={<Lightbulb size={18} className="text-gold" />} title="Отчёт за неделю" action={<Link to="/review" className="link">Подробнее</Link>} />
+      <ul className="grid gap-1.5 text-[14px]">
+        <li>Занятия: <b className="tabular-nums">{fmtMinutes(sum.actualMin)}</b>{prev.actualMin > 0 && <span className={diff >= 0 ? 'text-ok' : 'text-danger'}> ({diff >= 0 ? '+' : '−'}{fmtMinutes(Math.abs(diff))} к прошлой неделе)</span>}</li>
+        <li>Задачи: выполнено <b className="tabular-nums">{sum.done}</b> из {sum.planned}{sum.planned ? ` (${pct(sum.doneRate)})` : ''}{sum.skipped + sum.overdue ? `, не выполнено ${sum.skipped + sum.overdue}` : ''}</li>
+        {best && best.actualMin > 0 && <li>Лучший день: <b>{fmtDate(best.date, { weekday: 'long' })}</b> — {fmtMinutes(best.actualMin)}</li>}
+      </ul>
+      {recs.length > 0 && (
+        <div className="grid gap-1.5">
+          {recs.slice(0, 2).map((r, i) => <p key={i} className="rounded-xl bg-card px-3 py-2 text-[13px] ring-1 ring-line">{r.text} <span className="text-muted">— {r.why}</span></p>)}
+        </div>
+      )}
+    </section>
   );
 }

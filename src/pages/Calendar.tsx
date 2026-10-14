@@ -6,7 +6,7 @@ import { InstanceActions, TaskItem } from '../components/TaskItem';
 import { Empty, PageHeader, Tabs } from '../components/ui';
 import type { ISODate } from '../db/schema';
 import {
-  addDays, dateRange, endOfMonth, fmtDate, fmtMinutes, isValidISO, parseTime, showTime, startOfMonth, startOfWeek, WEEKDAY_NAMES,
+  addDays, dateRange, endOfMonth, fmtDate, fmtMinutes, isValidISO, parseTime, showTime, startOfMonth, startOfWeek, WEEKDAY_NAMES, weekday,
 } from '../lib/dates';
 import { categoryColor } from '../lib/labels';
 import { completion, isActive, isOverdue, type Instance } from '../lib/recurrence';
@@ -177,7 +177,7 @@ function HourLabels({ from, to }: { from: number; to: number }) {
   return (
     <div className="relative w-11 shrink-0" style={{ height: (to - from) * HOUR_PX }} aria-hidden>
       {Array.from({ length: to - from }, (_, k) => (
-        <span key={k} className="absolute right-2 -translate-y-1/2 text-[10.5px] font-semibold tabular-nums text-muted" style={{ top: k * HOUR_PX }}>{k === 0 ? '' : showTime((from + k) * 60)}</span>
+        <span key={k} className={`absolute right-2 text-[10.5px] font-semibold tabular-nums text-muted ${k === 0 ? '' : '-translate-y-1/2'}`} style={{ top: k * HOUR_PX }}>{showTime((from + k) * 60)}</span>
       ))}
     </div>
   );
@@ -244,7 +244,7 @@ function WeekGrid({ date, onOpen, onDay }: { date: ISODate; onOpen: (i: Instance
           <div className="w-11 shrink-0" />
           {days.map((d) => (
             <button key={d} onClick={() => onDay(d)} className="flex-1 py-2.5 text-center hover:bg-soft" aria-label={`Открыть день ${fmtDate(d, { day: 'numeric', month: 'long' })}`}>
-              <p className="text-[11px] font-bold uppercase text-muted">{WEEKDAY_NAMES[Number(new Date(d + 'T00:00:00Z').getUTCDay())]}</p>
+              <p className="text-[11px] font-bold uppercase text-muted">{WEEKDAY_NAMES[weekday(d)]}</p>
               <p className={`mx-auto mt-0.5 grid size-8 place-items-center rounded-full text-[15px] font-extrabold tabular-nums ${d === today ? 'bg-accent text-accent-fg' : ''}`}>{Number(d.slice(8))}</p>
             </button>
           ))}

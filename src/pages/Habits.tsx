@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Flame, Minus, Pencil, Plus, Trash2 } from 'lucide-react';
-import { Empty, Field, Modal, PageHeader, ProgressBar, errFields, errMsg, toNum, useUI } from '../components/ui';
+import { HABIT_COLORS, HABIT_ICONS, HabitIcon, habitIconKey } from '../components/habitIcons';
+import { Empty, Field, Modal, PageHeader, ProgressBar, Ring, errFields, errMsg, toNum, useUI } from '../components/ui';
 import type { Habit, HabitLog, HabitUnit, ISODate } from '../db/schema';
 import { deleteHabit, saveHabit, setHabitLog, validateHabit, type HabitInput } from '../db/repo';
-import { addDays, dateRange, fmtShort, fmtWeekdayShort, startOfWeek } from '../lib/dates';
+import { addDays, dateRange, fmtLong, fmtShort, fmtWeekdayShort, startOfWeek } from '../lib/dates';
 import { HABIT_UNITS, num, pct } from '../lib/labels';
-import { dayState, habitStats, logsMap, weekCount, type DayState } from '../lib/streaks';
+import { dayState, habitStats, habitsToday, logsMap, weekCount, type DayState } from '../lib/streaks';
 import type { Errors } from '../lib/validate';
 import { useData } from '../state/data';
 
 const STATE_CLS: Record<DayState, string> = {
-  done: 'bg-ok text-white', partial: 'bg-ok/35', rest: 'bg-sky-500/30', none: 'bg-soft',
+  done: 'bg-accent text-accent-fg', partial: 'bg-gold/45', rest: 'bg-info/25', none: 'bg-soft',
 };
 
 export default function Habits({ faith = false }: { faith?: boolean }) {
@@ -30,7 +31,10 @@ export default function Habits({ faith = false }: { faith?: boolean }) {
           text="Например: ежедневное чтение, повторение изученного, физическая активность. Цель может быть в минутах, страницах, повторениях или «выполнено / нет»."
           action={<button className="btn btn-primary" onClick={() => setEditing('new')}><Plus size={18} />Создать привычку</button>} />
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2">{list.map((h) => <HabitCard key={h.id} h={h} onEdit={() => setEditing(h)} />)}</ul>
+        <div className="grid gap-5">
+          {!faith && <TodayChecklist list={list} />}
+          <ul className="grid gap-4 md:grid-cols-2">{list.map((h) => <HabitCard key={h.id} h={h} onEdit={() => setEditing(h)} />)}</ul>
+        </div>
       )}
       {editing && <HabitForm habit={editing === 'new' ? undefined : editing} faith={faith} onClose={() => setEditing(null)} />}
     </div>
@@ -53,9 +57,10 @@ function HabitCard({ h, onEdit }: { h: Habit; onEdit: () => void }) {
 
   return (
     <li className="card grid gap-3">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate font-semibold">{h.name}</p>
+      <div className="flex items-start justify-between gap-3">
+        <HabitIcon h={h} size={42} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-bold">{h.name}</p>
           <p className="text-xs text-muted">
             {h.frequency === 'weekly' ? `${h.timesPerWeek} раз(а) в неделю · на этой неделе: ${weekCount(h, logs, today, settings.weekStart)}` : 'Ежедневно'}
             {h.unit !== 'check' && ` · цель ${num(h.target)} ${unit}`}
@@ -65,7 +70,7 @@ function HabitCard({ h, onEdit }: { h: Habit; onEdit: () => void }) {
       </div>
       <div className="flex items-center gap-3">
         {h.unit === 'check' ? (
-          <button className={`btn ${val >= 1 ? 'btn-primary' : 'btn-outline'} flex-1`} aria-pressed={val >= 1} onClick={() => set(val >= 1 ? 0 : 1)}>
+          <button className={`btn ${val >= 1 ? 'btn-primary' : 'btn-soft'} flex-1`} aria-pressed={val >= 1} onClick={() => set(val >= 1 ? 0 : 1)}>
             <Check size={18} />{val >= 1 ? 'Выполнено сегодня' : 'Отметить сегодня'}
           </button>
         ) : (
@@ -78,12 +83,17 @@ function HabitCard({ h, onEdit }: { h: Habit; onEdit: () => void }) {
           </div>
         )}
       </div>
-      {h.unit !== 'check' && <ProgressBar value={val / h.target} size="sm" label={`${h.name} сегодня`} />}
-      {todayLog && todayLog.kind !== 'value' && <p className="text-xs text-sky-600 dark:text-sky-300">Сегодня: {todayLog.kind === 'rest' ? 'день отдыха' : 'уважительный пропуск'}</p>}
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div><p className="text-lg font-semibold tabular-nums">{s.current}</p><p className="text-[11px] text-muted">серия, {s.unit}</p></div>
-        <div><p className="text-lg font-semibold tabular-nums">{s.best}</p><p className="text-[11px] text-muted">лучшая серия</p></div>
-        <div><p className="text-lg font-semibold tabular-nums">{pct(s.rate)}</p><p className="text-[11px] text-muted">соблюдение, 30 дн.</p></div>
+      {h.unit !== 'check' && (
+        <div className="flex items-center gap-2">
+          <ProgressBar value={val / h.target} size="sm" color={h.color} label={`${h.name} сегодня`} />
+          <span className="shrink-0 text-[12px] font-bold tabular-nums text-muted">{pct(Math.min(1, val / h.target))}</span>
+        </div>
+      )}
+      {todayLog && todayLog.kind !== 'value' && <p className="text-xs text-info">Сегодня: {todayLog.kind === 'rest' ? 'день отдыха' : 'уважительный пропуск'}</p>}
+      <div className="grid grid-cols-3 gap-2 rounded-xl bg-card-2 py-2 text-center ring-1 ring-line">
+        <div><p className="text-lg font-extrabold tabular-nums">{s.current}</p><p className="text-[11px] text-muted">серия, {s.unit}</p></div>
+        <div><p className="text-lg font-extrabold tabular-nums">{s.best}</p><p className="text-[11px] text-muted">лучшая серия</p></div>
+        <div><p className="text-lg font-extrabold tabular-nums">{pct(s.rate)}</p><p className="text-[11px] text-muted">соблюдение, 30 дн.</p></div>
       </div>
       <div>
         <div className="grid grid-cols-7 gap-1" role="grid" aria-label={`Календарь выполнения: ${h.name}`}>
@@ -147,6 +157,7 @@ function HabitForm({ habit, faith, onClose }: { habit?: Habit; faith: boolean; o
   const [d, setD] = useState({
     name: habit?.name ?? '', unit: (habit?.unit ?? 'check') as HabitUnit, target: String(habit?.target ?? 1),
     frequency: habit?.frequency ?? 'daily', times: String(habit?.timesPerWeek ?? 3), startDate: habit?.startDate ?? today, faith: habit?.faith ?? faith,
+    icon: habit?.icon ?? '', color: habit?.color ?? HABIT_COLORS[0],
   });
   const [errors, setErrors] = useState<Errors>({});
   useEffect(() => { if (d.unit === 'check') setD((p) => ({ ...p, target: '1' })); }, [d.unit]);
@@ -157,6 +168,7 @@ function HabitForm({ habit, faith, onClose }: { habit?: Habit; faith: boolean; o
     const input: HabitInput = {
       name: d.name, unit: d.unit, target: toNum(d.target), frequency: d.frequency as Habit['frequency'],
       timesPerWeek: toNum(d.times), startDate: d.startDate, faith: d.faith,
+      icon: d.icon || habitIconKey({ name: d.name, unit: d.unit }), color: d.color,
     };
     if (input.frequency === 'daily') input.timesPerWeek = 7;
     const errs = validateHabit(input);
@@ -168,7 +180,28 @@ function HabitForm({ habit, faith, onClose }: { habit?: Habit; faith: boolean; o
   return (
     <Modal open onClose={onClose} title={habit ? 'Изменить привычку' : 'Новая привычка'}>
       <form className="grid gap-3" onSubmit={submit} noValidate>
-        <Field label="Название" error={errors.name} id="h-name"><input id="h-name" className="input" value={d.name} onChange={(e) => set('name', e.target.value)} autoFocus maxLength={200} /></Field>
+        <Field label="Название" error={errors.name} id="h-name"><input id="h-name" className="input" value={d.name} onChange={(e) => set('name', e.target.value)} autoFocus maxLength={200} placeholder="Например: Чтение Корана" /></Field>
+        <fieldset>
+          <legend className="label">Иконка и цвет</legend>
+          <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Иконка">
+            {Object.entries(HABIT_ICONS).map(([k, v]) => {
+              const on = (d.icon || habitIconKey({ name: d.name, unit: d.unit })) === k;
+              const Icon = v.icon;
+              return (
+                <button type="button" key={k} role="radio" aria-checked={on} aria-label={v.label} title={v.label} onClick={() => set('icon', k)}
+                  className={`grid size-10 place-items-center rounded-xl border transition-colors ${on ? 'border-accent bg-accent-soft text-accent' : 'border-line text-muted hover:text-fg'}`}>
+                  <Icon size={18} />
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Цвет">
+            {HABIT_COLORS.map((c) => (
+              <button type="button" key={c} role="radio" aria-checked={d.color === c} aria-label={`Цвет ${c}`} onClick={() => set('color', c)}
+                className={`size-8 rounded-full ring-offset-2 ring-offset-card transition-shadow ${d.color === c ? 'ring-2 ring-fg' : ''}`} style={{ background: c }} />
+            ))}
+          </div>
+        </fieldset>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Единица" id="h-unit">
             <select id="h-unit" className="input" value={d.unit} onChange={(e) => set('unit', e.target.value)}>
@@ -202,5 +235,55 @@ function HabitForm({ habit, faith, onClose }: { habit?: Habit; faith: boolean; o
         </div>
       </form>
     </Modal>
+  );
+}
+
+/** Компактный список «Сегодня»: отметка в одно нажатие, частичный прогресс сохраняется. */
+function TodayChecklist({ list }: { list: Habit[] }) {
+  const { habitLogs, today, settings } = useData();
+  const { toast } = useUI();
+  const summary = habitsToday(list, habitLogs, today, settings.weekStart);
+  return (
+    <section className="card !p-0" aria-label="Привычки на сегодня">
+      <div className="flex items-center gap-4 px-4 pt-4 sm:px-5">
+        <Ring value={summary.total ? summary.done / summary.total : 0} size={52} stroke={6} label="Выполнено привычек сегодня">
+          <span className="text-[12px] font-extrabold tabular-nums">{summary.done}/{summary.total}</span>
+        </Ring>
+        <div className="min-w-0">
+          <h2 className="h2">Сегодня</h2>
+          <p className="text-[13px] text-muted">{fmtLong(today)}</p>
+        </div>
+      </div>
+      <ul className="grid p-2 sm:p-3">
+        {list.map((h) => {
+          const log = habitLogs.find((l) => l.id === `${h.id}|${today}`);
+          const val = log?.kind === 'value' ? log.value : 0;
+          const done = val >= h.target;
+          const rest = log && log.kind !== 'value';
+          const step = h.unit === 'min' ? 5 : 1;
+          const unit = HABIT_UNITS[h.unit].short;
+          const set = async (v: number) => { try { await setHabitLog(h.id, today, Math.max(0, v)); } catch (e) { toast(errMsg(e), 'error'); } };
+          return (
+            <li key={h.id} className="flex min-w-0 items-center gap-3 rounded-[14px] px-2 py-2 hover:bg-soft/70">
+              <HabitIcon h={h} size={36} />
+              <div className="min-w-0 flex-1">
+                <p className={`truncate text-[14px] font-semibold ${done ? 'text-muted line-through decoration-1' : ''}`}>{h.name}</p>
+                <p className="text-[12px] text-muted tabular-nums">
+                  {rest ? (log?.kind === 'rest' ? 'день отдыха' : 'уважительный пропуск') : h.unit === 'check' ? (h.frequency === 'weekly' ? `${h.timesPerWeek} раз(а) в неделю` : 'ежедневно') : `${num(val)} / ${num(h.target)} ${unit}`}
+                </p>
+              </div>
+              {h.unit !== 'check' && !done && (
+                <button className="btn btn-outline btn-icon !min-h-9 !min-w-9 !p-1.5" onClick={() => set(val + step)} aria-label={`Добавить ${step} ${unit}: ${h.name}`}><Plus size={16} /></button>
+              )}
+              <button onClick={() => set(done ? 0 : h.target)} aria-pressed={done}
+                aria-label={done ? `Снять отметку: ${h.name}` : `Выполнено полностью: ${h.name}`}
+                className={`grid size-[26px] shrink-0 place-items-center rounded-[8px] border-2 transition-colors ${done ? 'border-accent bg-accent text-accent-fg' : 'border-line hover:border-accent'}`}>
+                {done && <Check size={15} strokeWidth={3} className="check-pop" />}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

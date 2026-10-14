@@ -30,7 +30,6 @@ export function Planner() {
       <PageHeader title="Задачи" subtitle="Планируйте день, отмечайте выполнение и переносите без потери истории."
         actions={<>
           <Link to="/calendar" className="btn btn-outline"><CalendarDays size={18} />Календарь</Link>
-          <button className="btn btn-primary hidden lg:inline-flex" onClick={() => openTask({ date })}><Plus size={18} />Задача</button>
         </>} />
       <QuickAddBar date={date} />
       <div className="mb-4 mt-4">
@@ -78,10 +77,10 @@ function QuickAddBar({ date }: { date: ISODate }) {
   ].filter(Boolean) as string[] : [];
   return (
     <form onSubmit={add} className="card !p-2.5 sm:!p-3">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 rounded-xl px-1 focus-within:bg-soft/60">
         <Sparkles size={18} className="ml-1.5 shrink-0 text-gold" aria-hidden />
         <label htmlFor="quick" className="sr-only">Быстрое добавление задачи</label>
-        <input id="quick" className="min-h-10 w-full min-w-0 bg-transparent text-[15px] outline-none placeholder:text-muted" value={text} onChange={(e) => setText(e.target.value)}
+        <input id="quick" className="min-h-10 w-full min-w-0 bg-transparent text-[15px] !outline-none placeholder:text-muted" value={text} onChange={(e) => setText(e.target.value)}
           placeholder="Быстро: «Арабский язык — 60 минут»" maxLength={200} autoComplete="off" />
         <button type="button" className="btn btn-ghost btn-sm hidden sm:inline-flex" onClick={() => { openTask({ date, preset: text.trim() ? preset() : undefined }); setText(''); }}>Подробнее</button>
         <button className="btn btn-primary btn-sm !min-h-9" disabled={busy || !p.title}><Plus size={16} /><span className="hidden sm:inline">Добавить</span></button>

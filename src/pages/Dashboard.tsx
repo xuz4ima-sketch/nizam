@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   BookOpen, CalendarPlus, Download, Feather, Flame, GraduationCap, ListChecks, Pencil, Play, Plus, Sparkles, Timer,
 } from 'lucide-react';
 import { HeroArt, StarPattern } from '../components/Art';
-import { ChartLegend, MiniCalendar, useMediaQuery, useThemeColors, WeekChart } from '../components/charts';
+import { ChartLegend, MiniCalendar, useMediaQuery, useThemeColors } from '../components/charts';
 import { useQuickAdd } from '../components/Layout';
 import { TaskItem } from '../components/TaskItem';
 import { Empty, Field, IconBadge, Modal, ProgressBar, Ring, SectionHeader, Tabs, errFields, errMsg, useUI } from '../components/ui';
@@ -22,6 +22,11 @@ import type { Errors } from '../lib/validate';
 import { useData, useInstances } from '../state/data';
 
 type Filter = 'all' | 'open' | 'done';
+
+const LazyWeekChart = lazy(() => import('../components/WeekChart'));
+function WeekChart(props: { from: string; height?: number }) {
+  return <Suspense fallback={<div className="skeleton" style={{ height: props.height ?? 170 }} />}><LazyWeekChart {...props} /></Suspense>;
+}
 
 export function Dashboard() {
   const data = useData();

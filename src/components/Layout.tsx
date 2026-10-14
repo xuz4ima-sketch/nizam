@@ -11,6 +11,7 @@ import { buildNotices, type Notice } from '../lib/notices';
 import type { Task } from '../db/schema';
 import { downloadJSON, exportAll } from '../db/backup';
 import { Logo, StarPattern } from './Art';
+import { useIsDark } from './charts';
 import { TaskForm, type TaskPreset } from './TaskForm';
 import { IconBadge, errMsg, useUI } from './ui';
 
@@ -282,16 +283,6 @@ function Avatar({ size = 36 }: { size?: number }) {
       {ch || <UserRound size={size * 0.5} />}
     </span>
   );
-}
-
-function useIsDark() {
-  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
-  useEffect(() => {
-    const o = new MutationObserver(() => setDark(document.documentElement.classList.contains('dark')));
-    o.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => o.disconnect();
-  }, []);
-  return dark;
 }
 
 function HeaderActions({ notices, onSearch, mobile = false }: { notices: Notice[]; onSearch: () => void; mobile?: boolean }) {

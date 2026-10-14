@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Coffee, Info, Pause, Play, Square, Trash2, X, Zap } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Coffee, Info, Minimize2, Maximize2, Pause, Play, Square, Trash2, X, Zap } from 'lucide-react';
+import { StarPattern } from '../components/Art';
 import { Empty, Field, Modal, PageHeader, Tabs, errMsg, toNum, useUI } from '../components/ui';
 import type { TimerState } from '../db/schema';
 import {
   addDistraction, completeInstance, deleteSession, discardTimer, finishTimer, pauseTimer, pomodoroToBreak, pomodoroToWork,
   resumeTimer, saveSettings, startTimer, switchTimerMode, timerElapsed,
 } from '../db/repo';
-import { fmtClock, fmtMinutes, fmtShort, fmtTime, zonedParts } from '../lib/dates';
+import { fmtClock, fmtMinutes, fmtShort, showTime, zonedParts } from '../lib/dates';
 import { AREA_UNITS } from '../lib/labels';
 import { findInstance, isActive } from '../lib/recurrence';
 import { useData, useInstances, useNow } from '../state/data';
@@ -34,11 +36,29 @@ function notify(text: string, enabled: boolean) {
 
 export default function Focus() {
   const { timer } = useData();
+  const [minimized, setMinimized] = useState(false);
+  useEffect(() => { if (!timer) setMinimized(false); }, [timer]);
   return (
     <div className="fade-in grid gap-5">
-      <PageHeader title="Режим концентрации" subtitle="Таймер считает по временным меткам: переключение вкладок и перезагрузка не теряют время." />
-      {timer ? <ActiveTimer t={timer} /> : <StartForm />}
+      <PageHeader title="Концентрация" subtitle="Таймер считает по реальному времени: переключение вкладок и перезагрузка не теряют ни минуты." />
+      {timer ? <ActiveTimer t={timer} minimized={minimized} onToggle={() => setMinimized(!minimized)} /> : <StartForm />}
       <History />
+    </div>
+  );
+}
+
+function TimerRing({ progress, size, color, children }: { progress: number; size: number; color: string; children: React.ReactNode }) {
+  const stroke = Math.round(size * 0.045);
+  const R = (size - stroke) / 2 - 6, C = 2 * Math.PI * R;
+  return (
+    <div className="relative grid place-items-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90" aria-hidden>
+        <circle cx={size / 2} cy={size / 2} r={R + stroke} fill="none" stroke="currentColor" strokeOpacity="0.06" strokeWidth="1" />
+        <circle cx={size / 2} cy={size / 2} r={R} fill="none" stroke="currentColor" strokeOpacity="0.1" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={R} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={C} strokeDashoffset={C * (1 - Math.max(0, Math.min(1, progress)))} style={{ transition: 'stroke-dashoffset 1s linear' }} />
+      </svg>
+      <div className="absolute inset-0 grid place-items-center text-center">{children}</div>
     </div>
   );
 }
@@ -68,8 +88,25 @@ function StartForm() {
     } catch (e) { toast(errMsg(e), 'error'); }
   }
 
+  const previewMin = mode === 'pomodoro' ? toNum(work) : mode === 'five' ? 5 : 0;
   return (
-    <section className="card grid gap-4">
+    <section className="card grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:items-center">
+      <div className="grid justify-items-center gap-3 rounded-[20px] bg-card-2 py-6 text-accent ring-1 ring-line">
+        <TimerRing progress={0} size={210} color="var(--accent)">
+          <div>
+            <p className="text-[46px] font-extrabold tabular-nums tracking-tight text-fg">{previewMin > 0 && Number.isFinite(previewMin) ? fmtClock(previewMin * 60_000) : '00:00'}</p>
+            <p className="text-[13px] font-semibold text-muted">{mode === 'pomodoro' ? 'Работа' : mode === 'five' ? 'Минимальный шаг' : 'Свободный таймер'}</p>
+          </div>
+        </TimerRing>
+        {mode === 'pomodoro' && (
+          <div className="grid w-full max-w-[300px] grid-cols-3 gap-2 px-4 text-center">
+            <div className="rounded-xl bg-card px-2 py-2 ring-1 ring-line"><p className="text-[15px] font-extrabold tabular-nums text-fg">{work || '—'} мин</p><p className="text-[11px] text-muted">Работа</p></div>
+            <div className="rounded-xl bg-card px-2 py-2 ring-1 ring-line"><p className="text-[15px] font-extrabold tabular-nums text-fg">{brk || '—'} мин</p><p className="text-[11px] text-muted">Отдых</p></div>
+            <div className="rounded-xl bg-card px-2 py-2 ring-1 ring-line"><p className="text-[15px] font-extrabold tabular-nums text-fg">∞</p><p className="text-[11px] text-muted">Циклы</p></div>
+          </div>
+        )}
+      </div>
+      <div className="grid gap-4">
       <Tabs label="Режим таймера" value={mode} onChange={setMode} items={[['pomodoro', 'Pomodoro'], ['free', 'Свободный'], ['five', 'Начни с 5 минут']]} />
       {mode === 'five' && (
         <p className="rounded-xl bg-accent-soft px-3 py-2 text-sm">
@@ -107,12 +144,14 @@ function StartForm() {
         <Info size={14} className="mt-0.5 shrink-0" />
         Веб-приложение не может блокировать другие приложения на телефоне. Включите режим «Не беспокоить» и уберите телефон из поля зрения.
       </p>
+      </div>
     </section>
   );
 }
 
-function ActiveTimer({ t }: { t: TimerState }) {
-  const { settings, areas, tasks, occurrences, sidx } = useData();
+function ActiveTimer({ t, minimized, onToggle }: { t: TimerState; minimized: boolean; onToggle: () => void }) {
+  const { settings, areas, tasks, occurrences, sidx, sessions, today } = useData();
+  const todayFocus = sessions.filter((s) => s.date === today && s.source === 'timer').reduce((a, s) => a + s.minutes, 0);
   const { toast, confirm } = useUI();
   const now = useNow(!!t.runningSince);
   const elapsed = timerElapsed(t, Math.max(now, t.runningSince ?? 0));
@@ -150,32 +189,59 @@ function ActiveTimer({ t }: { t: TimerState }) {
   }, [fiveDone, t.sessionStartedAt, settings.notifications]);
 
   useEffect(() => {
+    if (minimized) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !document.querySelector('dialog[open]')) onToggle(); };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [minimized, onToggle]);
+
+  useEffect(() => {
     document.title = `${fmtClock(goalMs ? Math.max(0, remaining) : elapsed)} · НИЗАМ`;
     return () => { document.title = 'НИЗАМ — نِظَام'; };
   }, [elapsed, remaining, goalMs]);
 
   const shown = goalMs ? Math.max(0, remaining) : elapsed;
   const ring = goalMs ? Math.min(1, elapsed / goalMs) : (elapsed % 3_600_000) / 3_600_000;
-  const R = 108, C = 2 * Math.PI * R;
   const phaseLabel = t.phase === 'break' ? 'Отдых' : t.mode === 'five' ? 'Начни с 5 минут' : t.mode === 'pomodoro' ? `Работа · помидор ${t.completedPomodoros + 1}` : 'Свободный таймер';
 
-  return (
-    <section className="card grid justify-items-center gap-5 py-6">
-      <div className="text-center">
-        <p className="text-sm text-muted">{phaseLabel}</p>
-        <h2 className="mt-1 text-lg font-semibold">{t.label}</h2>
-        {area && <p className="text-xs text-muted">Направление: {area.name}</p>}
-      </div>
-      <div className="relative grid place-items-center">
-        <svg width="240" height="240" viewBox="0 0 240 240" className="-rotate-90" aria-hidden>
-          <circle cx="120" cy="120" r={R} fill="none" stroke="var(--soft)" strokeWidth="12" />
-          <circle cx="120" cy="120" r={R} fill="none" stroke={t.phase === 'break' ? '#f59e0b' : 'var(--accent)'} strokeWidth="12" strokeLinecap="round"
-            strokeDasharray={C} strokeDashoffset={C * (1 - ring)} style={{ transition: 'stroke-dashoffset 1s linear' }} />
-        </svg>
-        <div className="absolute text-center">
-          <p className="text-5xl font-semibold tabular-nums tracking-tight" role="timer" aria-live="off">{fmtClock(shown)}</p>
-          <p className="mt-1 text-xs text-muted">{t.runningSince ? (goalMs ? 'осталось' : 'прошло') : 'пауза'}</p>
+  if (minimized) {
+    return (
+      <section className="card flex flex-wrap items-center gap-4">
+        <div className="min-w-0 flex-1">
+          <p className="text-[12px] font-semibold text-muted">{phaseLabel}</p>
+          <p className="truncate font-bold">{t.label}</p>
         </div>
+        <p className="text-3xl font-extrabold tabular-nums" role="timer">{fmtClock(shown)}</p>
+        {t.runningSince
+          ? <button className="btn btn-outline" onClick={() => pauseTimer()}><Pause size={18} />Пауза</button>
+          : <button className="btn btn-primary" onClick={() => resumeTimer()}><Play size={18} />Продолжить</button>}
+        <button className="btn btn-deep" onClick={onToggle}><Maximize2 size={17} />Полный экран</button>
+      </section>
+    );
+  }
+
+  // Портал в body: предки с анимацией transform иначе «запирают» position: fixed внутри себя.
+  return createPortal(
+    <section className="fade fixed inset-0 z-[55] flex flex-col overflow-y-auto bg-bg text-fg" role="dialog" aria-modal="true" aria-label="Режим концентрации">
+      <div className="pointer-events-none absolute inset-0 text-accent"><StarPattern opacity={0.05} size={56} /></div>
+      <div className="safe-top relative flex items-center justify-between gap-2 px-4 pt-4 sm:px-8">
+        <p className="text-[13px] font-semibold text-muted">Сегодня в фокусе: <span className="tabular-nums text-fg">{fmtMinutes(todayFocus)}</span>{t.mode === 'pomodoro' && <> · циклов: <span className="tabular-nums text-fg">{t.completedPomodoros}</span></>}</p>
+        <button className="btn btn-ghost" onClick={onToggle} aria-label="Свернуть режим концентрации"><Minimize2 size={17} /><span className="hidden sm:inline">Свернуть</span></button>
+      </div>
+      <div className="relative mx-auto grid w-full max-w-lg flex-1 content-center justify-items-center gap-6 px-4 py-6">
+      <div className="text-center">
+        <p className="eyebrow">{phaseLabel}</p>
+        <h2 className="mt-2 text-balance text-[22px] font-extrabold tracking-tight sm:text-2xl">{t.label}</h2>
+        {area && <p className="mt-1 text-[13px] text-muted">{area.name}</p>}
+      </div>
+      <div className={t.phase === 'break' ? 'text-gold' : 'text-accent'}>
+        <TimerRing progress={ring} size={Math.min(300, typeof window !== 'undefined' ? window.innerWidth - 48 : 300)} color={t.phase === 'break' ? 'var(--gold)' : 'var(--accent)'}>
+          <div>
+            <p className="text-[56px] font-extrabold leading-none tabular-nums tracking-tight text-fg sm:text-[64px]" role="timer" aria-live="off">{fmtClock(shown)}</p>
+            <p className="mt-2 text-[13px] font-semibold text-muted">{t.runningSince ? (goalMs ? 'осталось' : 'прошло') : 'пауза'}</p>
+          </div>
+        </TimerRing>
       </div>
 
       {fiveDone && t.phase === 'work' && (
@@ -205,7 +271,7 @@ function ActiveTimer({ t }: { t: TimerState }) {
         }}><X size={18} />Сбросить</button>
       </div>
 
-      <form className="flex w-full max-w-md gap-2" onSubmit={async (e) => {
+      <form className="flex w-full max-w-md gap-2 opacity-80 focus-within:opacity-100" onSubmit={async (e) => {
         e.preventDefault();
         if (!distraction.trim()) return;
         await addDistraction(distraction);
@@ -218,9 +284,10 @@ function ActiveTimer({ t }: { t: TimerState }) {
       </form>
       {t.distractions.length > 0 && (
         <ul className="w-full max-w-md text-sm text-muted">
-          {t.distractions.map((d, i) => <li key={i}>· {fmtTime(zonedParts(d.at, settings.timeZone).minutes)} — {d.reason}</li>)}
+          {t.distractions.map((d, i) => <li key={i}>· {showTime(zonedParts(d.at, settings.timeZone).minutes)} — {d.reason}</li>)}
         </ul>
       )}
+      </div>
       {finishing && (
         <FinishDialog t={t} unit={area && area.unit !== 'min' ? AREA_UNITS[area.unit].label.toLowerCase() : undefined}
           minutes={t.phase === 'work' ? Math.round(Math.min(elapsed, t.mode === 'pomodoro' ? workMs : Infinity) / 60_000) : 0}
@@ -237,7 +304,8 @@ function ActiveTimer({ t }: { t: TimerState }) {
             } catch (e) { toast(errMsg(e), 'error'); }
           }} />
       )}
-    </section>
+    </section>,
+    document.body,
   );
 }
 
@@ -294,11 +362,11 @@ function History() {
           {list.map((s) => {
             const name = tasks.find((t) => t.id === s.taskId)?.title ?? areas.find((a) => a.id === s.areaId)?.name ?? s.note ?? 'Сосредоточенная работа';
             return (
-              <li key={s.id} className="flex items-center gap-3 rounded-xl border border-line bg-card px-3 py-2 text-sm">
+              <li key={s.id} className="flex min-w-0 items-center gap-3 rounded-[14px] border border-line bg-card px-3 py-2.5 text-sm">
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{name}</p>
                   <p className="text-xs text-muted">
-                    {fmtShort(s.date)} · {fmtTime(zonedParts(s.startedAt, settings.timeZone).minutes)}–{fmtTime(zonedParts(s.endedAt, settings.timeZone).minutes)}
+                    {fmtShort(s.date)} · {showTime(zonedParts(s.startedAt, settings.timeZone).minutes)}–{showTime(zonedParts(s.endedAt, settings.timeZone).minutes)}
                     {s.distractions?.length ? ` · отвлечений: ${s.distractions.length}` : ''}{s.amount ? ` · объём: ${s.amount}` : ''}
                   </p>
                 </div>

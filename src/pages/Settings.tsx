@@ -1,5 +1,8 @@
 import { useRef, useState } from 'react';
-import { Download, Monitor, Moon, Sun, Trash2, Upload } from 'lucide-react';
+import { Download, MonitorSmartphone, Monitor, Moon, Sun, Trash2, Upload } from 'lucide-react';
+import { Switch } from '../components/Layout';
+import { isStandalone, useInstallPrompt } from '../lib/install';
+import { HIJRI_METHOD } from '../lib/dates';
 import { Field, PageHeader, errFields, errMsg, toNum, useUI } from '../components/ui';
 import { clearAll, downloadJSON, exportAll, importAll, validateBackup } from '../db/backup';
 import { saveSettings } from '../db/repo';
@@ -16,7 +19,9 @@ export default function SettingsPage() {
   const [f, setF] = useState({
     name: settings.name, timeZone: settings.timeZone, weekStart: String(settings.weekStart), dayStart: settings.dayStart, dayEnd: settings.dayEnd,
     pomodoroWork: String(settings.pomodoroWork), pomodoroBreak: String(settings.pomodoroBreak), maxCarry: String(Math.round(settings.maxCarryRatio * 100)),
+    timeFormat: settings.timeFormat, greetTitle: settings.greetTitle, greetText: settings.greetText,
   });
+  const { available: canInstall, install } = useInstallPrompt();
   const [errors, setErrors] = useState<Errors>({});
   const fileRef = useRef<HTMLInputElement>(null);
   const set = (k: keyof typeof f, v: string) => setF((p) => ({ ...p, [k]: v }));
@@ -32,6 +37,7 @@ export default function SettingsPage() {
       await saveSettings({
         name: f.name.trim(), timeZone: f.timeZone, weekStart: f.weekStart === '0' ? 0 : 1, dayStart: f.dayStart, dayEnd: f.dayEnd,
         pomodoroWork: toNum(f.pomodoroWork), pomodoroBreak: toNum(f.pomodoroBreak), maxCarryRatio: carry / 100,
+        timeFormat: f.timeFormat === '12' ? '12' : '24', greetTitle: f.greetTitle.trim(), greetText: f.greetText.trim(),
       });
       setErrors({});
       toast('Настройки сохранены');
@@ -89,7 +95,14 @@ export default function SettingsPage() {
         <h2 className="h2">Основное</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Ваше имя (для приветствия)" error={errors.name} id="s-name"><input id="s-name" className="input" value={f.name} onChange={(e) => set('name', e.target.value)} maxLength={60} /></Field>
-          <Field label="Язык" id="s-lang"><select id="s-lang" className="input" disabled><option>Русский</option></select></Field>
+          <Field label="Язык интерфейса" hint="Сейчас доступен русский; арабский используется в названии и напоминаниях" id="s-lang"><select id="s-lang" className="input" disabled><option>Русский</option></select></Field>
+          <Field label="Формат времени" id="s-tf">
+            <select id="s-tf" className="input" value={f.timeFormat} onChange={(e) => set('timeFormat', e.target.value)}>
+              <option value="24">24 часа (14:30)</option><option value="12">12 часов (2:30 PM)</option>
+            </select>
+          </Field>
+          <Field label="Приветствие: заголовок" error={errors.greetTitle} id="s-gt"><input id="s-gt" className="input" value={f.greetTitle} onChange={(e) => set('greetTitle', e.target.value)} maxLength={80} /></Field>
+          <Field label="Приветствие: текст" error={errors.greetText} id="s-gx"><input id="s-gx" className="input" value={f.greetText} onChange={(e) => set('greetText', e.target.value)} maxLength={200} /></Field>
           <Field label="Часовой пояс" error={errors.timeZone} hint={`Сейчас там: ${fmtTime(zonedParts(Date.now(), isValidTimeZone(f.timeZone) ? f.timeZone : 'UTC').minutes)}. День определяется по этому поясу.`} id="s-tz">
             <input id="s-tz" className="input" list="zones" value={f.timeZone} onChange={(e) => set('timeZone', e.target.value)} />
             <datalist id="zones">{zones.map((z) => <option key={z} value={z} />)}</datalist>
@@ -108,19 +121,46 @@ export default function SettingsPage() {
         <button className="btn btn-primary justify-self-end">Сохранить</button>
       </form>
 
+      <section className="card grid gap-4">
+        <h2 className="h2">Главная страница</h2>
+        <label className="flex items-center justify-between gap-4 text-sm">
+          <span><span className="block font-semibold">Аят или хадис дня</span><span className="block text-xs text-muted">Только проверенные тексты с указанием источника и смысловым переводом.</span></span>
+          <Switch checked={settings.showReminder} onChange={() => saveSettings({ showReminder: !settings.showReminder })} label="Аят или хадис дня" />
+        </label>
+        <label className="flex items-center justify-between gap-4 text-sm">
+          <span><span className="block font-semibold">Дата по хиджре</span><span className="block text-xs text-muted">Календарь {HIJRI_METHOD}; возможна разница ±1 день с местным началом месяца.</span></span>
+          <Switch checked={settings.showHijri} onChange={() => saveSettings({ showHijri: !settings.showHijri })} label="Дата по хиджре" />
+        </label>
+      </section>
+
+      <section className="card grid gap-3">
+        <h2 className="h2">Установка приложения</h2>
+        {isStandalone() ? <p className="muted">НИЗАМ уже установлен и открыт как приложение.</p> : (
+          <>
+            <p className="muted">НИЗАМ можно установить на телефон или компьютер — он откроется без браузерных панелей и будет работать без интернета.</p>
+            {canInstall
+              ? <button className="btn btn-primary justify-self-start" onClick={async () => { if (await install()) toast('Приложение установлено'); }}><MonitorSmartphone size={18} />Установить НИЗАМ</button>
+              : <p className="text-[13px] text-muted">iPhone/iPad (Safari): «Поделиться» → «На экран „Домой“». Android/Chrome/Edge: меню браузера → «Установить приложение». Кнопка появится здесь, когда браузер разрешит установку.</p>}
+          </>
+        )}
+      </section>
+
       <section className="card grid gap-3">
         <h2 className="h2">Уведомления</h2>
-        <p className="muted">Звуковой сигнал и системное уведомление по окончании периода Pomodoro (пока вкладка открыта). Фоновые напоминания в закрытом браузере веб-приложение надёжно обеспечить не может.</p>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" className="size-4 accent-[var(--accent)]" checked={settings.notifications} onChange={async (e) => {
-            const on = e.target.checked;
-            if (on && 'Notification' in window && Notification.permission !== 'granted') {
-              const p = await Notification.requestPermission();
-              if (p !== 'granted') { toast('Браузер не разрешил уведомления', 'error'); return; }
+        <p className="muted">Напоминание за 5 минут до начала задачи и сигнал по окончании периода Pomodoro — пока приложение открыто. Фоновую доставку при закрытом браузере веб-приложение гарантировать не может, особенно на iPhone.</p>
+        <label className="flex items-center justify-between gap-4 text-sm">
+          <span className="font-semibold">Системные уведомления</span>
+          <Switch checked={settings.notifications} label="Системные уведомления" onChange={async () => {
+            const on = !settings.notifications;
+            if (on) {
+              if (!('Notification' in window)) { toast('Этот браузер не поддерживает уведомления', 'error'); return; }
+              if (Notification.permission !== 'granted') {
+                const p = await Notification.requestPermission();
+                if (p !== 'granted') { toast('Браузер не разрешил уведомления', 'error'); return; }
+              }
             }
             await saveSettings({ notifications: on });
           }} />
-          Системные уведомления таймера
         </label>
       </section>
 
@@ -147,7 +187,7 @@ export default function SettingsPage() {
         }}><Trash2 size={18} />Удалить все данные</button>
       </section>
 
-      <p className="text-center text-xs text-muted">НИЗАМ v1.0 · локальное хранение · без платных API</p>
+      <p className="text-center text-xs text-muted">НИЗАМ <span className="arabic" lang="ar">نِظَام</span> v2.0 · локальное хранение · без платных API</p>
     </div>
   );
 }

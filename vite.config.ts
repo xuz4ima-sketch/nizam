@@ -14,10 +14,10 @@ export default defineConfig({
       manifest: {
         name: 'НИЗАМ — نِظَام',
         short_name: 'НИЗАМ',
-        description: 'Порядок. Дисциплина. Постоянство. Развитие.',
+        description: 'Порядок. Постоянство. Развитие. Персональная система дисциплины и обучения.',
         lang: 'ru',
-        theme_color: '#065f46',
-        background_color: '#0d1211',
+        theme_color: '#0c342c',
+        background_color: '#f8f7f3',
         display: 'standalone',
         start_url: './',
         scope: './',
